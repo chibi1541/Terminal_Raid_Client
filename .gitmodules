@@ -1,0 +1,3 @@
+[submodule "Submodules/CraftEngine"]
+	path = Submodules/CraftEngine
+	url = https://github.com/chibi1541/craft-engine.git

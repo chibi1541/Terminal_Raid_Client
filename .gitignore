@@ -1,0 +1,106 @@
+﻿[Bb]uild/
+[Bb]in/Debug/*
+[Bb]in/Release/*
+[Oo]bj/
+out/
+cmake-build-*/
+Intermediate/
+
+# ==== 컴파일된 오브젝트/라이브러리/실행 파일 ====
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# ==== 라이브러리 파일 제외 ====
+!Bin/Debug/CraftEngine.dll
+!Bin/Debug/libprotobufd.dll
+
+!Libraries/Libs/CraftEngine/Debug/CraftEngine.lib
+!libprotobufd.lib
+
+# ==== CMake ====
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+CMakeUserPresets.json
+
+# ==== Makefile ====
+Makefile
+!Makefile.am
+
+# ==== Visual Studio ====
+.vs/
+*.vcxproj.user
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+ipch/
+x64/
+x86/
+ARM/
+ARM64/
+*.sln
+*.slnx
+
+# ==== VS Code ====
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ==== CLion / JetBrains ====
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# ==== Xcode ====
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# ==== 패키지 매니저 ====
+vcpkg_installed/
+conan.lock
+CMakeUserPresets.json
+
+# ==== 테스트/커버리지 ====
+*.gcda
+*.gcno
+*.gcov
+coverage/
+*.profraw
+*.profdata
+
+# ==== 로그/임시 파일 ====
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# ==== OS 관련 ====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+[Ii]ncludes/
