@@ -18,6 +18,7 @@
 #include "Utils/json.hpp"
 #include "Thread/Lock.h"
 #include "Memory/ObjectPool.h"
+#include "Utils/Types.h"
 
 // winsock
 #include <winsock2.h>

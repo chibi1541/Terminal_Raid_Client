@@ -7,7 +7,7 @@ NAME_SPACE_BEGIN(Craft)
 class RecvBuffer;
 class SendBuffer;
 
-class Session
+class CRAFT_API Session
 {
 	enum { RECV_BUFFER_SIZE = 0x1000, };
 
