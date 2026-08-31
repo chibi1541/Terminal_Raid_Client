@@ -1,0 +1,207 @@
+{
+  "main": {
+    "id": "7a1cbbec0e80d682",
+    "type": "split",
+    "children": [
+      {
+        "id": "3fb2dc1d3ff364c6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b1692d8a54867f32",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "no_base_name.canvas",
+                "viewState": {
+                  "x": -200,
+                  "y": -175,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "no_base_name"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "007166fe18c8933d",
+    "type": "split",
+    "children": [
+      {
+        "id": "f1159bbfda6e1476",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d9ae27cf533aaa1a",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "파일 탐색기"
+            }
+          },
+          {
+            "id": "e263173fe2be0513",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "검색"
+            }
+          },
+          {
+            "id": "b9d4f1e6de08940a",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "북마크"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "bd8454661a4960d7",
+    "type": "split",
+    "children": [
+      {
+        "id": "4e99d61a4a9677a5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5612a37abe40d3e8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "player_anim_state_test.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "백링크"
+            }
+          },
+          {
+            "id": "ad7320604f82b4c0",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "player_anim_state_test.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "나가는 링크"
+            }
+          },
+          {
+            "id": "2397eb2251820550",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "태그"
+            }
+          },
+          {
+            "id": "d9c7e934757d7b75",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "모든 속성"
+            }
+          },
+          {
+            "id": "98502335bc203663",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "player_anim_state_test.canvas",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "개요"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false,
+      "bases:새 베이스 생성하기": false
+    }
+  },
+  "active": "b1692d8a54867f32",
+  "lastOpenFiles": [
+    "player_anim_state.canvas",
+    "three_groups.canvas",
+    "player_anim_state_test.canvas",
+    "no_base_name.canvas",
+    "$null",
+    "player_anim_state - 복사본.canvas",
+    "player_anim_state.canvas.tmp.26164.ab226dd337a3",
+    "player_anim_state.canvas.tmp.26164.3226fcebf227",
+    "player_anim_state.canvas.tmp.26164.f201ad9781a9",
+    "환영합니다!.md"
+  ]
+}

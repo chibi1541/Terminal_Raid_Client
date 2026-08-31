@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "ServerSession.h"
 #include "Protocol/ServerPacketHandler.h"
+#include "Protocol/Protocol.pb.h"
 
 using namespace Craft;
 
@@ -12,6 +13,15 @@ ServerSession::ServerSession(NetAddress address)
 
 ServerSession::~ServerSession()
 {
+}
+
+void ServerSession::OnConnected()
+{
+	Protocol::C_LOGIN loginPkt;
+	loginPkt.set_name("chibi");
+	int32 size = 0;
+	BYTE* buffer = ServerPacketHandler::MakeSendBuffer(loginPkt, OUT size);
+	RegisterSend(buffer, size);
 }
 
 int32 ServerSession::OnRecv(BYTE* buffer, int32 len)
@@ -39,6 +49,7 @@ int32 ServerSession::OnRecv(BYTE* buffer, int32 len)
 
 void ServerSession::OnSend(int32 len)
 {
+	Session::OnSend(len);
 }
 
 void ServerSession::OnRecvPacket(BYTE* buffer, int32 len)

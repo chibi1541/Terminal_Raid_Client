@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	애니메이션 애셋의 이름 -> 파일 경로 매핑 테이블. (AnimationDataAsset)
+
+	액터는 여기 적힌 이름("Player" 등)만 알면 되고, 실제 파일 위치는 이 파일이 정한다.
+	새 캐릭터를 추가할 때 코드를 고치지 않고 여기에 줄을 추가한다.
+
+	Clips        : AnimationClip 정의 파일(*.anim.xml). 최소 하나는 있어야 한다.
+	StateMachines: 상태 머신 정의 파일. *.fsm.xml 과 *.canvas 둘 다 가능하다
+	               (AnimStateMachineLoader가 확장자로 포맷을 고른다).
+	               상태 머신 없이 클립만 쓰는 이름은 여기 안 적으면 된다.
+
+	경로는 Config/ 와 같은 관습대로 프로젝트 폴더 기준 상대 경로다.
+	이 파일은 BOM 없는 UTF-8로 저장할 것.
+-->
+<AnimationData>
+	<Clips>
+		<Clip name="TestActor" path="../Assets/TestActor.anim.xml" />
+	</Clips>
+
+	<StateMachines>
+		<StateMachine name="TestActor" path="../Assets/StateMachine/StateMachine/player_anim_state_test.canvas" />
+	</StateMachines>
+</AnimationData>

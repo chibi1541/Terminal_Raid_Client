@@ -77,6 +77,7 @@ public:
 	std::shared_ptr<Level> GetLevel();
 
 	AssetManager* GetAssetManager() const { return assetManager.get(); }
+	ThreadManager* GetThreadManager() const { return threadManager.get(); }
 
 protected:
 	// 입력 처리(폴링 방식 vs 이벤트)

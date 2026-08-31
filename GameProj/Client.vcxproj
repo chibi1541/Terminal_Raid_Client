@@ -104,6 +104,8 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Globals.cpp" />
+    <ClCompile Include="source\Actor\TestActor.cpp" />
     <ClCompile Include="source\Network\ServerSession.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -125,12 +127,19 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Globals.h" />
+    <ClInclude Include="source\Actor\TestActor.h" />
     <ClInclude Include="source\Network\ServerSession.h" />
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\Protocol\Enum.pb.h" />
     <ClInclude Include="source\Protocol\Protocol.pb.h" />
     <ClInclude Include="source\Protocol\ServerPacketHandler.h" />
     <ClInclude Include="source\Protocol\Struct.pb.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Common\Protobuf\Enum.proto" />
+    <None Include="..\Common\Protobuf\Protocol.proto" />
+    <None Include="..\Common\Protobuf\Struct.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

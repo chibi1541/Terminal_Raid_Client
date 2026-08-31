@@ -2,6 +2,7 @@
 #include <thread>
 #include <functional>
 #include <mutex>
+#include "TLS.h"
 
 // ########################
 // #	  ThreadManager	  #
@@ -24,6 +25,10 @@ public:
 	// Thread-Local-Storage 정리 
 	static void DestroyTLS();
 
+	BYTE* OpenBufferChunk(int32 size);
+	void CloseBufferChunk(int32 size);
+
+	uint32 GetThreadID() const { return LThreadId; }
 
 private:
 	// read-write-lock이 의미가 없어서 mutex를 사용

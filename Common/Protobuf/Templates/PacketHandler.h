@@ -2,6 +2,8 @@
 #include "Protocol.pb.h"
 #include "Network/SendBuffer.h"
 #include "Network/ServerSession.h"
+#include "Engine/Engine.h"
+#include "Thread/ThreadManager.h"
 
 using namespace Craft;
 
@@ -71,12 +73,12 @@ private:
 		uint16 dataSize = static_cast<uint16>(pkt.ByteSizeLong());
 		uint16 packetSize = dataSize + sizeof(PacketHeader);
 
-		BYTE* bufferChunk = LBufferChunk->Open(packetSize);
+		BYTE* bufferChunk = Engine::Get().GetThreadManager()->OpenBufferChunk(packetSize);
 		PacketHeader* header = reinterpret_cast<PacketHeader*>(bufferChunk);
 		header->size = packetSize;
 		header->id = pktId;
 		ASSERT_CRASH(pkt.SerializeToArray((&header[1]), dataSize));
-		LBufferChunk->Close(packetSize);
+		Engine::Get().GetThreadManager()->CloseBufferChunk(packetSize);
 
 		size = packetSize;
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	콘솔 16색 팔레트.
+	index는 Color enum의 슬롯 값과 일치해야 하고, 0~15가 모두 있어야 한다.
+	(하나라도 빠지면 코드에 박힌 기본 팔레트로 대체된다)
+	name은 사람이 보기 위한 것으로 파싱에는 쓰이지 않는다.
+	이 파일은 UTF-8로 저장할 것.
+-->
+<Palette>
+	<!-- 무채색 램프 -->
+	<Color index="0"  name="Black"     r="0"   g="0"   b="0"   />
+	<Color index="1"  name="DarkGray"  r="45"  g="45"  b="55"  />
+	<Color index="2"  name="Gray"      r="140" g="140" b="155" />
+	<Color index="3"  name="White"     r="245" g="245" b="255" />
+
+	<!-- 녹색 램프 (풀, 나뭇잎) -->
+	<Color index="4"  name="DarkGreen" r="30"  g="75"  b="40"  />
+	<Color index="5"  name="Green"     r="75"  g="150" b="60"  />
+
+	<!-- 갈색 램프 (흙, 나무, 가죽, 피부) -->
+	<Color index="6"  name="DarkBrown" r="60"  g="40"  b="30"  />
+	<Color index="7"  name="Brown"     r="125" g="85"  b="50"  />
+	<Color index="8"  name="Tan"       r="210" g="175" b="130" />
+
+	<!-- 적색 램프 (적, 피, HP) -->
+	<Color index="9"  name="DarkRed"   r="120" g="30"  b="35"  />
+	<Color index="10" name="Red"       r="210" g="60"  b="50"  />
+
+	<!-- 난색 (불, 금화, 발사체) -->
+	<Color index="11" name="Orange"    r="240" g="140" b="50"  />
+	<Color index="12" name="Yellow"    r="250" g="215" b="90"  />
+
+	<!-- 청색 램프 (물, 얼음, 마법) -->
+	<Color index="13" name="DarkBlue"  r="35"  g="55"  b="120" />
+	<Color index="14" name="Blue"      r="70"  g="130" b="215" />
+
+	<!-- 마법, 레어 등급 -->
+	<Color index="15" name="Purple"    r="150" g="80"  b="200" />
+</Palette>

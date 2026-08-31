@@ -44,7 +44,7 @@ protected:
 	virtual void OnSend(int32 len) {}
 	virtual void OnDisconnected() {}
 
-private:
+protected:
 	USE_LOCK;
 	SOCKET			_socket = INVALID_SOCKET;
 	NetAddress		_netAddress = {};

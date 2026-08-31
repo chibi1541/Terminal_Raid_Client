@@ -1,0 +1,9 @@
+{
+	"nodes":[
+		{"id":"g_Upper_-400","type":"group","label":"Upper","x":-400,"y":-400,"width":400,"height":200},
+		{"id":"s_Upper_-400","type":"text","text":"# Idle [entry]\n\nclip: IdleFull","x":-380,"y":-380,"width":200,"height":80},
+		{"id":"g_Lower_-150","type":"group","label":"Lower","x":-400,"y":-150,"width":400,"height":200},
+		{"id":"s_Lower_-150","type":"text","text":"# Idle [entry]\n\nclip: IdleFull","x":-380,"y":-130,"width":200,"height":80}
+	],
+	"edges":[]
+}

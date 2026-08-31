@@ -15,7 +15,7 @@ public:
 	virtual ~Service();
 
 	virtual bool Start() abstract;
-	bool CanStart() { return _sessionFactory != nullptr; }
+	bool CanStart() { return _session != nullptr; }
 	virtual void CloseService();
 
 	virtual void Run() abstract;
@@ -29,7 +29,7 @@ public:
 protected:
 	USE_LOCK;
 	std::unique_ptr<class Session> _session;
-	SessionFactory _sessionFactory;
+	//SessionFactory _sessionFactory;
 };
 
 class CRAFT_API ServerService : public Service

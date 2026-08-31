@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	프라이머리 애셋 매니페스트.
+
+	여기 적힌 애셋들은 게임 시작 시 AssetManager::LoadPrimaryAssetManifest()가
+	한꺼번에 로드하고, 이후 이름으로 조회한다. 유휴 언로드 대상이 아니다.
+
+	type : 코드에서 AssetManager::RegisterPrimaryAssetType<T>()로 등록한 문자열.
+	       등록되지 않은 type을 적으면 로드 시점에 크래시한다.
+	name : 조회 키. AssetManager::GetPrimaryAsset<T>("이름")으로 찾는다.
+	path : 실제 데이터 XML 경로. 파일 내용의 형식은 각 타입이 해석한다.
+
+	경로는 Config/ 와 같은 관습대로 프로젝트 폴더 기준 상대 경로다.
+	이 파일은 BOM 없는 UTF-8로 저장할 것.
+-->
+<PrimaryAssets>
+	<Asset type="AnimationData" name="AnimationData" path="../Assets/AnimationData.xml" />
+</PrimaryAssets>

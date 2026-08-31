@@ -1,0 +1,11 @@
+{
+	"nodes":[
+		{"id":"g_Base_-400","type":"group","label":"Base","x":-400,"y":-400,"width":400,"height":200},
+		{"id":"s_Base_-400","type":"text","text":"# Idle [entry]\n\nclip: IdleFull","x":-380,"y":-380,"width":200,"height":80},
+		{"id":"g_Overlay_-150","type":"group","label":"Overlay","x":-400,"y":-150,"width":400,"height":200},
+		{"id":"s_Overlay_-150","type":"text","text":"# Idle [entry]\n\nclip: IdleFull","x":-380,"y":-130,"width":200,"height":80},
+		{"id":"g_Extra_100","type":"group","label":"Extra","x":-400,"y":100,"width":400,"height":200},
+		{"id":"s_Extra_100","type":"text","text":"# Idle [entry]\n\nclip: IdleFull","x":-380,"y":120,"width":200,"height":80}
+	],
+	"edges":[]
+}
