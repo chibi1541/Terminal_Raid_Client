@@ -28,7 +28,13 @@ public:
 	BYTE* OpenBufferChunk(int32 size);
 	void CloseBufferChunk(int32 size);
 
-	uint32 GetThreadID() const { return LThreadId; }
+	// 현재 이 함수를 부른 쓰레드의 ID.
+	//
+	// 정의가 반드시 .cpp(=DLL 안)에 있어야 한다.
+	// LThreadId는 thread_local인데 TLS.h에서 dllimport 없이 선언돼 있어서,
+	// 이 접근자가 헤더에 인라인으로 있으면 EXE 쪽 코드가 DLL의 TLS 슬롯을
+	// 직접 읽으려다 잘못된 주소를 잡고 그대로 터진다.
+	uint32 GetThreadID() const;
 
 private:
 	// read-write-lock이 의미가 없어서 mutex를 사용

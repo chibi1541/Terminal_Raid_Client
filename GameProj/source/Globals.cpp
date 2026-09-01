@@ -1,4 +1,4 @@
 ﻿#include "pch.h"
 #include "Globals.h"
 
-Craft::Service* GService = nullptr;
+std::unique_ptr<Craft::Service> GService;

@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#include <functional>
+#include <memory>
+#include <vector>
+
 NAME_SPACE_BEGIN(Craft)
 
 class Level;
@@ -9,6 +13,7 @@ class Renderer;
 class CameraManager;
 class AssetManager;
 class ThreadManager;
+class JobQueue;
 
 namespace UI
 {
@@ -79,6 +84,26 @@ public:
 	AssetManager* GetAssetManager() const { return assetManager.get(); }
 	ThreadManager* GetThreadManager() const { return threadManager.get(); }
 
+	// 다른 쓰레드가 게임(메인) 쓰레드에서 실행되기를 원하는 작업을 밀어 넣는다.
+	//
+	// 어느 쓰레드에서 불러도 안전하다. 밀어 넣기만 하고 바로 돌아온다.
+	// 실제 실행 지점은 Run() 루프 안의 딱 한 곳(PumpGameThreadJobs)뿐이다.
+	//
+	// 네트워크 쓰레드에서 도착한 패킷을 게임에 반영하는 통로가 이것이다.
+	// 패킷 핸들러가 액터나 UI를 직접 만지면 메인 쓰레드의 Tick/Draw와 그대로 경합한다.
+	//
+	// 정의가 .cpp에 있어서 JobQueue 타입이 이 헤더로 새지 않는다.
+	// (헤더에서 JobQueue::DoAsync가 인스턴스화되면 ObjectPool<Job>의 정적 멤버를
+	//  다시 정의하려 들어 링크가 깨진다 - AssetManager.h의 같은 주석 참고)
+	void RunOnGameThread(std::function<void()> job);
+
+	// 엔진 종료 시, 워커 쓰레드를 Join()하기 직전에 호출될 콜백을 등록한다.
+	//
+	// 엔진이 만들지 않은 쓰레드(예: ThreadManager::Launch로 띄운 네트워크 쓰레드)에
+	// 정지 신호를 보내는 자리다. 이게 없으면 무한 루프인 그 쓰레드를 기다리며
+	// Join()이 영영 돌아오지 않는다 - 게임이 종료되지 않는다.
+	void AddShutdownHandler(std::function<void()> handler);
+
 protected:
 	// 입력 처리(폴링 방식 vs 이벤트)
 	void ProcessInput();
@@ -88,6 +113,10 @@ protected:
 	// BeginPlay 뒤에 두는 이유 - 이번 프레임에 등록된 컴포넌트도 바로 입력을 받는다.
 	// Tick 앞에 두는 이유 - 콜백이 세운 값을 같은 프레임의 Tick이 읽는다(한 프레임도 안 밀림).
 	void DispatchInput();
+
+	// 다른 쓰레드가 RunOnGameThread로 밀어 넣은 작업을 여기서 전부 소비한다.
+	// 게임 쓰레드에서 실행되는 유일한 소비 지점이다.
+	void PumpGameThreadJobs();
 
 	// 초기화 함수.
 	void OnInitialized();
@@ -161,6 +190,16 @@ protected:
 	// 애셋 파싱용 워커 쓰레드를 들고 있다.
 	// assetManager보다 먼저 정리돼야 워커가 죽은 매니저를 만지지 않는다.
 	std::unique_ptr<ThreadManager> threadManager;
+
+	// 다른 쓰레드 -> 게임 쓰레드로 넘어오는 작업 큐.
+	//
+	// 어느 워커보다도 먼저 만들어져야 한다. 워커가 뜬 뒤에 만들면
+	// 첫 잡이 아직 없는 큐로 들어온다.
+	// (JobQueue가 enable_shared_from_this를 상속해서 shared_ptr이어야 한다)
+	std::shared_ptr<JobQueue> gameThreadQueue;
+
+	// Shutdown()에서 Join() 직전에 순서대로 호출된다.
+	std::vector<std::function<void()>> shutdownHandlers;
 
 	// 화면에 프레임 수를 표시할지 여부
 	bool showFps = true;

@@ -30,6 +30,9 @@
     <ClCompile Include="source\Network\ServerSession.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Network\NetStatus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\Protocol\Enum.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Network\ServerSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Network\NetStatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Protocol\Enum.pb.h">
