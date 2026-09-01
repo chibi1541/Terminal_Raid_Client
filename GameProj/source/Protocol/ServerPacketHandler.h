@@ -23,6 +23,8 @@ enum : uint16
 	PKT_S_ENTER_ROOM = 1005,
 	PKT_C_EXIT_ROOM = 1006,
 	PKT_S_EXIT_ROOM = 1007,
+	PKT_S_SPAWN = 1008,
+	PKT_S_DESPAWN = 1009,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -32,6 +34,8 @@ bool Handle_S_LOGIN(const Session* session, Protocol::S_LOGIN& pkt);
 bool Handle_S_PONG(const Session* session, Protocol::S_PONG& pkt);
 bool Handle_S_ENTER_ROOM(const Session* session, Protocol::S_ENTER_ROOM& pkt);
 bool Handle_S_EXIT_ROOM(const Session* session, Protocol::S_EXIT_ROOM& pkt);
+bool Handle_S_SPAWN(const Session* session, Protocol::S_SPAWN& pkt);
+bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt);
 
 // PacketHandler 클래스 자동화
 class ServerPacketHandler
@@ -47,6 +51,8 @@ public:
 		GPacketHandler[PKT_S_PONG] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_PONG>(Handle_S_PONG, session, buffer, len); };
 		GPacketHandler[PKT_S_ENTER_ROOM] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ENTER_ROOM>(Handle_S_ENTER_ROOM, session, buffer, len); };
 		GPacketHandler[PKT_S_EXIT_ROOM] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_EXIT_ROOM>(Handle_S_EXIT_ROOM, session, buffer, len); };
+		GPacketHandler[PKT_S_SPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_SPAWN>(Handle_S_SPAWN, session, buffer, len); };
+		GPacketHandler[PKT_S_DESPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DESPAWN>(Handle_S_DESPAWN, session, buffer, len); };
 
 	}
 

@@ -135,6 +135,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClInclude Include="source\Protocol\Protocol.pb.h" />
     <ClInclude Include="source\Protocol\ServerPacketHandler.h" />
     <ClInclude Include="source\Protocol\Struct.pb.h" />
+    <ClInclude Include="Utils\ObjectIdHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Common\Protobuf\Enum.proto" />
