@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "ServerPacketHandler.h"
 #include "Network/NetStatus.h"
+#include "Network/NetSend.h"
+#include "Game/ObjectManager.h"
 
 using namespace Craft;
 
@@ -37,6 +39,11 @@ bool Handle_S_LOGIN(const Session* session, Protocol::S_LOGIN& pkt)
 	Engine::Get().RunOnGameThread([pkt]()
 		{
 			NetStatus::Get().OnLogin(pkt);
+
+			// 로그인만으로는 룸에 못 들어간다. 서버는 C_ENTER_ROOM을 받아야
+			// Room::Enter를 돌리고 그 결과로 S_ENTER_ROOM을 돌려준다.
+			Protocol::C_ENTER_ROOM enterPkt;
+			SendToServer(enterPkt);
 		});
 
 	return true;
@@ -56,6 +63,8 @@ bool Handle_S_ENTER_ROOM(const Session* session, Protocol::S_ENTER_ROOM& pkt)
 {
 	Engine::Get().RunOnGameThread([pkt]()
 		{
+			// 액터 배치가 먼저다. NetStatus가 개체 수를 ObjectManager에서 읽는다.
+			ObjectManager::Get().OnEnterRoom(pkt);
 			NetStatus::Get().OnEnterRoom(pkt);
 		});
 
@@ -66,6 +75,7 @@ bool Handle_S_EXIT_ROOM(const Session* session, Protocol::S_EXIT_ROOM& pkt)
 {
 	Engine::Get().RunOnGameThread([]()
 		{
+			ObjectManager::Get().OnExitRoom();
 			NetStatus::Get().OnExitRoom();
 		});
 
@@ -76,6 +86,7 @@ bool Handle_S_SPAWN(const Session* session, Protocol::S_SPAWN& pkt)
 {
 	Engine::Get().RunOnGameThread([pkt]()
 		{
+			ObjectManager::Get().OnSpawn(pkt);
 			NetStatus::Get().OnSpawn(pkt);
 		});
 
@@ -86,6 +97,7 @@ bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt)
 {
 	Engine::Get().RunOnGameThread([pkt]()
 		{
+			ObjectManager::Get().OnDespawn(pkt);
 			NetStatus::Get().OnDespawn(pkt);
 		});
 

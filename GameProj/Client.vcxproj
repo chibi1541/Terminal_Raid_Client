@@ -104,6 +104,10 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Actor\LocalPlayer.cpp" />
+    <ClCompile Include="source\Actor\PlayerActor.cpp" />
+    <ClCompile Include="source\Actor\ReplicatedActor.cpp" />
+    <ClCompile Include="source\Game\ObjectManager.cpp" />
     <ClCompile Include="source\Globals.cpp" />
     <ClCompile Include="source\Actor\TestActor.cpp" />
     <ClCompile Include="source\Network\ServerSession.cpp" />
@@ -128,8 +132,14 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Actor\LocalPlayer.h" />
+    <ClInclude Include="source\Actor\PlayerActor.h" />
+    <ClInclude Include="source\Actor\RemotePlayer.h" />
+    <ClInclude Include="source\Actor\ReplicatedActor.h" />
+    <ClInclude Include="source\Game\ObjectManager.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\Actor\TestActor.h" />
+    <ClInclude Include="source\Network\NetSend.h" />
     <ClInclude Include="source\Network\ServerSession.h" />
     <ClInclude Include="source\Network\NetStatus.h" />
     <ClInclude Include="source\pch.h" />
@@ -137,7 +147,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClInclude Include="source\Protocol\Protocol.pb.h" />
     <ClInclude Include="source\Protocol\ServerPacketHandler.h" />
     <ClInclude Include="source\Protocol\Struct.pb.h" />
-    <ClInclude Include="Utils\ObjectIdHandler.h" />
+    <ClInclude Include="source\Utils\ObjectIdHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Common\Protobuf\Enum.proto" />

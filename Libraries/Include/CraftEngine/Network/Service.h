@@ -31,7 +31,10 @@ public:
 	virtual void HandleRecv();
 	virtual void HandleSend();
 	
-	const Session* GetSession() const {return _session.get(); }
+	// non-const 판이 필요한 이유 - RegisterSend가 non-const 멤버다.
+	// 이게 없으면 패킷 핸들러나 게임 코드에서 서버로 아무것도 보낼 수 없다.
+	Session*		GetSession()		{ return _session.get(); }
+	const Session*	GetSession() const	{ return _session.get(); }
 	NetAddress GetAddress() const;
 
 protected:

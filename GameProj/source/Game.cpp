@@ -17,6 +17,7 @@
 #include "Globals.h"
 #include "Network/ServerSession.h"
 #include "Network/NetStatus.h"
+#include "Game/ObjectManager.h"
 #include "Thread/ThreadManager.h"
 #include <memory>
 
@@ -69,7 +70,10 @@ int main(int argc, char* argv[])
 	AssetManager::Get().RegisterPrimaryAssetType<AnimationDataAsset>("AnimationData");
 	AssetManager::Get().LoadPrimaryAssetManifest(L"../Assets/PrimaryAssets.xml");
 	Engine::Get().AddNewLevel<Level>();
-	Engine::Get().GetLevel()->SpawnActor<TestActor>(Vector2(60, 15), Color::Green);
+
+	// 플레이어 액터는 여기서 만들지 않는다.
+	// 서버가 S_ENTER_ROOM으로 알려준 정보대로 ObjectManager가 스폰한다.
+	// (TestActor는 엔진 입력/UI 회귀 테스트용으로 남겨둔다. 필요하면 여기서 다시 스폰)
 
 	// --- 상시 표시되는 안내 HUD ---
 	//
@@ -138,6 +142,10 @@ int main(int argc, char* argv[])
 	// 반드시 메인 쓰레드에서 부른다.
 	// 이때의 쓰레드 ID가 "게임 쓰레드"로 기록되어 이후 잡 호출을 검사하는 기준이 된다.
 	NetStatus::Get().BindTextBlock(netLabel);
+
+	// 서버가 보낸 스폰/디스폰을 반영할 주체.
+	// NetStatus와 같은 이유로 메인 쓰레드에서 기준 쓰레드 ID를 기록해 둔다.
+	ObjectManager::Get().BindGameThread();
 
 	Engine::Get().Run();
 }

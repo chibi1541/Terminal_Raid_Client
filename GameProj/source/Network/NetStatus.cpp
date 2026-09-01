@@ -5,6 +5,8 @@
 #include "Thread/ThreadManager.h"
 #include "UI/TextBlock.h"
 
+#include "Game/ObjectManager.h"
+
 using namespace Craft;
 
 
@@ -73,10 +75,6 @@ void NetStatus::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 		return;
 	}
 
-	// TODO : Object 계층이 들어오면 myObject/objects로 실제 액터를 스폰한다.
-	// 지금은 개수만 센다.
-	objectCount = pkt.objects_size() + 1;
-
 	state = "in room " + std::to_string(pkt.width()) + "x" + std::to_string(pkt.height());
 
 	Refresh();
@@ -86,7 +84,6 @@ void NetStatus::OnExitRoom()
 {
 	EnterGameThreadJob("S_EXIT_ROOM");
 
-	objectCount = 0;
 	state = "left room";
 
 	Refresh();
@@ -96,23 +93,12 @@ void NetStatus::OnSpawn(const Protocol::S_SPAWN& pkt)
 {
 	EnterGameThreadJob("S_SPAWN");
 
-	// TODO : Object 계층이 들어오면 여기서 액터를 스폰한다.
-	objectCount += pkt.objects_size();
-
 	Refresh();
 }
 
 void NetStatus::OnDespawn(const Protocol::S_DESPAWN& pkt)
 {
 	EnterGameThreadJob("S_DESPAWN");
-
-	// TODO : Object 계층이 들어오면 여기서 액터를 제거한다.
-	objectCount -= pkt.objectids_size();
-
-	if (objectCount < 0)
-	{
-		objectCount = 0;
-	}
 
 	Refresh();
 }
@@ -131,7 +117,8 @@ void NetStatus::Refresh()
 	std::string text;
 	text += "net  : " + state + "\n";
 	text += "pkt  : " + lastPacket + " x" + std::to_string(packetCount) + "\n";
-	text += "obj  : " + std::to_string(objectCount) + "\n";
+	// 개수를 여기서 따로 세지 않는다. 두 군데서 세면 반드시 어긋난다.
+	text += "obj  : " + std::to_string(ObjectManager::Get().GetCount()) + "\n";
 	text += "game thread : " + std::to_string(gameThreadId) + "\n";
 	text += "job  thread : " + std::to_string(lastJobThreadId);
 

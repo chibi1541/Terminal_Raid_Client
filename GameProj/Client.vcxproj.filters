@@ -45,6 +45,18 @@
     <ClCompile Include="source\Protocol\Struct.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Game\ObjectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Actor\LocalPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Actor\PlayerActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Actor\ReplicatedActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -74,7 +86,25 @@
     <ClInclude Include="source\Protocol\Struct.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\ObjectIdHandler.h">
+    <ClInclude Include="source\Utils\ObjectIdHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Game\ObjectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Network\NetSend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\LocalPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\PlayerActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\RemotePlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\ReplicatedActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

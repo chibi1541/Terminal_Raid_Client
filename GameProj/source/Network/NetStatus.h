@@ -65,5 +65,4 @@ private:
 	std::string lastPacket = "-";
 
 	int packetCount = 0;
-	int objectCount = 0;
 };
