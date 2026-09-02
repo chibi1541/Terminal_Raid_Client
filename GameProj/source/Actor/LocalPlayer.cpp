@@ -33,6 +33,20 @@ void LocalPlayer::BeginPlay()
 	// 구르기는 누른 순간 한 번만 시작되어야 하므로 Pressed.
 	inputComponent->BindKey(VK_SPACE, EInputEvent::Pressed, this, &LocalPlayer::OnRollPressed);
 
+	// 뷰 회전도 누른 순간 한 번씩이므로 Pressed.
+	// Held로 걸면 키를 꾹 누르는 동안 매 프레임 목표 각도가 밀려서 보간이 끝나지 않는다.
+	inputComponent->BindKey('Q', EInputEvent::Pressed, this, &LocalPlayer::OnRotateViewLeft);
+	inputComponent->BindKey('E', EInputEvent::Pressed, this, &LocalPlayer::OnRotateViewRight);
+
+	// 화면의 기준점. 등록되는 순간 활성 카메라가 되어
+	// 이 액터의 위치가 화면 중앙에 오도록 CameraManager가 매 프레임 뷰를 갱신한다.
+	//
+	// 이것도 InputComponent와 같은 이유로 super보다 앞이어야 한다.
+	// CameraComponent는 자기 BeginPlay에서 CameraManager에 등록되는데,
+	// 순서를 어기면 등록이 안 돼 활성 카메라가 없는 채로 뷰가 동결된다.
+	// 그러면서도 Tick/Draw는 정상으로 불리기 때문에 원인을 찾기 어렵다.
+	cameraComponent = AddComponent<CameraComponent>();
+
 	// 애니메이터 셋업은 PlayerActor가 하고, 컴포넌트 BeginPlay 전파는 Actor가 한다.
 	// 위에서 만든 inputComponent도 여기서 함께 BeginPlay를 받는다.
 	super::BeginPlay();
@@ -66,6 +80,29 @@ void LocalPlayer::OnAttack()
 void LocalPlayer::OnRollPressed()
 {
 	isRolling = true;
+}
+
+void LocalPlayer::OnRotateViewLeft()
+{
+	// 예외 처리 - BeginPlay 전에는 컴포넌트가 없다.
+	if (nullptr == cameraComponent)
+	{
+		return;
+	}
+
+	// 스크린 y가 아래로 갈수록 커지는 좌표계라
+	// +1이 화면상 시계 방향이다. Q는 그 반대.
+	cameraComponent->AddViewQuarterTurns(-1, viewRotateBlendTime);
+}
+
+void LocalPlayer::OnRotateViewRight()
+{
+	if (nullptr == cameraComponent)
+	{
+		return;
+	}
+
+	cameraComponent->AddViewQuarterTurns(1, viewRotateBlendTime);
 }
 
 void LocalPlayer::Tick(float deltaTime)

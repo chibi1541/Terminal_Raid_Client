@@ -2,6 +2,7 @@
 
 #include "PlayerActor.h"
 #include "Input/InputComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include <memory>
 
@@ -38,8 +39,24 @@ private:
 	void OnAttack();
 	void OnRollPressed();
 
+	// 뷰를 90도씩 돌린다. Q가 반시계, E가 시계 방향.
+	//
+	// 다른 입력과 달리 값만 세우고 Tick으로 미루지 않고 여기서 바로 처리한다.
+	// 이동/애니메이션과 달리 누적할 것도 없고, 카메라 상태는 CameraManager가 가진다.
+	void OnRotateViewLeft();
+	void OnRotateViewRight();
+
 private:
 	std::shared_ptr<Craft::InputComponent> inputComponent;
+
+	// 이 클라이언트의 화면을 비추는 카메라.
+	//
+	// autoActivate 기본값이 true라 등록되는 순간 활성 카메라가 된다.
+	// RemotePlayer에는 붙이지 않는다 - 화면을 비추는 건 내가 조종하는 하나뿐이다.
+	std::shared_ptr<Craft::CameraComponent> cameraComponent;
+
+	// 뷰 회전에 쓰는 보간 시간(초). 0이면 즉시 스냅이라 화면이 튄다.
+	static constexpr float viewRotateBlendTime = 0.25f;
 
 	// 초당 이동할 칸 수
 	float moveSpeed = 20.0f;
