@@ -15,4 +15,5 @@
 -->
 <PrimaryAssets>
 	<Asset type="AnimationData" name="AnimationData" path="../Assets/AnimationData.xml" />
+	<Asset type="LevelData" name="LevelData" path="../Assets/LevelData.xml" />
 </PrimaryAssets>

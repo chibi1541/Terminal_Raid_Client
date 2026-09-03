@@ -17,6 +17,16 @@ NAME_SPACE_BEGIN(Craft)
 // 그래서 UI 트리는 대역 값 하나를 공유하고 제출 순서로 앞뒤를 정한다.
 namespace RenderLayer
 {
+	// 월드 배경(타일맵, 지형). 액터(기본 0)보다 아래다.
+	//
+	// -1이 하한이다. Renderer의 Frame::Clear가 sortingOrderArray를 -1로 채우고
+	// z 테스트가 `기존값 > 새값`이라, -2 이하로 제출한 명령은 절대 그려지지 않는다.
+	// 즉 이 값은 "가장 아래 레이어"이자 동시에 "아무것도 안 그려짐" 센티넬이다.
+	//
+	// 배경 아래에 레이어를 하나 더 끼워야 한다면(패럴랙스, 하늘),
+	// 이 값을 낮추는 게 아니라 Frame::Clear의 초기값을 INT_MIN으로 내려야 한다.
+	constexpr int Background = -1;
+
 	// 액터. 별도 상수를 두지 않고 Actor::GetSortingOrder()를 그대로 쓴다.
 
 	// 액터에 붙어서 따라다니는 위젯(머리 위 체력바 등).

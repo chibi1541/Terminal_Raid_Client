@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	레벨 목록. 이름 -> 레벨 파일 경로 매핑만 들고 있다.
+
+	AnimationData.xml과 같은 자리다. 실제 격자는 여기 적힌 경로의 *.level.xml에 있고,
+	AssetManager가 그 파일을 LevelMap 타입으로 따로 캐싱한다.
+	레벨을 추가할 때 PrimaryAssets.xml을 건드리지 말고 이 목록에만 한 줄 넣으면 된다.
+
+	name : 조회 키. TileMapLevel("이름") 으로 찾는다.
+	path : 실제 레벨 XML 경로. Config/ 와 같은 관습대로 프로젝트 폴더 기준 상대 경로다.
+
+	이 파일은 BOM 없는 UTF-8로 저장할 것.
+-->
+<LevelData>
+	<Levels>
+		<Level name="Cemetery" path="../Assets/Cemetery.level.xml" />
+	</Levels>
+</LevelData>

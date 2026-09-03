@@ -4,10 +4,11 @@
 #include "Engine/Engine.h"
 #include "Level/Level.h"
 #include "Render/Renderer.h"
-#include "Actor/Actor.h"
 #include "Actor/TestActor.h"
 #include "Asset/AssetManager.h"
 #include "Asset/AnimationDataAsset.h"
+#include "Asset/LevelDataAsset.h"
+#include "Level/TileMapLevel.h"
 
 #include "UI/UISystem.h"
 #include "UI/Border.h"
@@ -63,32 +64,17 @@ int main(int argc, char* argv[])
 
 	// 화면 전체 배경색 설정 (아무것도 안 그려진 칸이 이 색으로 남음)
 	//
-	// UI 확인용으로 일부러 눈에 띄는 색을 쓴다.
-	// 배경색 합성이나 클리핑이 깨지면 초록 위에서 바로 보인다.
-	Renderer::Get().SetClearColor(Color::Green);
+	// 타일맵이 쓰는 기호 아홉 중 Black에 대응하는 것이 하나도 없다.
+	// 그래서 검은 칸을 "지형이 안 칠해진 칸"으로 바로 읽을 수 있다.
+	// (예전에 쓰던 초록은 최다 기호 G(Color::Green)와 같아서
+	//  타일맵이 그려졌는지 안 그려졌는지를 구분할 수 없다)
+	Renderer::Get().SetClearColor(Color::Black);
 
 	// Primary Data Asset 로드
 	AssetManager::Get().RegisterPrimaryAssetType<AnimationDataAsset>("AnimationData");
+	AssetManager::Get().RegisterPrimaryAssetType<LevelDataAsset>("LevelData");
 	AssetManager::Get().LoadPrimaryAssetManifest(L"../Assets/PrimaryAssets.xml");
-	Engine::Get().AddNewLevel<Level>();
-
-	// --- 카메라 검증용 임시 랜드마크 ---
-	//
-	// 월드에 고정된 기준점이 없으면 카메라가 플레이어를 따라오는지
-	// 아예 안 움직이는지 화면으로 구분할 수 없다(배경이 단색이라 더 그렇다).
-	//
-	// TestActor를 쓰면 안 된다 - 개도 WASD를 바인딩해서 같이 움직인다.
-	// 그래서 image만 들고 있는 엔진 기본 Actor를 그대로 쓴다.
-	// 레벨 데이터(XML)가 들어오면 이 블록은 제거한다.
-	{
-		// mainLevel이 없으면 nextLevel을 돌려주므로 AddNewLevel 직후에 안전하다.
-		const std::shared_ptr<Level> level = Engine::Get().GetLevel();
-
-		level->SpawnActor<Actor>("[20,10]", Vector2(20, 10), Color::Purple);
-		level->SpawnActor<Actor>("[100,10]", Vector2(100, 10), Color::Purple);
-		level->SpawnActor<Actor>("[20,30]", Vector2(20, 30), Color::Purple);
-		level->SpawnActor<Actor>("[100,30]", Vector2(100, 30), Color::Purple);
-	}
+	Engine::Get().AddNewLevel<TileMapLevel>();
 
 	// 플레이어 액터는 여기서 만들지 않는다.
 	// 서버가 S_ENTER_ROOM으로 알려준 정보대로 ObjectManager가 스폰한다.
