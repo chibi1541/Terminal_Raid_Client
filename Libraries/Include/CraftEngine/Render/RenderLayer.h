@@ -27,7 +27,15 @@ namespace RenderLayer
 	// 이 값을 낮추는 게 아니라 Frame::Clear의 초기값을 INT_MIN으로 내려야 한다.
 	constexpr int Background = -1;
 
-	// 액터. 별도 상수를 두지 않고 Actor::GetSortingOrder()를 그대로 쓴다.
+	// 월드 액터의 위치 기반 깊이 정렬 기준값.
+	//
+	// 실제 값은 이 값 + "화면 세로 좌표"다. 아래에 있는 액터일수록 커져서 앞에 그려진다.
+	// Level::Draw가 매 프레임 덮어쓴다(UsesDepthSorting이 켜진 액터에 한해).
+	//
+	// 기준값이 필요한 이유 - 카메라가 180/270°면 깊이 키가 음수가 된다.
+	// 0 근처에 두면 Background(-1)를 파고들어 액터가 통째로 사라진다.
+	// 월드 좌표는 수천 단위라 이 여유(100,000)로 WorldUI(500,000)까지 닿지 않는다.
+	constexpr int WorldActorDepth = 100'000;
 
 	// 액터에 붙어서 따라다니는 위젯(머리 위 체력바 등).
 	// 액터보다는 위, 뷰포트 UI보다는 아래.

@@ -27,6 +27,16 @@ public:
 	virtual void Tick(float deltaTime);
 	virtual void Draw();
 
+	// 카메라 회전이 "완전히 끝난" 순간에만 불린다. Tick이 아니다.
+	//
+	// 정적 액터는 여기서 그릴 방향 슬롯을 다시 고른다. 매 프레임 카메라를
+	// 들여다볼 이유가 없고, 보간 중에 그림이 바뀌면 회전 도중에 튀어 보인다.
+	// quarterTurns는 정착한 뷰 회전(0~3)이다.
+	//
+	// 브로드캐스트는 Level::Draw가 CameraManager의 회전 버전을 보고 판단한다.
+	// 델리게이트 등록 목록이 아니라서 액터가 죽어도 해제할 것이 없다.
+	virtual void OnViewRotationChanged(int quarterTurns) {}
+
 	// 액터 제거 함수.
 	void Destroy();
 
@@ -107,6 +117,14 @@ public:
 	inline int GetSortingOrder() const { return sortingOrder; }
 	inline void SetSortingOrder(int newSortingOrder) { sortingOrder = newSortingOrder; }
 
+	// 위치에 따라 sortingOrder를 매 프레임 다시 계산할 대상인지.
+	//
+	// 켜져 있으면 Level::Draw가 화면 아래쪽 액터일수록 앞에 오도록 값을 덮어쓴다.
+	// 즉 이게 켜진 액터에 SetSortingOrder를 부르는 것은 의미가 없다.
+	// 화면에 고정되거나 항상 맨 앞/뒤여야 하는 액터를 만들면 이걸 끄고 직접 정한다.
+	inline bool UsesDepthSorting() const { return usesDepthSorting; }
+	inline void SetUsesDepthSorting(bool value) { usesDepthSorting = value; }
+
 protected:
 	// BeginPlay
 	bool hasBeganPlay = false;
@@ -137,6 +155,9 @@ protected:
 	int width = 0;
 
 	int sortingOrder = 0;
+
+	// 위치 기반 깊이 정렬 대상 여부. 월드 액터의 기본값은 참이다.
+	bool usesDepthSorting = true;
 
 	Vector2 position;
 };

@@ -106,6 +106,19 @@ public:
 	inline Rect GetWorldBounds() const { return worldBounds; }
 	inline void SetWorldBounds(const Rect& bounds) { worldBounds = bounds; }
 
+	// 카메라 영역 밖의 액터를 Draw에서 건너뛸지.
+	//
+	// 끄면 모든 액터가 그려진다(컬링 버그를 의심할 때 A/B 하려고 남겨둔다).
+	inline bool IsViewCullingEnabled() const { return viewCullingEnabled; }
+	inline void SetViewCullingEnabled(bool value) { viewCullingEnabled = value; }
+
+	// 컬링 경계를 화면보다 얼마나 넓게 잡을지(칸).
+	//
+	// 0이면 안 된다. 경계를 화면에 딱 맞추면 폭이 넓은 오브젝트가
+	// 기준점이 들어오는 순간에야 그려져서 가장자리에서 튀어나오듯 나타난다.
+	inline int GetCullMargin() const { return cullMargin; }
+	inline void SetCullMargin(int value) { cullMargin = value; }
+
 protected:
 	void ProcessAddAndDestoryActors();
 
@@ -115,6 +128,17 @@ protected:
 
 	// 월드 경계. 기본값은 비어 있음(size 0) = 클램프 없음.
 	Rect worldBounds;
+
+	// 카메라 영역 밖 액터를 Draw에서 건너뛴다.
+	bool viewCullingEnabled = true;
+
+	// 컬링 경계를 화면보다 넓히는 여유(칸).
+	// 가장 큰 프롭 스프라이트가 16칸이라 2타일(24칸)이면 넉넉하다.
+	int cullMargin = 24;
+
+	// 마지막으로 액터들에게 알린 카메라 회전 버전.
+	// 0으로 시작해서 첫 Draw에 반드시 한 번 브로드캐스트가 일어난다.
+	int lastViewRotationVersion = 0;
 
 	// 레벨에 배치된 모든 액터
 	std::vector<std::shared_ptr<Actor>> actorList;

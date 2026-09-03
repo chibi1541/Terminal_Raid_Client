@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	정적 프롭 묶음의 이름 -> 파일 경로 목록.
+
+	AnimationData.xml / LevelData.xml 과 같은 자리다.
+	프롭을 쓰는 쪽(StaticPropActor)은 "Cemetery" 같은 이름만 알면 되고,
+	그 이름이 어느 파일인지는 여기서 정한다.
+
+	name : 조회 키. StaticPropActor 생성자의 첫 인자다.
+	       PrimaryAssets.xml의 name과 다르다 - 그쪽은 이 목록 자체의 이름이고,
+	       여기는 그 목록 안의 항목 이름이다.
+	path : 프롭 정의 파일(*.prop.xml). Tools/convert_props.py가 생성한다.
+
+	경로는 Config/ 와 같은 관습대로 프로젝트 폴더 기준 상대 경로다.
+	이 파일은 BOM 없는 UTF-8로 저장할 것.
+-->
+<PropData>
+	<PropSets>
+		<PropSet name="Cemetery" path="../Assets/CemeteryProps.prop.xml" />
+	</PropSets>
+</PropData>

@@ -52,9 +52,15 @@ public:
 
 	// 레벨 추가 요청 함수
 	template<typename T, typename = std::enable_if_t<std::is_base_of<Level, T>:: value>>
-	void AddNewLevel()
+	std::shared_ptr<T> AddNewLevel()
 	{
-		nextLevel = std::make_shared<T>();
+		std::shared_ptr<T> level = std::make_shared<T>();
+
+		nextLevel = level;
+
+		// 호출부가 여기에 액터를 미리 심을 수 있도록 돌려준다.
+		// 레벨 교체는 프레임 끝에 일어나므로 지금 Engine에서 찾을 수 없다.
+		return level;
 	}
 
 	// 전역 인스턴스 반환

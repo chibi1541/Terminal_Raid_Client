@@ -8,6 +8,8 @@
 #include "Asset/AssetManager.h"
 #include "Asset/AnimationDataAsset.h"
 #include "Asset/LevelDataAsset.h"
+#include "Asset/PropDataAsset.h"
+#include "Actor/StaticPropActor.h"
 #include "Level/TileMapLevel.h"
 
 #include "UI/UISystem.h"
@@ -73,8 +75,57 @@ int main(int argc, char* argv[])
 	// Primary Data Asset 로드
 	AssetManager::Get().RegisterPrimaryAssetType<AnimationDataAsset>("AnimationData");
 	AssetManager::Get().RegisterPrimaryAssetType<LevelDataAsset>("LevelData");
+	AssetManager::Get().RegisterPrimaryAssetType<PropDataAsset>("PropData");
 	AssetManager::Get().LoadPrimaryAssetManifest(L"../Assets/PrimaryAssets.xml");
-	Engine::Get().AddNewLevel<TileMapLevel>();
+	std::shared_ptr<TileMapLevel> level = Engine::Get().AddNewLevel<TileMapLevel>();
+
+	// --- 임시 : 정적 프롭 시스템 검증용 배치 ---
+	//
+	// TODO : 배치 데이터로 이관한다. 어떤 프롭이 어디에 놓이는지는 코드가 아니라
+	//        데이터가 가져야 한다. 지금은 회전/피벗/Z-order/컬링을 눈으로 확인하려고
+	//        여기서 직접 스폰한다.
+	//
+	// 확인 항목:
+	//  - facing이 서로 달라야 Q/E로 돌렸을 때 정면/측면이 섞여 나온다.
+	//  - y가 서로 달라야 플레이어가 지나가며 앞뒤로 들락거리는 것을 볼 수 있다.
+	if (nullptr != level)
+	{
+		struct PropPlacement
+		{
+			const char* name;
+			int x;
+			int y;
+			EFacing facing;
+		};
+
+		static const PropPlacement placements[] =
+		{
+			{ "TOMB_A",   30, 18, EFacing::Up    },
+			{ "TOMB_B",   54, 18, EFacing::Right },
+			{ "GATEPOST", 78, 18, EFacing::Up    },
+
+			{ "FENCE",    30, 34, EFacing::Up    },
+			{ "FENCE",    42, 34, EFacing::Up    },
+			{ "FENCE",    54, 34, EFacing::Right },
+			{ "FENCE",    54, 46, EFacing::Right },
+
+			{ "GATE_L",   78, 40, EFacing::Up    },
+			{ "GATE_R",   90, 40, EFacing::Up    },
+
+			{ "TOMB_A",   30, 58, EFacing::Down  },
+			{ "TOMB_B",   54, 58, EFacing::Left  },
+			{ "GATEPOST", 78, 58, EFacing::Left  },
+		};
+
+		for (const PropPlacement& placement : placements)
+		{
+			level->SpawnActor<StaticPropActor>(
+				"Graveyard",
+				placement.name,
+				Vector2(placement.x, placement.y),
+				placement.facing);
+		}
+	}
 
 	// 플레이어 액터는 여기서 만들지 않는다.
 	// 서버가 S_ENTER_ROOM으로 알려준 정보대로 ObjectManager가 스폰한다.
