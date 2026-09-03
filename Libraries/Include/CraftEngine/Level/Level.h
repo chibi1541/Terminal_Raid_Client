@@ -2,6 +2,7 @@
 
 #include "Core/CraftObject.h"
 #include "Math/Rect.h"
+#include "Level/TileMetrics.h"
 
 NAME_SPACE_BEGIN(Craft)
 
@@ -119,6 +120,23 @@ public:
 	inline int GetCullMargin() const { return cullMargin; }
 	inline void SetCullMargin(int value) { cullMargin = value; }
 
+	// 프롭 배치/충돌 격자 한 칸의 크기(콘솔 셀 개수).
+	//
+	// 레벨마다 아트 스케일이 다르므로 전역 상수가 아니라 레벨이 가진다.
+	// 값의 출처는 레이아웃 XML이고, 그게 도착하기 전에는 DefaultTileSize다.
+	inline int GetTileSize() const { return tileSize; }
+	inline void SetTileSize(int value) { tileSize = value; }
+
+	// 액터의 기준점(피벗이 놓이는 월드 점)을 빨간 칸으로 표시하는 디버그 모드.
+	//
+	// 게임 중 P 키로 켜고 끈다. 스프라이트가 기준점에 대해 어디에 붙는지는
+	// 눈으로만 판단하기 어려운데(피벗은 이미지 안의 점이라 그림에 안 보인다),
+	// 점 하나를 같은 좌표 변환으로 찍어보면 바로 드러난다.
+	//
+	// static인 이유 - 레벨을 갈아타도 켜둔 상태가 유지되어야 디버깅이 끊기지 않는다.
+	static bool IsShowingPivots() { return showPivotDebug; }
+	static void SetShowPivots(bool value) { showPivotDebug = value; }
+
 protected:
 	void ProcessAddAndDestoryActors();
 
@@ -133,8 +151,14 @@ protected:
 	bool viewCullingEnabled = true;
 
 	// 컬링 경계를 화면보다 넓히는 여유(칸).
-	// 가장 큰 프롭 스프라이트가 16칸이라 2타일(24칸)이면 넉넉하다.
+	// 가장 큰 프롭 스프라이트가 24칸이라 2타일(24칸)이면 넉넉하다.
 	int cullMargin = 24;
+
+	// 프롭 배치/충돌 격자 한 칸의 크기.
+	int tileSize = DefaultTileSize;
+
+	// 기준점 디버그 표시 여부. Level::Tick에서 P 키로 토글한다.
+	static bool showPivotDebug;
 
 	// 마지막으로 액터들에게 알린 카메라 회전 버전.
 	// 0으로 시작해서 첫 Draw에 반드시 한 번 브로드캐스트가 일어난다.

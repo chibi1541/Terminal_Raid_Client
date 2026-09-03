@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Utils/EngineMacro.h"
+#include "Actor/Facing.h"
+#include "Asset/PropSpriteSet.h"
 #include "Level/Level.h"
 #include <memory>
 #include <string>
@@ -8,6 +10,8 @@
 NAME_SPACE_BEGIN(Craft)
 
 class LevelMap;
+class LevelLayout;
+class StaticPropActor;
 
 // LevelDataAsset의 지형을 배경으로 깔고 그 위에 액터를 올리는 레벨.
 //
@@ -35,6 +39,14 @@ public:
 	virtual void OnInitialized() override;
 	virtual void Draw() override;
 
+	// 프롭 하나를 타일 좌표에 세운다. 스프라이트 묶음이 도착한 뒤에만 동작한다.
+	//
+	// 기준점 변환(타일 좌표 -> 월드 좌표)이 여기 한 곳에만 있다.
+	// facing에 따라 스팬 축과 앵커가 달라지는 산수를 호출부마다 반복하면
+	// 반드시 한 군데가 어긋난다.
+	std::shared_ptr<StaticPropActor> SpawnProp(
+		const std::string& propName, int tileX, int tileY, EFacing facing);
+
 private:
 	// 화면 한 줄을 제출한다. 전부 투명이면 제출하지 않는다.
 	void SubmitRow(int screenY, int width);
@@ -42,12 +54,24 @@ private:
 	// 비동기 로드가 끝나면 격자를 받아 월드 경계까지 세운다.
 	void OnLevelMapLoaded(std::shared_ptr<const LevelMap> loaded);
 
+	// 배치가 도착하면 타일 크기를 받아 세우고, 스프라이트 묶음 로드를 이어서 건다.
+	void OnLayoutLoaded(std::shared_ptr<const LevelLayout> loaded);
+
+	// 스프라이트 묶음까지 도착하면 배치대로 액터를 만든다.
+	void OnPropSetLoaded(std::shared_ptr<const PropSpriteSet> loaded);
+
 private:
 	std::string levelName;
 
 	// 조회는 OnInitialized에서 한 번만 한다.
 	// GetPrimaryAsset은 해시 조회 + Cast<T>(dynamic_cast)라 Draw에서 부를 것이 아니다.
 	std::shared_ptr<const LevelMap> levelMap;
+
+	// 배치 목록. 스프라이트 묶음이 도착할 때까지 들고 있다가 스폰에 쓴다.
+	std::shared_ptr<const LevelLayout> levelLayout;
+
+	// 스프라이트 묶음. 액터들이 이걸 공유한다(액터마다 로드하지 않는다).
+	std::shared_ptr<const PropSpriteSet> propSet;
 
 	// 화면 한 줄을 조립하는 버퍼. 프레임마다 재할당하지 않으려고 멤버로 둔다.
 	//

@@ -10,7 +10,7 @@
 
 NAME_SPACE_BEGIN(Craft)
 
-// 필드에 고정되어 움직이지 않는 오브젝트. (묘비, 울타리, 문기둥)
+// 필드에 고정되어 움직이지 않는 오브젝트. (묘비, 울타리, 문기둥, 철문)
 //
 // 이동형 액터와 갈라지는 지점:
 //  - 표시 이미지가 카메라 회전 "하나만"으로 정해진다.
@@ -23,35 +23,37 @@ NAME_SPACE_BEGIN(Craft)
 // 거기서 displaySlot 하나만 갱신한다. Draw는 카메라를 아예 보지 않는다.
 // 보간 중에 그림이 바뀌면 회전하는 도중에 오브젝트가 튀는 것처럼 보인다.
 //
-// 기준점(GetPosition)은 타일 영역의 하단 중앙이다.
-// 타일 영역은 정사각이고 카메라가 돌아도 회전하지 않는다 - GetTileBounds 참고.
+// ★ 애셋을 직접 로드하지 않는다 ★
+// 이미 로드된 PropSpriteSet을 받아서 생성된다. 배치가 100개를 넘으면
+// 액터마다 LoadAsync를 걸 이유가 없다(같은 파일에 콜백만 100개 쌓인다).
+// 로딩은 레벨이 한 번 하고(TileMapLevel), 결과를 나눠준다.
 class CRAFT_API StaticPropActor : public Actor
 {
 	TYPE_DECLARATIONS(StaticPropActor, Actor)
 
 public:
-	// propSetName : Assets/PropData.xml의 name= (예 "Graveyard")
-	// propName    : 그 파일 안의 <Prop name="..."> (예 "TOMB_A")
-	// facing      : 이 프롭이 월드에서 보고 있는 방향. 카메라와 무관한 고정값이다.
+	// propSet  : 이미 로드된 스프라이트 묶음. 캐시가 "사용 중"으로 보도록 계속 들고 있는다.
+	// propName : 그 묶음 안의 <Prop name="..."> (예 "TOMB_A")
+	// position : 기준점(월드). 타일 좌표가 아니다 - 변환은 스폰하는 쪽이 한다.
+	// facing   : 이 프롭이 월드에서 보고 있는 방향. 카메라와 무관한 고정값이다.
 	StaticPropActor(
-		std::string propSetName,
+		std::shared_ptr<const PropSpriteSet> propSet,
 		std::string propName,
 		const Vector2& position,
 		EFacing facing = EFacing::Up);
 
 	virtual ~StaticPropActor() = default;
 
-	virtual void BeginPlay() override;
 	virtual void Draw() override;
 
 	// 카메라 회전이 정착한 순간에만 불린다. Tick이 아니다.
 	virtual void OnViewRotationChanged(int quarterTurns) override;
 
-	// 타일 영역(월드 공간, 정사각). 길찾기/이동 차단이 붙을 자리다.
+	// 타일 영역(월드 공간). 길찾기/이동 차단이 붙을 자리다.
 	//
-	// 기준점이 하단 중앙이므로 영역은 기준점에서 위로 뻗는다.
-	// 카메라 회전을 참조하지 않는다 - 회전해도 이 값은 절대 변하지 않는다.
-	// (그래서 이동형 액터의 판정이 뷰에 따라 달라지지 않는다)
+	// 정사각이 아니다 - 정사각인 것은 타일 한 칸이고, 오브젝트는 크기만큼
+	// 타일을 여러 개 먹는다(깊이는 언제나 1타일). 스팬이 걸리는 축과
+	// 기준점의 위치는 카메라가 아니라 facing이 정하므로, 화면을 돌려도 이 값은 안 변한다.
 	Rect GetTileBounds() const;
 
 	inline EFacing GetFacing() const { return facing; }
@@ -61,15 +63,10 @@ public:
 	inline EFacing GetDisplaySlot() const { return displaySlot; }
 	inline const std::string& GetPropName() const { return propName; }
 
-	// 애셋이 도착해서 그릴 수 있는 상태인지.
+	// 묶음에서 이름을 찾지 못하면(데이터 오타) 그릴 것이 없다.
 	inline bool IsSpriteReady() const { return propSprite != nullptr; }
 
 private:
-	// 비동기 로드가 끝나면 묶음에서 자기 프롭을 찾아 붙든다.
-	void OnPropSetLoaded(std::shared_ptr<const PropSpriteSet> loaded);
-
-private:
-	std::string propSetName;
 	std::string propName;
 
 	// 월드 방향. 절대 변하지 않는다(정적이니까).
@@ -79,9 +76,9 @@ private:
 	//
 	// AssetManager는 "매니저 말고 아무도 안 들고 있는" 애셋을 유휴 언로드하므로
 	// 이 shared_ptr을 놓으면 30초 뒤에 스프라이트가 사라진다.
-	std::shared_ptr<const PropSpriteSet> loadedSet;
+	std::shared_ptr<const PropSpriteSet> propSet;
 
-	// loadedSet 안의 항목을 가리킨다. loadedSet이 살아있는 동안만 유효하다.
+	// propSet 안의 항목을 가리킨다. propSet이 살아있는 동안만 유효하다.
 	// (unordered_map은 재해싱해도 원소 주소가 안 변한다 - 여기서는 삽입도 없다)
 	const PropSprite* propSprite = nullptr;
 

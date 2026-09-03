@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Cemetery 레벨의 프롭 배치.
+
+	★ 이 파일이 원본이다 ★
+	생성기가 없다. 처음 한 번만 계산해서 채웠고, 이후 수정은 여기서 직접 한다.
+	(지형 Cemetery.level.xml은 아트에서 변환한 생성물이라 반대다 - 그쪽은 손대지 말 것)
+
+	propSet  : Assets/PropData.xml의 name=. 이 배치가 쓰는 스프라이트 묶음이다.
+	tileSize : 배치 격자 한 칸의 셀 수. 레벨이 이 값을 받아 간다.
+
+	Prop x, y : ★ 기준점이 아니라 "타일 좌상단 셀 좌표"다 ★
+	          기준점은 facing/스팬에 따라 타일 안에서 위치가 달라지는데,
+	          그 산수를 여기 적으면 규칙이 바뀔 때마다 전부 다시 계산해야 한다.
+	          한 칸 옮기려면 tileSize(12)만큼 더하거나 빼면 된다.
+	facing   : Up / Down / Left / Right. 프롭이 월드에서 보는 방향이고
+	          카메라와 무관하다. 화면에 그릴 그림은 엔진이
+	          RotateFacing(facing, 카메라 회전)으로 매 회전마다 다시 고른다.
+
+	현재 배치 - 레벨 380 x 280, 타일 12
+	  울타리 링   : x 10~369, y 8~271 (30 x 22 슬롯). 네 변 한가운데에 문.
+	  십자로      : 세로 x 178~201, 가로 y 128~151 (문 개구부 폭 24)
+	  사분면      : 각 13 x 9 타일. 3x3 묘비 - 길 쪽 L자 5개가 TOMB_B, 안쪽 2x2가 TOMB_A.
+-->
+<LevelLayout levelId="Cemetery" propSet="Cemetery" tileSize="4">
+
+	<!-- 북쪽 울타리 -->
+	<Prop name="FENCE"      x="12"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="24"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="36"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="48"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="60"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="72"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="84"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="96"    y="16"    facing="Up" />
+	<Prop name="FENCE"      x="108"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="120"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="132"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="144"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="156"   y="16"    facing="Up" />
+	<Prop name="GATEPOST"   x="167"   y="16"    facing="Up" />
+	<Prop name="GATE"       x="178"   y="16"    facing="Up" />
+	<Prop name="GATEPOST"   x="200"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="210"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="222"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="234"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="246"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="258"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="270"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="282"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="294"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="306"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="318"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="330"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="342"   y="16"    facing="Up" />
+	<Prop name="FENCE"      x="354"   y="16"    facing="Up" />
+
+	<!-- 남쪽 울타리 -->
+	<Prop name="FENCE"      x="14"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="26"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="38"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="50"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="62"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="74"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="86"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="98"    y="268"   facing="Down" />
+	<Prop name="FENCE"      x="110"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="122"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="134"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="146"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="158"   y="268"   facing="Down" />
+	<Prop name="GATEPOST"   x="169"   y="268"   facing="Down" />
+	<Prop name="GATE"       x="180"   y="268"   facing="Down" />
+	<Prop name="GATEPOST"   x="202"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="212"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="224"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="236"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="248"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="260"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="272"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="284"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="296"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="308"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="320"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="332"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="344"   y="268"   facing="Down" />
+	<Prop name="FENCE"      x="356"   y="268"   facing="Down" />
+
+	<!-- 서쪽 울타리 -->
+	<Prop name="FENCE"      x="14"    y="12"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="24"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="36"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="48"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="60"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="72"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="84"    facing="Left" />
+	<Prop name="FENCE"      x="14"    y="96"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="108"   facing="Left" />
+	<Prop name="GATEPOST"   x="14"    y="118"   facing="Left" />
+	<Prop name="GATE"       x="14"    y="121"   facing="Left" />
+	<Prop name="GATEPOST"   x="14"    y="148"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="158"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="170"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="182"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="194"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="206"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="218"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="230"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="242"   facing="Left" />
+	<Prop name="FENCE"      x="14"    y="254"   facing="Left" />
+
+	<!-- 동쪽 울타리 -->
+	<Prop name="FENCE"      x="362"   y="12"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="24"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="36"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="48"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="60"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="72"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="84"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="96"    facing="Right" />
+	<Prop name="FENCE"      x="362"   y="108"   facing="Right" />
+	<Prop name="GATEPOST"   x="362"   y="118"   facing="Right" />
+	<Prop name="GATE"       x="362"   y="121"   facing="Right" />
+	<Prop name="GATEPOST"   x="362"   y="148"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="158"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="170"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="182"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="194"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="206"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="218"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="230"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="242"   facing="Right" />
+	<Prop name="FENCE"      x="362"   y="254"   facing="Right" />
+
+	<!-- 북서 사분면 묘비 -->
+	<Prop name="TOMB_A"     x="46"    y="34"    facing="Up" />
+	<Prop name="TOMB_A"     x="94"    y="34"    facing="Up" />
+	<Prop name="TOMB_B"     x="146"   y="26"    facing="Right" />
+	<Prop name="TOMB_A"     x="46"    y="70"    facing="Up" />
+	<Prop name="TOMB_A"     x="94"    y="70"    facing="Up" />
+	<Prop name="TOMB_B"     x="146"   y="62"    facing="Right" />
+	<Prop name="TOMB_B"     x="46"    y="106"   facing="Down" />
+	<Prop name="TOMB_B"     x="94"    y="106"   facing="Down" />
+	<Prop name="TOMB_B"     x="142"   y="106"   facing="Down" />
+
+	<!-- 북동 사분면 묘비 -->
+	<Prop name="TOMB_B"     x="230"   y="26"    facing="Left" />
+	<Prop name="TOMB_A"     x="274"   y="34"    facing="Up" />
+	<Prop name="TOMB_A"     x="322"   y="34"    facing="Up" />
+	<Prop name="TOMB_B"     x="230"   y="62"    facing="Left" />
+	<Prop name="TOMB_A"     x="274"   y="70"    facing="Up" />
+	<Prop name="TOMB_A"     x="322"   y="70"    facing="Up" />
+	<Prop name="TOMB_B"     x="226"   y="106"   facing="Down" />
+	<Prop name="TOMB_B"     x="274"   y="106"   facing="Down" />
+	<Prop name="TOMB_B"     x="322"   y="106"   facing="Down" />
+
+	<!-- 남서 사분면 묘비 -->
+	<Prop name="TOMB_B"     x="46"    y="172"   facing="Up" />
+	<Prop name="TOMB_B"     x="94"    y="172"   facing="Up" />
+	<Prop name="TOMB_B"     x="142"   y="172"   facing="Up" />
+	<Prop name="TOMB_A"     x="46"    y="208"   facing="Up" />
+	<Prop name="TOMB_A"     x="94"    y="208"   facing="Up" />
+	<Prop name="TOMB_B"     x="146"   y="200"   facing="Right" />
+	<Prop name="TOMB_A"     x="46"    y="244"   facing="Up" />
+	<Prop name="TOMB_A"     x="94"    y="244"   facing="Up" />
+	<Prop name="TOMB_B"     x="146"   y="236"   facing="Right" />
+
+	<!-- 남동 사분면 묘비 -->
+	<Prop name="TOMB_B"     x="226"   y="172"   facing="Up" />
+	<Prop name="TOMB_B"     x="274"   y="172"   facing="Up" />
+	<Prop name="TOMB_B"     x="322"   y="172"   facing="Up" />
+	<Prop name="TOMB_B"     x="230"   y="200"   facing="Left" />
+	<Prop name="TOMB_A"     x="274"   y="208"   facing="Up" />
+	<Prop name="TOMB_A"     x="322"   y="208"   facing="Up" />
+	<Prop name="TOMB_B"     x="230"   y="236"   facing="Left" />
+	<Prop name="TOMB_A"     x="274"   y="244"   facing="Up" />
+	<Prop name="TOMB_A"     x="322"   y="244"   facing="Up" />
+
+</LevelLayout>

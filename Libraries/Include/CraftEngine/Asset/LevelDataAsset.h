@@ -24,9 +24,14 @@ NAME_SPACE_BEGIN(Craft)
 //
 //   <LevelData>
 //       <Levels>
-//           <Level name="Cemetery" path="../Assets/Cemetery.level.xml" />
+//           <Level name="Cemetery" path="../Assets/Cemetery.level.xml"
+//                                layout="../Assets/Cemetery.LevelLayout.xml" />
 //       </Levels>
 //   </LevelData>
+//
+//   path   : 지형 격자(LevelMap). 필수.
+//   layout : 프롭 배치(LevelLayout). 선택 - 없으면 프롭 없는 레벨이다.
+//            레이아웃은 레벨과 1:1이라 별도 PrimaryDataAsset을 두지 않고 여기 붙인다.
 //
 // 경로는 Config/ 와 같은 관습대로 프로젝트 폴더 기준 상대 경로다.
 class CRAFT_API LevelDataAsset : public PrimaryDataAsset
@@ -43,6 +48,9 @@ public:
 	// (이름 오타는 그 경로로 로드를 시도하는 호출부에서 걸린다)
 	const std::wstring& FindLevelPath(const std::string& name) const;
 
+	// 등록되지 않은 이름이거나 layout 속성이 없으면 빈 문자열.
+	const std::wstring& FindLayoutPath(const std::string& name) const;
+
 	inline bool HasLevel(const std::string& name) const
 	{
 		return levelPaths.find(name) != levelPaths.end();
@@ -52,6 +60,9 @@ public:
 
 private:
 	std::unordered_map<std::string, std::wstring> levelPaths;
+
+	// layout이 적힌 항목만 들어간다. levelPaths보다 작을 수 있다.
+	std::unordered_map<std::string, std::wstring> layoutPaths;
 };
 
 NAME_SPACE_END

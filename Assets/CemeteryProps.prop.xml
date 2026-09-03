@@ -7,8 +7,10 @@
 	Prop name : 조회 키. StaticPropActor 생성자에 넘기는 그 이름이다.
 	          Assets/PropData.xml의 name= 과는 다르다. 그쪽은 이 파일 자체의 이름이고,
 	          여기는 그 파일 안의 항목 이름이다.
-	tileSpan  : 타일 영역(정사각)의 한 변 길이(타일 개수). 생략하면 1.
-	          한 타일은 PropTileSize(Level/TileMetrics.h) 칸이다.
+	tileSpan  : 타일 영역의 "벽 방향" 길이(타일 개수). 깊이는 언제나 1타일이다.
+	          정사각인 것은 타일 한 칸의 정의(8x8 / 12x12 / 16x16)이지 이 영역이 아니다.
+	          손으로 적지 않는다 - 정면 스프라이트 폭 / 타일 크기로 계산한다.
+	          스팬이 걸리는 축은 facing이 정한다(Up/Down이면 가로, Left/Right면 세로).
 	          타일 영역은 카메라가 돌아도 회전하지 않는다.
 
 	Sprite dir : Up / Down / Left / Right. 액터가 "어디를 보는가"이지
@@ -19,11 +21,13 @@
 	          진실의 원천은 픽셀맵이고 이건 선언일 뿐이다.
 	          줄이 통째로 빠져 12x14가 12x13이 되는 실수는 이 선언이 있어야 걸린다.
 	pivot     : 선택. "x,y" 형태로 기준점에 놓일 스프라이트 안의 점(셀 단위).
-	          생략하면 슬롯에 따라 기본값이 다르다 -
-	            정면(Up/Down) : 가운데 맨 아래 = ((width-1)*0.5, height-1)
-	            측면(Left/Right) : 이미지 한가운데 = ((width-1)*0.5, (height-1)*0.5)
-	          타일 영역이 회전하지 않기 때문에 이렇게 갈라야 충돌 영역과
-	          보이는 그림이 어긋나지 않는다.
+	          생략하면 정면 기준점(하단 중앙)을 90도씩 돌린 값이 쓰인다 -
+	            Up / Down : 하단 중앙  ((width-1)*0.5, height-1)
+	            Right     : 좌변 중앙  (0,             (height-1)*0.5)
+	            Left      : 우변 중앙  (width-1,       (height-1)*0.5)
+	          측면이 거울인 이유 - k=1에서 월드 아래쪽이 화면 왼쪽으로,
+	          k=3에서는 화면 오른쪽으로 간다. 한쪽으로 고정하면 회전 방향에 따라
+	          프롭이 한 타일씩 어긋난다.
 
 	기호는 SymbolPalette(Math/SymbolPalette.h)의 16개 대문자 + 투명('.')만 쓸 수 있다.
 	줄 앞뒤 공백은 로더가 버리므로 들여쓰기를 자유롭게 써도 된다.
@@ -31,10 +35,10 @@
 	이 파일은 Tools/convert_props.py가 생성한다. 손으로 고치지 말 것.
 	BOM 없는 UTF-8 / LF로 저장해야 한다.
 -->
-<PropSprites desc="원본 : Assets/cemetery_sprites.txt">
+<PropSprites tileSize="4" desc="원본 : Assets/cemetery_sprites.txt">
 
-	<Prop name="GATE" tileSpan="1">
-		<Sprite dir="Up" width="24" height="16">
+	<Prop name="GATE" tileSpan="6">
+		<Sprite dir="Up" width="24" height="16" pivot="11.5,13">
 			........L.LLLL.L........
 			......L.D.DLLD.D.L......
 			......D.D.DLLD.D.D......
@@ -47,43 +51,68 @@
 			KKKKKKKKKKKKKKKKKKKKKKKK
 			D.D.D.D.D.DYYD.D.D.D.D.D
 			D.D.D.D.D.DYYD.D.D.D.D.D
-			D.D.D.D.D.DLLD.D.D.D.D.D
 			DDDDDDDDDDDDDDDDDDDDDDDD
 			KKKKKKKKKKKKKKKKKKKKKKKK
 			F.F.F.F.F.FFFF.F.F.F.F.F
+			........................
 		</Sprite>
-		<Sprite dir="Left" width="12" height="24">
-			....LL......
-			....DL......
-			...DDLDD....
-			....DL......
-			..DDDLDD....
-			....DL......
-			.DDDDLDD....
-			....DL......
-			DDDDDLDD....
-			....DL......
-			DDDDDLDD....
-			....DY......
-			....DY......
-			DDDDDLDD....
-			....DL......
-			DDDDDLDD....
-			....DL......
-			.DDDDLDD....
-			....DL......
-			..DDDLDD....
-			....DL......
-			...DDLDD....
-			....DK......
-			....FF......
+		<Sprite dir="Left" width="8" height="24" pivot="5.5,13.5">
+			.....LL.
+			.....DL.
+			..LDDDD.
+			....DL..
+			.LDDDDD.
+			....DL..
+			.LDDDDD.
+			...DL...
+			LDDDDDD.
+			..DL....
+			LDDDDDD.
+			...DY...
+			...DY...
+			LDDDDDD.
+			..DL....
+			LDDDDDD.
+			...DL...
+			.LDDDDD.
+			....DL..
+			..LDDDD.
+			.....DL.
+			...LDDD.
+			.....DL.
+			.....LL.
 		</Sprite>
 	</Prop>
 
-	<Prop name="GATEPOST" tileSpan="1">
-		<Sprite dir="Up" width="12" height="16">
+	<Prop name="GATEPOST" tileSpan="3">
+		<Sprite dir="Up" width="12" height="20" pivot="5.5,17">
 			............
 			.KKKKKKKKKK.
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
+			.KDDDDDDDDK.
+			..KLLLLLDK..
+			..KLBLLLDK..
+			..KLLLLLDK..
+			..KLLLLLDK..
+			..KLLLLLDK..
+			..KLFLLLDK..
+			..KLLLLLDK..
+			..KLLFLLDK..
+			..KLLLLLDK..
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
+			.KDDDDDDDDK.
+			.FFFFFFFFFF.
+		</Sprite>
+		<Sprite dir="Left" width="12" height="20" pivot="5.5,17">
+			............
+			.KKKKKKKKKK.
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
 			.KLLLLLLLDK.
 			.KDDDDDDDDK.
 			..KLLLLLDK..
@@ -92,35 +121,18 @@
 			..KLLLLLDK..
 			..KLFLLLDK..
 			..KLLLLLDK..
-			..KLLFLLDK..
+			..KLLDLFDK..
 			..KLLLLLDK..
+			.KLLLLLLLDK.
+			.KLLLLLLLDK.
 			.KLLLLLLLDK.
 			.KDDDDDDDDK.
 			.FFFFFFFFFF.
-			............
-		</Sprite>
-		<Sprite dir="Left" width="12" height="16">
-			............
-			..KKKKKKKK..
-			..KLLLLLDK..
-			..KDDDDDDK..
-			...KLLLDK...
-			...KLBLDK...
-			...KLLLDK...
-			...KLLLDK...
-			...KLFLDK...
-			...KLLLDK...
-			...KLLFDK...
-			...KLLLDK...
-			..KLLLLLDK..
-			..KDDDDDDK..
-			..FFFFFFFF..
-			............
 		</Sprite>
 	</Prop>
 
-	<Prop name="FENCE" tileSpan="1">
-		<Sprite dir="Up" width="12" height="14">
+	<Prop name="FENCE" tileSpan="3">
+		<Sprite dir="Up" width="12" height="14" pivot="5,11">
 			............
 			.L..L..L..L.
 			DD.DD.DD.DD.
@@ -136,26 +148,25 @@
 			DK.DK.DK.DK.
 			FF.FF.FF.FF.
 		</Sprite>
-		<Sprite dir="Left" width="12" height="14">
-			............
-			.....L......
-			....DD......
-			....DL......
-			...DDDD.....
-			...KKKK.....
-			....DL......
-			....DL......
-			....DL......
-			...DDDD.....
-			...KKKK.....
-			....DL......
-			....DK......
-			....FF......
+		<Sprite dir="Left" width="4" height="13" pivot="2,10">
+			..L.
+			.DD.
+			.DL.
+			DDDD
+			KKKK
+			.DL.
+			.DL.
+			.DL.
+			DDDD
+			KKKK
+			.DL.
+			.DK.
+			.FF.
 		</Sprite>
 	</Prop>
 
-	<Prop name="TOMB_A" tileSpan="1">
-		<Sprite dir="Up" width="12" height="14">
+	<Prop name="TOMB_A" tileSpan="3">
+		<Sprite dir="Up" width="12" height="14" pivot="5.5,11">
 			...KKKKKK...
 			..KLLLLLLK..
 			.KLBLLLLLDK.
@@ -171,7 +182,7 @@
 			KDDDDDDDDDDK
 			.FFFFFFFFFF.
 		</Sprite>
-		<Sprite dir="Left" width="12" height="14">
+		<Sprite dir="Left" width="12" height="14" pivot="5.5,11">
 			.....KK.....
 			....KLDK....
 			....KLDK....
@@ -189,8 +200,8 @@
 		</Sprite>
 	</Prop>
 
-	<Prop name="TOMB_B" tileSpan="1">
-		<Sprite dir="Up" width="12" height="16">
+	<Prop name="TOMB_B" tileSpan="3">
+		<Sprite dir="Up" width="12" height="16" pivot="5.5,13">
 			.....KK.....
 			....KLDK....
 			....KLDK....
@@ -208,7 +219,8 @@
 			.KDDDDDDDDDK
 			..FFFFFFFF..
 		</Sprite>
-		<Sprite dir="Left" width="12" height="16">
+		<Sprite dir="Left" width="12" height="16" pivot="5.5,13">
+			............
 			.....KK.....
 			....KLDK....
 			....KLDK....
@@ -224,7 +236,6 @@
 			..KLLLDDDK..
 			..KDDDDDDK..
 			...FFFFFF...
-			............
 		</Sprite>
 	</Prop>
 
