@@ -2,6 +2,7 @@
 
 #include "Utils/EngineMacro.h"
 #include "Utils/Types.h"
+#include "Actor/Facing.h"
 #include "Animation/AnimParameters.h"
 #include "Animation/AnimStateMachine.h"
 #include "Animation/AnimationPlayer.h"
@@ -31,6 +32,39 @@ struct CRAFT_API AnimNotifyEvent
 	bool isFromOverlay = false;
 };
 
+// 방향 슬롯 하나. 폴백 해소가 끝나면 clip은 절대 널이 아니다.
+struct CRAFT_API DirectionalClipSlot
+{
+	std::shared_ptr<const AnimationClip> clip;
+
+	// 이 슬롯을 그릴 때 좌우를 뒤집어야 하는가.
+	//
+	// 미러 이미지를 따로 굽지 않는 이유 - AnimInstance는 이미 합성이 끝난 결과를
+	// 한 번만 뒤집고 피벗도 같이 옮긴다(Composite 참고). 프레임을 복제하면 메모리만 늘고,
+	// 무엇보다 좌 <-> 우 전환에서 클립 포인터가 달라져 재생이 끊긴다.
+	// 같은 포인터를 공유하고 이 플래그만 다르게 두면 전환이 공짜다.
+	bool mirrored = false;
+};
+
+// 논리 클립 이름 하나에 대한 네 방향 슬롯. (PropSprite가 스프라이트로 하는 일과 같다)
+//
+// ★ 폴백은 FinalizeClips()에서 끝난다 ★
+// 그래서 런타임에는 "이 슬롯이 비었나" 분기가 아예 없다.
+// 아트가 정면 한 장뿐이어도 네 슬롯이 전부 채워진 상태로 틱에 들어간다.
+struct CRAFT_API DirectionalClipSet
+{
+	DirectionalClipSlot slots[FacingCount];
+
+	// 데이터가 진짜로 선언한 슬롯인지(폴백으로 채워진 것과 구분).
+	//
+	// 미러 폴백이 이 값을 봐야 한다. 폴백으로 들어온 앞모습을 다시 좌우 반전하면
+	// 얼굴이 반대편에 붙은 그림이 나온다 - 진짜 측면 아트에서만 미러해야 한다.
+	bool authored[FacingCount] = { false, false, false, false };
+
+	// @facing을 안 적은 클립. 있으면 네 슬롯 전부의 원본이 된다.
+	std::shared_ptr<const AnimationClip> omniClip;
+};
+
 // 상태 머신 하나와 그 재생 상태를 묶은 단위.
 //
 // 5단계부터 AnimInstance는 이 타입을 정확히 2개(BaseLayer/Overlay) 고정으로 갖는다.
@@ -46,6 +80,13 @@ public:
 
 	// 현재 상태에 머문 시간(초). 전이 조건 stateTime의 값이 된다.
 	float stateTime = 0.0f;
+
+	// 지금 재생 중인 클립의 "논리" 이름.
+	//
+	// player.GetClip()->GetLogicalName()으로도 알 수 있지만, 클립이 널일 때와
+	// 상태가 막 바뀐 순간을 구분해야 해서 따로 든다.
+	// 이 값이 같은데 클립 포인터만 달라졌다 = 방향만 바뀐 것 -> 재생 위치를 이어받는다.
+	std::string playingLogicalClip;
 };
 
 // 애니메이션 계층의 주체. (언리얼의 UAnimInstance)
@@ -84,11 +125,36 @@ public:
 	inline AnimParameters& GetParameters() { return parameters; }
 	inline const AnimParameters& GetParameters() const { return parameters; }
 
-	// 클립 등록. 키는 clip->GetName().
+	// 클립 등록. 키는 clip->GetName()(= 방향까지 포함한 등록 이름).
 	void AddClip(const std::shared_ptr<const AnimationClip>& clip);
+
+	// 이름으로 클립을 찾는다. 논리 이름을 주면 "지금 보고 있는 방향"의 슬롯을 돌려준다.
+	// 등록 이름("Walk@Up")을 직접 줘도 찾는다.
 	std::shared_ptr<const AnimationClip> FindClip(const std::string& name) const;
+
 	inline int GetClipCount() const { return static_cast<int>(clipMap.size()); }
-	inline bool HasClip(const std::string& name) const { return clipMap.find(name) != clipMap.end(); }
+
+	// 등록 이름 또는 논리 이름 둘 중 하나로 걸리면 참.
+	//
+	// ★ 논리 이름을 봐야 하는 이유 ★
+	// AnimStateMachineLoader가 State의 clip 이름을 이걸로 검증한다. 상태 머신은
+	// "Walk"만 아는데 클립 맵에는 "Walk@Up"만 들어있을 수 있으므로,
+	// 등록 이름만 보면 방향별로 쪼갠 순간 로드가 크래시한다.
+	bool HasClip(const std::string& name) const;
+
+	// 등록된 클립을 논리 이름 -> 네 방향 슬롯으로 정리하고 빈 슬롯을 채운다.
+	//
+	// 모든 AddClip이 끝난 뒤 한 번 부르면 된다. 잊어도 다음 조회 시점에 알아서 불리지만
+	// (AddClip이 dirty 표시를 남긴다), 로드가 끝난 자리에서 명시적으로 불러야
+	// 데이터 실수가 프레임 중간이 아니라 로드할 때 터진다.
+	void FinalizeClips() const;
+
+	// 지금 그릴 방향 슬롯. 게임플레이가 매 틱 정해서 넣는다.
+	//
+	// 여기 들어오는 값은 월드 방향이 아니라 "화면" 슬롯이다
+	// (= RotateFacing(월드 방향, 카메라 회전)). 카메라를 아는 것은 액터 쪽이다.
+	void SetFacing(EFacing displaySlot);
+	inline EFacing GetFacing() const { return facing; }
 
 	// 레이어 접근. 둘 다 항상 존재하는 객체를 돌려준다 - Overlay를 안 쓰면
 	// 그냥 상태 머신이 비어 있는 채로 남아서 Tick/Composite에서 조용히 무시된다.
@@ -105,6 +171,10 @@ public:
 	inline const std::string& GetCurrentPixelMap() const { return compositeBuffer; }
 
 	// 좌우 반전. 아트가 그려진 방향이 false다.
+	//
+	// ★ SetFacing을 쓰는 액터에서는 이걸 직접 부르지 말 것 ★
+	// 방향 슬롯이 정해지는 순간 그 슬롯의 mirrored 값으로 매 틱 덮어써진다.
+	// 방향 세트를 안 쓰는 액터(단일 측면 아트 + 게임플레이가 직접 뒤집는 경우)만 이 경로를 쓴다.
 	//
 	// 합성이 끝난 뒤 결과를 한 번만 뒤집는다. BaseLayer/Overlay를 따로 뒤집지 않는 이유는
 	// 마스크가 행 기준이라 가로 반전과 무관해서 결과가 같고, 한 번이면 충분하기 때문이다.
@@ -134,6 +204,9 @@ private:
 	// 레이어 하나의 상태를 갱신한다(전이 평가 -> 클립 적용 -> 시간 전진).
 	void TickLayer(AnimLayer& layer, float deltaTime);
 
+	// 논리 이름 + 현재 facing -> 그릴 슬롯. 등록되지 않은 이름이면 nullptr.
+	const DirectionalClipSlot* ResolveSlot(const std::string& logicalName) const;
+
 	// BaseLayer의 현재 상태가 Overlay를 화면에 내보내도 되는지.
 	//
 	// Composite()와 노티파이 수집이 반드시 같은 판단을 써야 해서 함수로 묶었다.
@@ -148,7 +221,27 @@ private:
 	void Composite();
 
 private:
+	// 등록 이름 -> 클립. 방향 변형은 여기서 "Walk@Up"처럼 서로 다른 키를 갖는다.
 	std::unordered_map<std::string, std::shared_ptr<const AnimationClip>> clipMap;
+
+	// 논리 이름 -> 네 방향 슬롯. clipMap에서 파생되는 캐시다.
+	//
+	// mutable인 이유 - FindClip/HasClip 같은 const 조회에서도 필요하면 다시 만들어야 한다.
+	// "쓰기 전에 FinalizeClips를 부를 것"이라는 규약으로 두면 언젠가 잊고, 그때 증상이
+	// "아무것도 안 그려진다"라 원인을 찾기 어렵다. 잊을 수 없게 만드는 쪽을 골랐다.
+	mutable std::unordered_map<std::string, DirectionalClipSet> directionalClips;
+
+	// clipMap이 바뀐 뒤 directionalClips를 다시 만들어야 하는지.
+	mutable bool clipsDirty = false;
+
+	// 지금 그리고 있는 방향 슬롯.
+	EFacing facing = EFacing::Down;
+
+	// SetFacing이 한 번이라도 불렸는지.
+	//
+	// 이게 false면 flipX를 건드리지 않는다 - 방향을 안 쓰는 기존 액터(TestActor 등)가
+	// 게임플레이에서 직접 SetFlipX로 뒤집던 동작을 그대로 유지하기 위한 것이다.
+	bool facingDriven = false;
 
 	AnimParameters parameters;
 

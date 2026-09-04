@@ -1,6 +1,11 @@
 ﻿#include "pch.h"
 #include "LocalPlayer.h"
 
+#include "Camera/CameraManager.h"
+#include "Input/Input.h"
+
+#include <cmath>
+
 using namespace Craft;
 
 void LocalPlayer::BeginPlay()
@@ -105,6 +110,68 @@ void LocalPlayer::OnRotateViewRight()
 	cameraComponent->AddViewQuarterTurns(1, viewRotateBlendTime);
 }
 
+Craft::EFacing LocalPlayer::ComputeWorldFacing() const
+{
+	CameraManager& camera = CameraManager::Get();
+
+	// 뷰 회전 보간(0.25초) 중에는 화면 좌표가 매 프레임 미끄러진다.
+	// 그 사이에 각을 다시 재면 회전이 끝날 때까지 슬롯이 계속 요동친다. 끝날 때까지 잡아둔다.
+	if (camera.IsRotationBlending())
+	{
+		return facing;
+	}
+
+	// 구르는 동안만 방향을 잠근다.
+	//
+	// 구르기는 방향을 정해서 몸을 던지는 동작이라 도중에 조준을 따라가면 안 되고,
+	// 끝나는 시점도 RollEnd 노티파이로 분명하게 정해져 있다.
+	//
+	// ★ 공격은 잠그지 않는다 ★
+	// 로컬 플레이어에게 마우스는 절대 기준이다. 게다가 좌클릭은 Held로도 묶여 있어서
+	// 여기에 isAttack을 넣으면 버튼을 누르고 있는 내내 방향이 얼어붙는다 -
+	// 누르면 멈추고 떼면 따라오는, 갱신이 멋대로인 것처럼 보이는 움직임이 된다.
+	if (isRolling)
+	{
+		return facing;
+	}
+
+	const Vector2 selfScreen =
+		camera.WorldToScreen(GetPosition() + Vector2(0, facingAnchorOffsetY));
+
+	// 마우스는 애초에 콘솔 셀 좌표로 들어온다.
+	// "월드가 아니라 카메라 기준"이라는 규칙이 변환 없이 그대로 성립한다.
+	const Vector2 mousePosition = Input::Get().GetMousePosition();
+
+	const int deltaX = mousePosition.x - selfScreen.x;
+	const int deltaY = mousePosition.y - selfScreen.y;
+
+	// 기준점과 정확히 겹치면 각도가 정의되지 않는다. 보던 방향을 유지한다.
+	if (0 == deltaX && 0 == deltaY)
+	{
+		return facing;
+	}
+
+	// 콘솔은 y가 아래로 커진다. -deltaY로 뒤집어야 화면 위쪽이 +90°가 되고,
+	// 그래야 "60~120도는 뒷모습"이라는 규칙이 성립한다.
+	// 콘솔 셀이 정사각(8x8 폰트)이라 종횡비 보정은 필요 없다.
+	const float radians =
+		::atan2f(-static_cast<float>(deltaY), static_cast<float>(deltaX));
+
+	const float degrees = NormalizeDegrees(radians * 57.29578f);
+
+	const int quarterTurns = camera.GetViewQuarterTurns();
+
+	// 히스테리시스는 화면 슬롯 기준으로 건다 - 흔들리는 것은 커서고, 커서는 화면에 있다.
+	const EFacing previousScreenSlot = RotateFacing(facing, quarterTurns);
+
+	const EFacing screenSlot = FacingFromScreenAngleSticky(
+		degrees, previousScreenSlot, facingHysteresisDegrees);
+
+	// 화면 슬롯 -> 월드 방향. displaySlot 계산(RotateFacing(facing, k))의 역변환이다.
+	// 화면 값을 그대로 들고 있으면 카메라를 돌리는 순간 캐릭터가 실제로 도는 셈이 된다.
+	return RotateFacing(screenSlot, -quarterTurns);
+}
+
 void LocalPlayer::Tick(float deltaTime)
 {
 	// 컴포넌트(= 애니메이션 평가/재생)로 deltaTime을 전달하는 처리가 여기 들어있다.
@@ -131,12 +198,10 @@ void LocalPlayer::Tick(float deltaTime)
 		animator->GetParameters().SetFloat("IsAttack", isAttack ? 1.0f : 0.0f);
 		animator->GetParameters().SetFloat("IsRolling", isRolling ? 1.0f : 0.0f);
 
-		// 가로 입력이 있을 때만 방향을 바꾼다.
-		// 위아래로만 움직이거나 멈춰 있는 동안에는 보던 방향을 유지한다.
-		if (inputDirection.x != 0)
-		{
-			animator->SetFlipX(inputDirection.x < 0);
-		}
+		// 좌우 반전은 여기서 하지 않는다.
+		// 어느 방향 그림을 쓸지와 그걸 뒤집을지는 PlayerActor::UpdateFacing이 고른
+		// 방향 슬롯이 정한다(SpriteAnimatorComponent::SetFacing 참고).
+		// 여기서 SetFlipX를 부르면 다음 틱에 슬롯 값으로 덮어써져 아무 효과가 없다.
 	}
 
 	if (isMoving)

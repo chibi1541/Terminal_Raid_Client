@@ -71,8 +71,26 @@ public:
 	inline AnimInstance& GetAnimInstance() { return animInstance; }
 	inline const AnimInstance& GetAnimInstance() const { return animInstance; }
 
+	// 이번 프레임에 그릴 방향 슬롯.
+	//
+	// 여기 넣는 값은 월드 방향이 아니라 "화면" 슬롯이다
+	// (= RotateFacing(월드 방향, 카메라 회전)). 카메라를 아는 것은 액터 쪽이라 거기서 정한다.
+	//
+	// 클립이 방향별로 나뉘어 있으면(*.anim.xml의 @facing) 이 값이 어느 그림을 쓸지 고르고,
+	// 좌우 반전도 그 슬롯이 정한다. 방향이 없는 클립만 있는 액터에 불러도 안전하다 -
+	// 네 슬롯이 전부 같은 클립이라 그림은 그대로고 왼쪽 슬롯에서만 반전이 켜진다.
+	//
+	// ★ 호출 시점 주의 ★
+	// 이 컴포넌트의 Tick이 애니메이션을 평가하므로, 소유 액터는 super::Tick(=Actor::Tick)
+	// "앞에서" 이 함수를 불러야 같은 프레임에 반영된다. 뒤에 두면 언제나 한 프레임 늦는다.
+	inline void SetFacing(EFacing newFacing) { animInstance.SetFacing(newFacing); }
+	inline EFacing GetFacing() const { return animInstance.GetFacing(); }
+
 	// 좌우 반전. 아트가 그려진 방향이 false다.
 	// 피벗을 축으로 뒤집으므로 방향을 바꿔도 캐릭터 위치는 그대로다.
+	//
+	// ★ SetFacing을 쓰는 액터에서는 부르지 말 것 ★
+	// 매 틱 현재 슬롯의 값으로 덮어써져서 아무 효과가 없다.
 	inline void SetFlipX(bool newFlipX) { animInstance.SetFlipX(newFlipX); }
 	inline bool GetFlipX() const { return animInstance.GetFlipX(); }
 

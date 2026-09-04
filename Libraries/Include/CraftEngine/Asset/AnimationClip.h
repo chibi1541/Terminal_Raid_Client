@@ -2,6 +2,7 @@
 
 #include "Utils/EngineMacro.h"
 
+#include "Actor/Facing.h"
 #include "Asset/Sprite.h"
 #include <string>
 #include <vector>
@@ -104,6 +105,26 @@ public:
 	static float GetDefaultPivotX(int width) { return (width - 1) * 0.5f; }
 	static float GetDefaultPivotY(int height) { return static_cast<float>(height - 1); }
 
+	// 이 클립이 어느 논리 동작의 어느 방향 변형인지 로더가 적어준다.
+	//
+	// 등록 이름(GetName)과 논리 이름(GetLogicalName)이 갈리는 이유 -
+	// AnimInstance의 클립 맵은 이름 하나에 클립 하나라, 같은 "Walk"를 방향별로 넣으려면
+	// 등록 키는 달라야 한다("Walk@Up"). 반면 상태 머신이 지목하는 것은 언제나 논리 이름이다.
+	// 상태를 방향마다 복제하지 않기 위한 분리다.
+	//
+	// AddNotify와 같은 이유로 생성자 인자가 아니다 - 이미 6인자 오버로드가 있어서
+	// 더 늘리면 호출부를 읽을 수 없다.
+	void SetFacingVariant(const std::string& newLogicalName, EFacingSlotSpec spec);
+
+	// 상태 머신이 아는 이름. SetFacingVariant를 안 부른 클립은 등록 이름과 같다.
+	inline const std::string& GetLogicalName() const
+	{
+		return logicalName.empty() ? name : logicalName;
+	}
+
+	// 데이터가 선언한 방향 슬롯. None이면 "방향이 없는 클립"이라 네 슬롯 전부가 된다.
+	inline EFacingSlotSpec GetFacingSpec() const { return facingSpec; }
+
 	// 노티파이를 등록한다. 잘못된 선언은 여기서 크래시한다.
 	//
 	// 생성자 인자로 받지 않는 이유 - 이미 6인자짜리 오버로드가 있어서 더 늘리면 호출부가 읽기 어렵다.
@@ -122,6 +143,12 @@ private:
 	// 클립 식별자. SpriteAnimatorComponent가 이 이름을 키로 클립을 등록한다.
 	// 나중에 상태(AnimState)가 재생할 클립을 지목할 때도 이 이름을 쓴다.
 	std::string name;
+
+	// 상태 머신이 지목하는 이름. 비어 있으면 name과 같다는 뜻이다.
+	std::string logicalName;
+
+	// 이 클립이 그려진 시점(視點). 로더가 @facing에서 읽어 채운다.
+	EFacingSlotSpec facingSpec = EFacingSlotSpec::None;
 
 	std::vector<Sprite> frames;
 

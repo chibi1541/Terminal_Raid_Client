@@ -51,7 +51,18 @@ public:
 	bool HasKeyActivity(int keyCode) const;
 
 	// 현재 마우스 포인터의 콘솔 셀 좌표를 반환.
+	//
+	// 매 프레임 실제 커서 위치를 폴링해서 갱신한다(ProcessInput 참고).
+	// 콘솔 마우스 이벤트만 믿으면 이벤트가 오는 순간에만 값이 바뀌어서,
+	// 조준처럼 "지금 어디를 가리키나"가 매 프레임 필요한 쪽에서는 값이 띄엄띄엄 는다.
 	const Vector2& GetMousePosition() const { return mousePosition; }
+
+	// 화면 격자 크기(셀 개수)를 알려준다. 커서 픽셀 좌표를 셀로 환산할 때 쓴다.
+	//
+	// Input이 Renderer를 직접 보지 않는 이유 - 둘 다 Engine이 만드는 하위 시스템이고,
+	// Input이 먼저 생긴다. 크기를 아는 쪽(Engine)이 알려주는 편이 의존 방향이 깔끔하다.
+	// 이 값이 설정되기 전에는 폴링을 건너뛰고 콘솔 이벤트 값만 쓴다.
+	void SetScreenCellSize(const Vector2& newScreenCellSize);
 
 	// 외부에서 접근이 가능하도록 해주는 함수.
 	static Input& Get();
@@ -80,6 +91,15 @@ private:
 	// 커서를 움직여 다음 이벤트가 올 때까지 버튼이 눌린 채로 남는다.
 	void ReconcileMouseButtons();
 
+	// 실제 커서 위치를 읽어 콘솔 셀 좌표로 환산하는 함수.
+	//
+	// 콘솔 입력 버퍼의 MOUSE_EVENT는 "셀이 바뀌었을 때"만 오고, 창 밖으로 나가거나
+	// 포커스가 오갈 때는 아예 안 온다. 그래서 이벤트만으로는 커서를 멈춘 사이에
+	// 화면이 스크롤되거나 창이 움직인 경우를 따라가지 못한다.
+	// 여기서는 창의 클라이언트 영역을 격자로 나눠 직접 계산하므로
+	// 폰트 크기나 DPI 배율이 어떻든 같은 결과가 나온다.
+	void PollMousePosition();
+
 	// 콘솔 창이 입력 포커스를 가지고 있는지 확인하는 함수.
 	//
 	// FOCUS_EVENT는 문서상 "내부용이므로 무시하라"고 되어 있어서 신뢰하기 어렵다.
@@ -101,6 +121,9 @@ private:
 
 	// 현재 마우스 포인터의 콘솔 셀 좌표.
 	Vector2 mousePosition = Vector2::Zero;
+
+	// 화면 격자 크기(셀 개수). 0이면 아직 아무도 안 알려준 것이라 폴링하지 않는다.
+	Vector2 screenCellSize = Vector2::Zero;
 
 	// 전역 접근이 가능하도록 변수 추가.
 	static Input* instance;

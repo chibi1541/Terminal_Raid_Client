@@ -23,7 +23,36 @@ NAME_SPACE_BEGIN(Craft)
 //       </Clip>
 //   </SpriteAnimation>
 //
-//   name : 클립 이름. SpriteAnimatorComponent::PlayClip()에 넘기는 그 이름.
+//   name : 클립 이름. 상태 머신의 State가 지목하는 "논리" 이름이고,
+//          SpriteAnimatorComponent::PlayClip()에 넘기는 그 이름이기도 하다.
+//   facing : 선택. 이 그림이 그려진 시점(視點). "Up" "Right" "Down" "Left" "Side".
+//          생략하면 방향이 없는 클립이 되어 네 방향 슬롯을 전부 차지한다
+//          (= 이 속성이 생기기 전의 모든 파일이 예전과 똑같이 동작한다).
+//
+//          같은 name을 facing만 다르게 여러 번 적으면 하나의 방향 세트가 된다.
+//          상태 머신은 계속 "Walk" 하나만 알고, 어느 슬롯을 그릴지는
+//          SpriteAnimatorComponent::SetFacing()이 정한다 - 상태를 방향마다 복제하지 않는다.
+//
+//              <Clip name="Walk" facing="Down"> ... </Clip>
+//              <Clip name="Walk" facing="Up">   ... </Clip>
+//
+//          "Side"는 측면 아트 한 장으로 좌우를 다 덮는다는 선언이다. 그림이 그려진 방향이
+//          Right가 되고 반대편은 좌우 반전으로 채워진다(AnimInstance의 flipX가 처리하므로
+//          미러 이미지를 따로 굽지 않는다). 좌우를 따로 그렸다면 Left/Right를 직접 쓴다.
+//
+//          ★ 빠진 슬롯은 AnimInstance::FinalizeClips()가 로드 시점에 채운다 ★
+//          그래서 런타임에는 "이 슬롯이 비었나" 분기가 없다(PropSprite와 같은 계약).
+//          채우는 순서는 다음과 같다.
+//            1. 방향 없는 클립이 있으면 네 슬롯 전부 그것.
+//            2. Side 선언은 Right에 들어간다.
+//            3. 측면끼리 미러 - Left가 비고 Right가 진짜 아트면 Left = Right + 반전. (반대도 동일)
+//               ★ 진짜로 선언된 슬롯에서만 미러한다 ★ 폴백으로 채워진 앞모습을 다시 미러하면
+//               얼굴이 반대편에 붙은 그림이 나온다.
+//            4. 앞뒤 폴백 - Up <- Down, Down <- Up. 반전하지 않는다
+//               (앞모습으로 뒷모습을 때우는 것이지 거울이 아니다).
+//            5. 그래도 비면 채워진 아무 슬롯(Right -> Down -> Up -> Left 순).
+//
+//          같은 (name, facing)을 두 번 적으면 로드할 때 크래시한다(조용한 덮어쓰기 방지).
 //   fps  : 초당 넘길 프레임 수. 생략하면 12.
 //   loop : 끝에서 처음으로 돌아갈지. 생략하면 true.
 //   width / height : 선택. 적어두면 픽셀맵과 대조해서 다르면 크래시한다.

@@ -1,166 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-	TestActor 스프라이트 애니메이션.
+	Knight 스프라이트 애니메이션.
 
-	Clip  name : PlayClip()에 넘기는 이름. fps : 초당 프레임 수. loop : 반복 여부.
-	Frame      : 픽셀맵 한 장. 줄 앞뒤 공백은 무시되므로 들여쓰기를 자유롭게 써도 된다.
+	★ 이 파일은 생성물이다 ★
+	손으로 고치지 말고 원본을 고친 뒤 다시 뽑을 것.
+	    원본   : Assets/Knight_sprite.txt
+	    변환기 : Tools/convert_anim.py
 
-	width/height : 선택. 적어두면 픽셀맵과 대조해서 다르면 크래시한다.
-	             진실의 원천은 픽셀맵이고 이건 선언일 뿐이다.
-	             줄이 통째로 빠져 8x8이 8x7이 되는 실수는 이 선언이 있어야 걸린다.
-	pivot        : 선택. "x,y" 형태로 액터 위치에 놓일 스프라이트 안의 점(셀 단위).
-	             생략하면 가운데 맨 아래(발밑) = ((width-1)*0.5, height-1).
-	             x가 실수인 이유 - 짝수 너비의 가운데는 정수로 안 떨어진다(8칸이면 3.5).
-	             정수로 반올림해두면 좌우 반전할 때마다 그림이 한 칸씩 튄다.
+	Clip name   : 상태 머신의 State가 지목하는 "논리" 이름.
+	Clip facing : 이 그림이 그려진 시점. Up / Right / Down / Left / Side.
+	              같은 name을 facing만 다르게 여러 번 쓰면 하나의 방향 세트가 된다.
+	              빠진 방향은 엔진이 로드 시점에 폴백으로 채운다
+	              (규칙은 Asset/SpriteAnimationLoader.h 주석 참고).
+	pivot       : 액터 위치에 놓일 스프라이트 안의 점. 방향마다 하나이고 x는 정수다 -
+	              클립마다 다르면 상태가 바뀔 때 캐릭터가 옆으로 튀고,
+	              반쪽 값은 좌우 반전에서 한 칸 튄다.
 
 	기호는 SymbolPalette(Math/SymbolPalette.h)의 16개 대문자 + 투명('.')만 쓸 수 있다.
-	  무채색 K(Black) D(DarkGray) L(Gray) B(White)
-	  녹색   F(DarkGreen) G(Green)
-	  갈색   N(DarkBrown) W(Brown) T(Tan)
-	  적색   C(DarkRed) R(Red)
-	  난색   O(Orange) Y(Yellow)
-	  청색   V(DarkBlue) U(Blue)
-	  보라   P(Purple)
 
 	이 파일은 UTF-8(BOM 없이)로 저장할 것.
 -->
 <SpriteAnimation>
 
-	<!-- 대기. 상체가 1픽셀 내려앉았다 올라오는 호흡. -->
-	<Clip name="Idle" fps="3" loop="true" width="8" height="8" pivot="3.5,7">
+	<!-- 앞모습 대기 -->
+	<Clip name="Idle" facing="Down" fps="3" loop="true" width="8" height="8" pivot="2,7">
 		<Frame>
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			.DLLKL.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
-			.K...K..
-		</Frame>
-		<Frame>
-			........
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
-			.K...K..
+			LLLLL.L.
+			BBBBB.L.
+			BKKKB.L.
+			BBKBB.L.
+			DDLLDDB.
+			DDBKK...
+			DDDDD...
+			K...K...
 		</Frame>
 	</Clip>
 
-	<!-- 걷기. 접지 / 왼발 듦 / 접지 / 오른발 듦 4장 사이클. -->
-	<Clip name="Walk" fps="8" loop="true" width="8" height="8" pivot="3.5,7">
+	<!-- 뒷모습 대기 -->
+	<Clip name="Idle" facing="Up" fps="3" loop="true" width="8" height="8" pivot="4,7">
 		<Frame>
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			.DLLKL.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
-			.K...K..
+			L.LLLLL.
+			L.LLLLL.
+			L.LLLLL.
+			L.LLLLL.
+			BDDLLLD.
+			..KKKKKD
+			..DDDDD.
+			..K...K.
 		</Frame>
+	</Clip>
+
+	<!-- 앞모습 이동 -->
+	<Clip name="Walk" facing="Down" fps="8" loop="true" width="8" height="8" pivot="2,7">
 		<Frame>
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			.DLLKL.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
-			.....K..
-		</Frame>
-		<Frame>
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			.DLLKL.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
-			.K...K..
-		</Frame>
-		<Frame>
-			.DDDDD.D
-			.DLLLL.D
-			.DLKKK.D
-			.DLLKL.D
-			KKKLLDDB
-			KKKKDK.D
-			KKKDDD..
+			LLLLLL..
+			BBBBBL..
+			BKKKBL..
+			BBKBBL..
+			DDDLDB..
+			DDDKK...
+			DDDDD...
 			.K......
 		</Frame>
-	</Clip>
-	
-	
-		<!-- 공격. -->
-	<Clip name="Attack" fps="12" loop="false" width="13" height="8" pivot="3.5,7">
 		<Frame>
-			.DDDDD.D.....
-			.DLLLL.D.....
-			.DLKKK.D.....
-			.DLLKL.D.....
-			KKKLLDDB.....
-			KKKKDK.D.....
-			KKKDDD.......
-			.............
-		</Frame>
-		<Frame>
-			.DDDDD.......
-			.DLLDD.......
-			.DLKKDD......
-			.DLLKLBD.....
-			KKKLLDDD.....
-			KKKKDK.......
-			KKKDDD.......
-			.............
-		</Frame>
-		<Frame>
-			.DDDDD....DD.
-			.DLLLL...DD..
-			.DLKKK..DD...
-			.DLLKL.DD....
-			KKKLLDBD.....
-			KKKKDK.......
-			KKKDDD.......
-			.............
-		</Frame>		
-		<Frame>
-			.DDDDD.B.....
-			.DLLLL..BB...
-			.DLKKK...BB..
-			.DLLKL.....B.
-			KKKLLDBDDDDDD
-			KKKKDK.......
-			KKKDDD.......
-			.............
-		</Frame>
-		<Frame>
-			.DDDDD.......
-			.DLLLL.......
-			.DLKKK.......
-			.DLLKL..BB...
-			KKKLLDD..BB..
-			KKKKDKBDD.BB.
-			KKKDDD..DD.BB
-			..........DD.
-		</Frame>
-		<Frame>
-			.DDDDD.D.....
-			.DLLLL.D.....
-			.DLKKK.D.....
-			.DLLKL.D.....
-			KKKLLDDB.....
-			KKKKDK.D.....
-			KKKDDD.......
-			.............
+			LLLLL...
+			BBBBB.L.
+			BKKKB.L.
+			BBKBB.L.
+			DDLLD.L.
+			DDBKKDB.
+			DDDDD...
+			...K....
 		</Frame>
 	</Clip>
-	
-		<!-- 구른다...! -->
-	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="3.5,7">
+
+	<!-- 측면 이동 -->
+	<Clip name="Walk" facing="Side" fps="8" loop="true" width="8" height="8" pivot="2,7">
+		<Frame>
+			LLLLL.L.
+			LBBBB.L.
+			LBKKK.L.
+			LBBKB.L.
+			DDLLDDB.
+			DDKBK...
+			DDDDD...
+			K...K...
+		</Frame>
+		<Frame>
+			LLLLLL..
+			LBBBBL..
+			LBKKKL..
+			LBBKBL..
+			DDDLDB..
+			DDDBK...
+			DDDDD...
+			.KKK....
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 이동 -->
+	<Clip name="Walk" facing="Up" fps="8" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			LLLLLL..
+			LLLLLL..
+			LLLLLL..
+			LLLLLL..
+			BDLLLD..
+			.KKKKK..
+			.DDDDD..
+			....K...
+		</Frame>
+		<Frame>
+			..LLLLL.
+			L.LLLLL.
+			L.LLLLL.
+			L.LLLLL.
+			L.DLLLD.
+			BDKKKKKD
+			..DDDDD.
+			..K.....
+		</Frame>
+	</Clip>
+
+	<!-- 앞모습 공격 -->
+	<Clip name="Attack" facing="Down" fps="12" loop="false" width="8" height="8" pivot="2,7">
+		<Frame>
+			LLLLL.L.
+			BBBBB.L.
+			BKKKB.L.
+			BBKBB.B.
+			DDLLDD..
+			DDBKK...
+			DDDDD...
+			K...K...
+		</Frame>
+		<Frame>
+			LLLLL...
+			BBBBB...
+			BKKKB...
+			DDKBB...
+			DDLLDD..
+			DDBKKKB.
+			DDDDDL..
+			K...L...
+		</Frame>
+	</Clip>
+
+	<!-- 측면 공격 -->
+	<Clip name="Attack" facing="Side" fps="12" loop="false" width="12" height="8" pivot="2,7">
+		<Frame>
+			LLLLL.......
+			LBBBB.......
+			LBKKKL......
+			LBBKBKB.....
+			DDLLDD......
+			DDKBK.......
+			DDDDD.......
+			K....K......
+		</Frame>
+		<Frame>
+			.LLLLL......
+			.LBBBB......
+			.LBKKK......
+			DDDBKB......
+			DDDLLDDBLLLL
+			DDDKBK......
+			DDDDDD......
+			K....K......
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 공격 -->
+	<Clip name="Attack" facing="Up" fps="12" loop="false" width="8" height="8" pivot="4,7">
+		<Frame>
+			L.LLLLL.
+			L.LLLLL.
+			L.LLLLL.
+			B.LLLLL.
+			.DDLLLD.
+			..KKKKKD
+			..DDDDD.
+			..K...K.
+		</Frame>
+		<Frame>
+			.LLLLL..
+			.LLLLL..
+			.LLLLL..
+			.LLLLL..
+			.DLLLDD.
+			BKKKKK..
+			LDDDDD..
+			LK...K..
+		</Frame>
+	</Clip>
+
+	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="4,7">
 		<!-- 구르기가 실제로 끝나는 순간을 게임플레이에게 알린다.
 		     이게 없으면 IsRolling이 계속 참으로 남아서 Any->Roll이 매번 다시 잡아채
 		     구르기 상태를 영영 못 빠져나온다. -->
@@ -194,7 +228,7 @@
 			..KKDDDKK....
 			....KKK......
 			.............
-		</Frame>		
+		</Frame>
 		<Frame>
 			...KKKK......
 			..KDDLLDD....

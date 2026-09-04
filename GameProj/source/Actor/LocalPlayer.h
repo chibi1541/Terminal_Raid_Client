@@ -27,6 +27,13 @@ protected:
 	// 내 캐릭터는 노란색 이름표로 구분한다.
 	virtual Craft::Color GetNameColor() const override { return Craft::Color::Yellow; }
 
+	// 마우스가 절대 기준이다.
+	//
+	// 이동 방향으로 정하지 않는 이유 - 이 게임에서 "보는 방향"은 조준 방향이다.
+	// 뒷걸음질치며 앞을 겨누는 동작이 이동 방향 기준으로는 표현되지 않는다.
+	// 원격 플레이어와 몬스터는 마우스가 없어서 이동/공격 방향으로 대신한다(RemotePlayer 참고).
+	virtual Craft::EFacing ComputeWorldFacing() const override;
+
 private:
 	// 입력 바인딩 콜백.
 	//
@@ -57,6 +64,18 @@ private:
 
 	// 뷰 회전에 쓰는 보간 시간(초). 0이면 즉시 스냅이라 화면이 튄다.
 	static constexpr float viewRotateBlendTime = 0.25f;
+
+	// 마우스 각도를 재는 기준점을 액터 위치에서 얼마나 위로 올릴지(칸).
+	//
+	// 액터 위치는 발밑이고 스프라이트는 거기서 위로 뻗어 있다. 발밑을 기준으로 각을 재면
+	// 캐릭터의 "가슴"보다 아래에 원점이 놓여서, 커서를 캐릭터 몸통 위에 얹어도
+	// 아래쪽(앞모습) 섹터로 계산된다. 몸 한가운데로 올려야 화면에서 보이는 대로 맞는다.
+	static constexpr int facingAnchorOffsetY = -4;
+
+	// 섹터 경계에서 방향을 유지하는 여유각(도).
+	//
+	// 없으면 커서가 경계에 걸쳐 있을 때 1칸 흔들림에도 앞뒤 그림이 매 프레임 교차한다.
+	static constexpr float facingHysteresisDegrees = 8.0f;
 
 	// 초당 이동할 칸 수
 	float moveSpeed = 20.0f;

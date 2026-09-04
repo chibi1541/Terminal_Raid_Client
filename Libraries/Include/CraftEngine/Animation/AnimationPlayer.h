@@ -33,6 +33,16 @@ public:
 	// 애니메이션이 첫 장에서 멈춰 보이기 때문이다.
 	void Play(const std::shared_ptr<const AnimationClip>& newClip, bool forceRestart = false);
 
+	// 같은 논리 클립의 "다른 방향" 변형으로 갈아탄다.
+	//
+	// Play()와 갈라지는 이유 - Play는 클립이 바뀌면 Reset해서 0프레임으로 되돌린다.
+	// 방향 전환에 그 규칙을 쓰면 걷는 중에 커서를 옆으로 옮길 때마다 걸음이 첫 장으로 튄다.
+	// 여기서는 재생 위치를 "비율"로 이어받는다 - 프레임 수가 다른 변형(3장 <-> 2장)에도
+	// 걸음 주기의 위상이 유지된다. 인덱스를 그대로 옮기면 범위를 넘거나 위상이 어긋난다.
+	//
+	// 프레임 진입 이벤트를 기록하지 않는다. 이건 "진입"이 아니라 "이어받기"라서다.
+	void RetargetClip(const std::shared_ptr<const AnimationClip>& newClip);
+
 	// 시간을 누적해서 프레임을 전진시킨다. Actor::Tick 경로에서만 호출.
 	void Tick(float deltaTime);
 
