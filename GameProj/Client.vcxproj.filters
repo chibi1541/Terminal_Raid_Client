@@ -51,10 +51,13 @@
     <ClCompile Include="source\Actor\LocalPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Actor\PlayerActor.cpp">
+    <ClCompile Include="source\Actor\ReplCharacter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Actor\ReplicatedActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Actor\Monster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,13 +101,16 @@
     <ClInclude Include="source\Actor\LocalPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Actor\PlayerActor.h">
+    <ClInclude Include="source\Actor\ReplCharacter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Actor\RemotePlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Actor\ReplicatedActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\Monster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

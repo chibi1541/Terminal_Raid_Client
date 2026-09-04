@@ -2,21 +2,27 @@
 
 #include "ReplicatedActor.h"
 #include "Actor/Facing.h"
-#include "Component/SpriteAnimatorComponent.h"
 
 #include <memory>
 #include <string>
 
-// LocalPlayer와 RemotePlayer가 공유하는 부분.
+// 전방 선언
+NAME_SPACE_BEGIN(Craft)
+
+class SpriteAnimatorComponent;
+
+NAME_SPACE_END
+
+
+// 애니메이션을 가지고 움직이는 ReplicatedActor가 공유
 //
 // "보이는 것"만 여기 있다 - 스프라이트 애니메이터와 머리 위 이름표.
-// 입력은 LocalPlayer만 갖고, 서버 위치 보간은 RemotePlayer만 갖는다.
-class PlayerActor : public ReplicatedActor
+class ReplCharacter : public ReplicatedActor
 {
-	TYPE_DECLARATIONS(PlayerActor, ReplicatedActor)
+	TYPE_DECLARATIONS(ReplCharacter, ReplicatedActor)
 
 public:
-	PlayerActor() = default;
+	ReplCharacter() = default;
 
 	virtual void BeginPlay() override;
 
@@ -28,7 +34,7 @@ public:
 	// PlayerInfo.name을 여기서 받는다.
 	virtual void ApplyObjectInfo(const Protocol::ObjectInfo& info) override;
 
-	inline const std::string& GetPlayerName() const { return playerName; }
+	inline const std::string& GetCharacterName() const { return characterName; }
 
 protected:
 	// 이름표 색. 내 캐릭터와 남을 화면에서 구분하는 유일한 수단이다.
@@ -40,7 +46,7 @@ protected:
 	// 이동형 액터가 정적 프롭과 갈라지는 지점이 여기다. 프롭은 방향이 고정값이지만
 	// 이쪽은 조작 주체에 따라 근거가 다르다.
 	//   LocalPlayer  - 마우스 각도(화면 기준)
-	//   RemotePlayer - 공격 중이면 공격 방향, 아니면 이동 방향
+	//   otherReplicatedChara - 공격 중이면 공격 방향, 아니면 이동 방향
 	// 기본 구현은 "보던 방향 유지"다. 근거가 없는 액터는 아무것도 안 하면 된다.
 	virtual Craft::EFacing ComputeWorldFacing() const { return facing; }
 
@@ -59,9 +65,11 @@ protected:
 	Craft::EFacing displaySlot = Craft::EFacing::Down;
 
 protected:
+	std::string animName = {};
+
 	// 스프라이트 애니메이션 재생 담당.
 	// 생성자가 아니라 BeginPlay에서 만든다(weak_from_this가 그때부터 유효).
 	std::shared_ptr<Craft::SpriteAnimatorComponent> animator;
 
-	std::string playerName;
+	std::string characterName;
 };

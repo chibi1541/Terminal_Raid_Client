@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "PlayerActor.h"
+#include "ReplCharacter.h"
+#include "Render/Renderer.h"
 
 // 다른 유저가 조종하는 플레이어.
 //
@@ -9,12 +10,21 @@
 // TODO : 위치 보간.
 // 지금은 서버 값을 그대로 꽂아서 갱신이 올 때마다 순간이동한다.
 // 이동 패킷(S_MOVE)이 생기면 목표 지점을 향해 부드럽게 따라가도록 바꾼다.
-class RemotePlayer : public PlayerActor
+
+//TODO : cpp 만들자 좀!
+class RemotePlayer : public ReplCharacter
 {
-	TYPE_DECLARATIONS(RemotePlayer, PlayerActor)
+	TYPE_DECLARATIONS(RemotePlayer, ReplCharacter)
 
 public:
 	RemotePlayer() = default;
+
+	virtual void BeginPlay() override
+	{
+		animName = "Knight";
+
+		super::BeginPlay();
+	}
 
 	// 서버가 보낸 위치에서 이동 방향을 뽑아낸다.
 	//
@@ -58,6 +68,20 @@ protected:
 		}
 
 		return facing;
+	}
+
+	// TODO : 함수 정리 왜 이거 cpp 안만들었냐?
+	virtual void Draw() override
+	{
+		super::Draw();
+
+		// 액터는 월드 객체이므로 월드 좌표로 제출한다. 카메라가 화면 좌표로 옮긴다.
+// 정렬 순서를 한 칸 올려서 스프라이트에 가리지 않게 한다.
+		Craft::Renderer::Get().SubmitWorld(
+			characterName,
+			GetPosition() + Craft::Vector2(0, -9),
+			GetNameColor(),
+			GetSortingOrder() + 1);
 	}
 
 protected:

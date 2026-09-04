@@ -104,8 +104,9 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Actor\Monster.cpp" />
     <ClCompile Include="source\Actor\LocalPlayer.cpp" />
-    <ClCompile Include="source\Actor\PlayerActor.cpp" />
+    <ClCompile Include="source\Actor\ReplCharacter.cpp" />
     <ClCompile Include="source\Actor\ReplicatedActor.cpp" />
     <ClCompile Include="source\Game\ObjectManager.cpp" />
     <ClCompile Include="source\Globals.cpp" />
@@ -132,8 +133,9 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Actor\Monster.h" />
     <ClInclude Include="source\Actor\LocalPlayer.h" />
-    <ClInclude Include="source\Actor\PlayerActor.h" />
+    <ClInclude Include="source\Actor\ReplCharacter.h" />
     <ClInclude Include="source\Actor\RemotePlayer.h" />
     <ClInclude Include="source\Actor\ReplicatedActor.h" />
     <ClInclude Include="source\Game\ObjectManager.h" />

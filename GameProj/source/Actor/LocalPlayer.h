@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "PlayerActor.h"
+#include "ReplCharacter.h"
 #include "Input/InputComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -13,15 +13,17 @@
 //
 // 지금은 입력이 로컬에서만 반영된다(서버로 보내지 않는다).
 // 다음 단계에서 C_MOVE / C_ATTACK 전송과 서버 보정이 이 자리에 들어온다.
-class LocalPlayer : public PlayerActor
+class LocalPlayer : public ReplCharacter
 {
-	TYPE_DECLARATIONS(LocalPlayer, PlayerActor)
+
+	TYPE_DECLARATIONS(LocalPlayer, ReplCharacter)
 
 public:
 	LocalPlayer() = default;
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
+	virtual void Draw() override;
 
 protected:
 	// 내 캐릭터는 노란색 이름표로 구분한다.
@@ -54,6 +56,8 @@ private:
 	void OnRotateViewRight();
 
 private:
+	const int nameLabelOffsetY = -9;
+
 	std::shared_ptr<Craft::InputComponent> inputComponent;
 
 	// 이 클라이언트의 화면을 비추는 카메라.

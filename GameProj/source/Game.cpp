@@ -5,6 +5,7 @@
 #include "Level/Level.h"
 #include "Render/Renderer.h"
 #include "Actor/TestActor.h"
+#include "Actor/Monster.h"
 #include "Asset/AssetManager.h"
 #include "Asset/AnimationDataAsset.h"
 #include "Asset/LevelDataAsset.h"
@@ -155,6 +156,10 @@ int main(int argc, char* argv[])
 	// 서버가 보낸 스폰/디스폰을 반영할 주체.
 	// NetStatus와 같은 이유로 메인 쓰레드에서 기준 쓰레드 ID를 기록해 둔다.
 	ObjectManager::Get().BindGameThread();
+
+	//temp
+	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
+	monster->SetPosition(Craft::Vector2(200, 130));
 
 	Engine::Get().Run();
 }

@@ -1,8 +1,9 @@
 ﻿#include "pch.h"
 #include "LocalPlayer.h"
-
+#include "Component/SpriteAnimatorComponent.h"
 #include "Camera/CameraManager.h"
 #include "Input/Input.h"
+#include "Render/Renderer.h"
 
 #include <cmath>
 
@@ -10,6 +11,9 @@ using namespace Craft;
 
 void LocalPlayer::BeginPlay()
 {
+	// TODO 나중에 서버로부터 인덱스를 받아서 해당 캐릭터 로딩하도록 수정
+	animName = "Knight";
+
 	// 주의 - super::BeginPlay()는 이 함수의 "맨 마지막"에 불러야 한다.
 	//
 	// Actor::BeginPlay가 그 시점의 componentList를 훑어 각 컴포넌트의 BeginPlay를 부르는데,
@@ -229,4 +233,17 @@ void LocalPlayer::Tick(float deltaTime)
 	// 다음 프레임의 디스패치가 이 Tick 뒤에 오므로 지금 비워도 안전하다.
 	inputDirection = Vector2::Zero;
 	isAttack = false;
+}
+
+void LocalPlayer::Draw()
+{
+	super::Draw();
+
+	// 액터는 월드 객체이므로 월드 좌표로 제출한다. 카메라가 화면 좌표로 옮긴다.
+// 정렬 순서를 한 칸 올려서 스프라이트에 가리지 않게 한다.
+	Renderer::Get().SubmitWorld(
+		characterName,
+		GetPosition() + Vector2(0, nameLabelOffsetY),
+		GetNameColor(),
+		GetSortingOrder() + 1);
 }

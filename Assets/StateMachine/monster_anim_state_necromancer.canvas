@@ -1,0 +1,105 @@
+{
+	"nodes": [
+		{
+			"id": "e94a03b7c2f16d58",
+			"type": "group",
+			"x": -620,
+			"y": -700,
+			"width": 1560,
+			"height": 560,
+			"color": "5",
+			"label": "Base"
+		},
+		{
+			"id": "a1c4e7f209b35d68",
+			"type": "text",
+			"text": "# Parameters\n\n- IsAttack: false\n- IsDead: false\n- speed: 0\n- IsRolling: false",
+			"x": -1060,
+			"y": -690,
+			"width": 320,
+			"height": 170,
+			"color": "6"
+		},
+		{
+			"id": "7d2e9a4b16c8035f",
+			"type": "text",
+			"text": "# Any",
+			"x": -560,
+			"y": -600,
+			"width": 220,
+			"height": 70,
+			"color": "3"
+		},
+		{
+			"id": "c5906e3a8d417b2e",
+			"type": "text",
+			"text": "# Idle [entry]\n\nclip: Idle",
+			"x": -20,
+			"y": -620,
+			"width": 300,
+			"height": 110,
+			"color": "5"
+		},
+		{
+			"id": "8cc6f46ee07b56bf",
+			"type": "text",
+			"text": "# Attack\n\nclip: Attack",
+			"x": 580,
+			"y": -620,
+			"width": 260,
+			"height": 110,
+			"color": "5"
+		},
+		{
+			"id": "f1a70c96b2d4e835",
+			"type": "text",
+			"text": "# Walk\n\nclip: Walk",
+			"x": 260,
+			"y": -430,
+			"width": 260,
+			"height": 110
+		}
+	],
+	"edges": [
+		{
+			"id": "347963176c943a56",
+			"fromNode": "c5906e3a8d417b2e",
+			"fromSide": "right",
+			"toNode": "8cc6f46ee07b56bf",
+			"toSide": "left",
+			"label": "IsAttack == true"
+		},
+		{
+			"id": "544a3c0ad6d77119",
+			"fromNode": "8cc6f46ee07b56bf",
+			"fromSide": "bottom",
+			"toNode": "c5906e3a8d417b2e",
+			"toSide": "bottom",
+			"label": "animFinished"
+		},
+		{
+			"id": "c73b1e08a5f6d294",
+			"fromNode": "c5906e3a8d417b2e",
+			"fromSide": "bottom",
+			"toNode": "f1a70c96b2d4e835",
+			"toSide": "top",
+			"label": "speed gt 0"
+		},
+		{
+			"id": "b0d94f27e6a3c518",
+			"fromNode": "f1a70c96b2d4e835",
+			"fromSide": "left",
+			"toNode": "c5906e3a8d417b2e",
+			"toSide": "bottom",
+			"label": "speed le 0"
+		},
+		{
+			"id": "a48e2b61c9057d3f",
+			"fromNode": "f1a70c96b2d4e835",
+			"fromSide": "right",
+			"toNode": "8cc6f46ee07b56bf",
+			"toSide": "bottom",
+			"label": "IsAttack == true"
+		}
+	]
+}
