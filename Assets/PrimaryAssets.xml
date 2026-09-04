@@ -14,7 +14,7 @@
 	이 파일은 BOM 없는 UTF-8로 저장할 것.
 -->
 <PrimaryAssets>
-	<Asset type="AnimationData" name="AnimationData" path="../Assets/AnimationData.xml" />
-	<Asset type="LevelData" name="LevelData" path="../Assets/LevelData.xml" />
-	<Asset type="PropData" name="PropData" path="../Assets/PropData.xml" />
+	<Asset type="AnimationData" name="AnimationData" path="../Assets/Animation/AnimationData.xml" />
+	<Asset type="LevelData" name="LevelData" path="../Assets/Level/LevelData.xml" />
+	<Asset type="PropData" name="PropData" path="../Assets/Level/PropData.xml" />
 </PrimaryAssets>

@@ -6,6 +6,7 @@
 #include "Render/Renderer.h"
 #include "Actor/TestActor.h"
 #include "Actor/Monster.h"
+#include "Actor/ProjectileActor.h"
 #include "Asset/AssetManager.h"
 #include "Asset/AnimationDataAsset.h"
 #include "Asset/LevelDataAsset.h"
@@ -160,6 +161,8 @@ int main(int argc, char* argv[])
 	//temp
 	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
 	monster->SetPosition(Craft::Vector2(200, 130));
+	std::shared_ptr<ProjectileActor> projectile = Engine::Get().GetLevel()->SpawnActor<ProjectileActor>();
+	projectile->SetPosition(Craft::Vector2(170, 130));
 
 	Engine::Get().Run();
 }

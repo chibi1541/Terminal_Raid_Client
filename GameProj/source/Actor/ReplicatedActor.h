@@ -29,16 +29,7 @@ public:
 
 	// 개체 타입은 따로 실려오지 않는다. objectId 상위 16비트에 들어 있다.
 	Protocol::ObjectType GetObjectType() const;
-
-	// TODO : 모든 replicated 액터가 hp를 가지진 않기 때문에 삭제 예정(투사체)
-	inline int32 GetHp() const { return hp; }
-	inline int32 GetMaxHp() const { return maxHp; }
-	inline bool IsAlive() const { return hp > 0; }
-
 protected:
 	// 서버가 발급한 식별자. 클라이언트는 발급하지 않고 받아서 해석만 한다.
 	uint64 objectId = 0;
-
-	int32 hp = 0;
-	int32 maxHp = 0;
 };

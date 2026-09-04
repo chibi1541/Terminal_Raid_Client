@@ -25,6 +25,9 @@ enum : uint16
 	PKT_S_EXIT_ROOM = 1007,
 	PKT_S_SPAWN = 1008,
 	PKT_S_DESPAWN = 1009,
+	PKT_C_MOVE = 1010,
+	PKT_S_MOVE = 1011,
+	PKT_S_MOVE_ACK = 1012,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -36,6 +39,8 @@ bool Handle_S_ENTER_ROOM(const Session* session, Protocol::S_ENTER_ROOM& pkt);
 bool Handle_S_EXIT_ROOM(const Session* session, Protocol::S_EXIT_ROOM& pkt);
 bool Handle_S_SPAWN(const Session* session, Protocol::S_SPAWN& pkt);
 bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt);
+bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt);
+bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt);
 
 // PacketHandler 클래스 자동화
 class ServerPacketHandler
@@ -53,6 +58,8 @@ public:
 		GPacketHandler[PKT_S_EXIT_ROOM] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_EXIT_ROOM>(Handle_S_EXIT_ROOM, session, buffer, len); };
 		GPacketHandler[PKT_S_SPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_SPAWN>(Handle_S_SPAWN, session, buffer, len); };
 		GPacketHandler[PKT_S_DESPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DESPAWN>(Handle_S_DESPAWN, session, buffer, len); };
+		GPacketHandler[PKT_S_MOVE] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_MOVE>(Handle_S_MOVE, session, buffer, len); };
+		GPacketHandler[PKT_S_MOVE_ACK] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_MOVE_ACK>(Handle_S_MOVE_ACK, session, buffer, len); };
 
 	}
 
@@ -67,6 +74,7 @@ public:
 	static BYTE* MakeSendBuffer(Protocol::C_PING& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_PING, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_ENTER_ROOM& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_ENTER_ROOM, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_EXIT_ROOM& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_EXIT_ROOM, size); }
+	static BYTE* MakeSendBuffer(Protocol::C_MOVE& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_MOVE, size); }
 
 
 private:

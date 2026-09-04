@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Archer 스프라이트 애니메이션.
+
+	★ 이 파일은 생성물이다 ★
+	손으로 고치지 말고 원본을 고친 뒤 다시 뽑을 것.
+	    원본   : Assets/Archer_sprite.txt
+	    변환기 : Tools/convert_anim.py
+
+	Clip name   : 상태 머신의 State가 지목하는 "논리" 이름.
+	Clip facing : 이 그림이 그려진 시점. Up / Right / Down / Left / Side.
+	              같은 name을 facing만 다르게 여러 번 쓰면 하나의 방향 세트가 된다.
+	              빠진 방향은 엔진이 로드 시점에 폴백으로 채운다
+	              (규칙은 Asset/SpriteAnimationLoader.h 주석 참고).
+	pivot       : 액터 위치에 놓일 스프라이트 안의 점. 방향마다 하나이고 x는 정수다 -
+	              클립마다 다르면 상태가 바뀔 때 캐릭터가 옆으로 튀고,
+	              반쪽 값은 좌우 반전에서 한 칸 튄다.
+
+	기호는 SymbolPalette(Math/SymbolPalette.h)의 16개 대문자 + 투명('.')만 쓸 수 있다.
+
+	이 파일은 UTF-8(BOM 없이)로 저장할 것.
+-->
+<SpriteAnimation>
+
+	<!-- 앞모습 대기 -->
+	<Clip name="Idle" facing="Down" fps="3" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			..GGG.W.
+			.FGGGF.W
+			.YKYKY.W
+			.YYYYY.W
+			FFGGGFFY
+			YNWLWN.W
+			.FFFFF.W
+			.N...NW.
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 대기 -->
+	<Clip name="Idle" facing="Up" fps="3" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			.W.GGG..
+			W.FGGGF.
+			W.FFFFF.
+			W.OYYYO.
+			YFFGGGFF
+			W.NWWWNY
+			W.FFFFF.
+			.WN...N.
+		</Frame>
+	</Clip>
+
+	<!-- 앞모습 이동 -->
+	<Clip name="Walk" facing="Down" fps="8" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			..GGG.W.
+			.FGGGF.W
+			.YKYKY.W
+			.YYYYY.W
+			.FGGGFFY
+			YNWLWN.W
+			.FFFFF.W
+			..N...W.
+		</Frame>
+		<Frame>
+			..GGG.W.
+			.FGGGF.W
+			.YKYKY.W
+			.YYYYY.W
+			.FGGGFFY
+			FYWLWN.W
+			.FFFFF.W
+			....N.W.
+		</Frame>
+	</Clip>
+
+	<!-- 측면 이동 -->
+	<Clip name="Walk" facing="Side" fps="8" loop="true" width="8" height="8" pivot="3,7">
+		<Frame>
+			FFGGF.W.
+			.FGGFF.W
+			.FYKYK.W
+			.OYYYY.W
+			FFGGGFFY
+			YNWWLN.W
+			.FFFFF.W
+			.N...NW.
+		</Frame>
+		<Frame>
+			FFGGFW..
+			.FGGFFW.
+			.FYKYKW.
+			.OYYYYW.
+			.FGGGFY.
+			.YWWLNW.
+			.FFFFFW.
+			..NNNW..
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 이동 -->
+	<Clip name="Walk" facing="Up" fps="8" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			.W.GGG..
+			W.FGGGF.
+			W.FFFFF.
+			W.OYYYO.
+			YFFGGGF.
+			W.NWWWNY
+			W.FFFFF.
+			.W.N....
+		</Frame>
+		<Frame>
+			.W.GGG..
+			W.FGGGF.
+			W.FFFFF.
+			W.OYYYO.
+			YFFGGGF.
+			W.NWWWNF
+			W.FFFFF.
+			.W...N..
+		</Frame>
+	</Clip>
+	
+	<!-- 앞모습 공격 -->
+	<Clip name="Attack" facing="Down" fps="12" loop="false" width="8" height="8" pivot="3,7">
+		<Frame>
+			.GGWFF..
+			FGGWF...
+			YKYWY...
+			YYYWY...
+			FYNWF...
+			NLWYF...
+			FFFWF...
+			N..WN...
+		</Frame>
+		<Frame>
+			..GGWFF.
+			.FGGWF..
+			.YKYWY..
+			.YYYWY..
+			YFGGWF..
+			.NLWYF..
+			.FFFWF..
+			.N..WN..
+		</Frame>
+	</Clip>
+
+	<!-- 측면 공격 -->
+	<Clip name="Attack" facing="Side" fps="12" loop="false" width="8" height="8" pivot="4,7">
+		<Frame>
+			FFGGF.W.
+			.FGGFF.W
+			.OYKYK.W
+			.OYYYY.W
+			FFYNNNNN
+			.NWLWNFY
+			.FFFFFDW
+			.N...NW.
+		</Frame>
+		<Frame>
+			FFGGF.W.
+			.FGGFF.W
+			.OYKYK.W
+			.OYYYY.W
+			FYFGGF.W
+			.NNWLWFY
+			.FFFFFDW
+			.N...NW.
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 공격 -->
+	<Clip name="Attack" facing="Up" fps="12" loop="false" width="8" height="8" pivot="4,7">
+		<Frame>
+			.WGGG...
+			.FGGGF..
+			.FFFFF..
+			.OYYYO..
+			FFGGGF..
+			.NWWWN..
+			.FFFFF..
+			.N...N..
+		</Frame>
+		<Frame>
+			.WGGG...
+			.FGGGF..
+			.FFFFF..
+			.OYYYO..
+			YFGGGF..
+			FNWWWN..
+			.FFFFF..
+			.N...N..
+		</Frame>
+	</Clip>
+	
+	<!-- ARCHER — Rolling -->
+	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="4,7">
+			<!-- 구르기가 실제로 끝나는 순간을 게임플레이에게 알린다.
+		     이게 없으면 IsRolling이 계속 참으로 남아서 Any->Roll이 매번 다시 잡아채
+		     구르기 상태를 영영 못 빠져나온다. -->
+		<Notify frame="end" name="RollEnd" />
+		<Frame>
+			.GGWFF.......
+			FGGWF........
+			YKYWY........
+			YYYWY........
+			FYNWF........
+			NLWYF........
+			FFFWF........
+			N..WN........
+		</Frame>
+		<Frame>
+			...GGGG......
+			..FYGGGGF....
+			.FGYYYGGGF...
+			.FGYYYGGGF...
+			..FFGGGFF....
+			....FFF......
+			.N........N..
+			.GN......NG..
+		</Frame>
+		<Frame>
+			.............
+			..FFGG.......
+			..FYYYYGG....
+			.FGYYYGGGF...
+			.FFGGGGGFG...
+			..FFGGGFF....
+			....FFF......
+			.............
+		</Frame>
+		<Frame>
+			...FFFF......
+			..FGGYYGG....
+			.FGGGGYYGG...
+			.FGGGGYYGG...
+			..FFGGYFF....
+			....FFF......
+			.N........N..
+			.GN......NG..
+		</Frame>
+		<Frame>
+			.............
+			...FGFF......
+			..FGGGYF.....
+			.FGGGGGGFF...
+			.FGGGYYYGF...
+			..FFYYYGG....
+			....FFG......
+			.............
+		</Frame>
+		<Frame>
+			.............
+			...FFFF......
+			..FGGGGFG....
+			.FYYGGGGGF...
+			.GGYYYGGGF...
+			..GGYYGFF....
+			....GGF......
+			.............
+		</Frame>
+		<Frame>
+			...GGWFF.....
+			..FGGWF......
+			G.YKYWY......
+			..YYYWY......
+			G.FYNWF......
+			..NLWYF......
+			..FFFWF......
+			..N..WN......
+		</Frame>
+	</Clip>
+
+</SpriteAnimation>

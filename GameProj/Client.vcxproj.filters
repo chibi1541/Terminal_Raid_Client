@@ -60,6 +60,9 @@
     <ClCompile Include="source\Actor\Monster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Actor\ProjectileActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Actor\Monster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\ProjectileActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

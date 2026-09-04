@@ -103,3 +103,13 @@ bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt)
 
 	return true;
 }
+
+bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt)
+{
+	return true;
+}
+
+bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt)
+{
+	return true;
+}

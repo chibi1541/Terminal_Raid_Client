@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Mage 스프라이트 애니메이션.
+
+	★ 이 파일은 생성물이다 ★
+	손으로 고치지 말고 원본을 고친 뒤 다시 뽑을 것.
+	    원본   : Assets/Mage_sprite.txt
+	    변환기 : Tools/convert_anim.py
+
+	Clip name   : 상태 머신의 State가 지목하는 "논리" 이름.
+	Clip facing : 이 그림이 그려진 시점. Up / Right / Down / Left / Side.
+	              같은 name을 facing만 다르게 여러 번 쓰면 하나의 방향 세트가 된다.
+	              빠진 방향은 엔진이 로드 시점에 폴백으로 채운다
+	              (규칙은 Asset/SpriteAnimationLoader.h 주석 참고).
+	pivot       : 액터 위치에 놓일 스프라이트 안의 점. 방향마다 하나이고 x는 정수다 -
+	              클립마다 다르면 상태가 바뀔 때 캐릭터가 옆으로 튀고,
+	              반쪽 값은 좌우 반전에서 한 칸 튄다.
+
+	기호는 SymbolPalette(Math/SymbolPalette.h)의 16개 대문자 + 투명('.')만 쓸 수 있다.
+
+	이 파일은 UTF-8(BOM 없이)로 저장할 것.
+-->
+<SpriteAnimation>
+
+	<!-- 앞모습 대기 -->
+	<Clip name="Idle" facing="Down" fps="3" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			..PPP..N
+			.VPPPV.N
+			.YKYKY.N
+			.YYYYY.N
+			VVPPPVVY
+			YNWLWN.N
+			.VVVVV.N
+			VNVVVNVN
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 대기 -->
+	<Clip name="Idle" facing="Up" fps="3" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			N..PPP..
+			N.VPPPV.
+			N.VVPVV.
+			N.OYYYO.
+			YVVPPPVV
+			N.NWWWNY
+			N.VVVVV.
+			NVNVVVNV
+		</Frame>
+	</Clip>
+
+	<!-- 앞모습 이동 -->
+	<Clip name="Walk" facing="Down" fps="8" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			..PPP.N.
+			.VPPPVN.
+			.YKYKYN.
+			.YYYYYN.
+			.VPPPVY.
+			YNWLWNN.
+			.VVVVVN.
+			VVNVVVN.
+		</Frame>
+		<Frame>
+			..PPP...
+			.VPPPV.N
+			.YKYKY.N
+			.YYYYY.N
+			.VPPPV.N
+			VYWLWNVY
+			.VVVVVDN
+			.VVVNVVN
+		</Frame>
+	</Clip>
+
+	<!-- 측면 이동 -->
+	<Clip name="Walk" facing="Side" fps="8" loop="true" width="8" height="8" pivot="3,7">
+		<Frame>
+			VVPPV..N
+			.VPPVV.N
+			.VYKYK.N
+			.OYYYY.N
+			VVPPPVVY
+			YNWWLN.N
+			.VVVVV.N
+			VNVVVN.N
+		</Frame>
+		<Frame>
+			VVPPV.N.
+			.VPPVVN.
+			.VYKYKN.
+			.OYYYYN.
+			.VPPPVY.
+			.YWWLNN.
+			.VVVVVN.
+			VVNNNVN.
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 이동 -->
+	<Clip name="Walk" facing="Up" fps="8" loop="true" width="8" height="8" pivot="4,7">
+		<Frame>
+			N.PPP...
+			NVPPPV..
+			NVVPVV..
+			NOYYYO..
+			YVPPPV..
+			NNWWWNY.
+			NVVVVV..
+			NVVVNVV.
+		</Frame>
+		<Frame>
+			...PPP..
+			N.VPPPV.
+			N.VVPVV.
+			N.OYYYO.
+			N.VPPPV.
+			YVNWWWN.
+			NDVVVVV.
+			NVVNVVV.
+		</Frame>
+	</Clip>
+
+		<!-- 앞모습 공격 -->
+	<Clip name="Attack" facing="Down" fps="12" loop="false" width="8" height="8" pivot="3,7">
+		<Frame>
+			..PPP...
+			.VPPPV.N
+			.YKYKY.N
+			.YYYYY.N
+			VVPPPVVY
+			YNWLWN.N
+			.VVVVV.N
+			VNVVVNVN
+		</Frame>
+		<Frame>
+			..PPP...
+			.VPPPV..
+			.YKYKYN.
+			.YYYYYN.
+			YVPPPVV.
+			.NWLWNY.
+			.VVVVVN.
+			VNVVVNN.
+		</Frame>
+	</Clip>
+
+	<!-- 측면 공격 -->
+	<Clip name="Attack" facing="Side" fps="12" loop="false" width="11" height="8" pivot="4,7">
+		<Frame>
+			VVPPV..N...
+			.VPPVV.N...
+			.VYKYK.N...
+			.OYYYY.Y...
+			VVPPPVVN...
+			YNWWLN.N...
+			.VVVVV.N...
+			VNVVVN.N...
+		</Frame>
+		<Frame>
+			VVPPV......
+			.VPPVV.....
+			.VYKYK.....
+			.OYYYY.....
+			YVPPPVVYNNN
+			.NWWLN.....
+			.VVVVV.....
+			VNVVVN.....
+		</Frame>
+	</Clip>
+
+	<!-- 뒷모습 공격 -->
+	<Clip name="Attack" facing="Up" fps="12" loop="false" width="8" height="8" pivot="4,7">
+		<Frame>
+			N..PPP..
+			N.VPPPV.
+			N.VVPVV.
+			Y.OYYYO.
+			NVVPPPVV
+			N.NWWWNY
+			N.VVVVV.
+			NVNVVVNV
+		</Frame>
+		<Frame>
+			..PPP...
+			NVPPPV..
+			NVVPVV..
+			NOYYYO..
+			YVPPPVY.
+			NNWWWN..
+			NVVVVV..
+			VNVVVNV.
+		</Frame>
+	</Clip>
+
+<!-- MAGE — Rolling -->
+	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="4,7">
+				<!-- 구르기가 실제로 끝나는 순간을 게임플레이에게 알린다.
+		     이게 없으면 IsRolling이 계속 참으로 남아서 Any->Roll이 매번 다시 잡아채
+		     구르기 상태를 영영 못 빠져나온다. -->
+		<Notify frame="end" name="RollEnd" />
+		<Frame>
+			..PPP........
+			.VPPPV.N.....
+			.YKYKY.N.....
+			.YYYYY.N.....
+			VVPPPVVY.....
+			YNWLWN.N.....
+			.VVVVV.N.....
+			VNVVVNVN.....
+		</Frame>
+		<Frame>
+			...PPPP......
+			..VYPPPPV....
+			.VPYYYPPPV...
+			.VPYYYPPPV...
+			..VVPPPVV....
+			....VVV......
+			.N........N..
+			.WN......NW..
+		</Frame>
+		<Frame>
+			.............
+			...VVPP......
+			..VYYYYPP....
+			.VPYYYPPPV...
+			.VVPPPPPVP...
+			..VVPPPVV....
+			....VVV......
+			.............
+		</Frame>
+		<Frame>
+			...VVVV......
+			..VPPYYPP....
+			.VPPPPYYPP...
+			.VPPPPYYPP...
+			..VVPPYVV....
+			....VVV......
+			.N........N..
+			.WN......NW..
+		</Frame>
+		<Frame>
+			.............
+			...VPVV......
+			..VPPPYV.....
+			.VPPPPPPVV...
+			.VPPPYYYPV...
+			..VVYYYPP....
+			....VVP......
+			.............
+		</Frame>
+		<Frame>
+			.............
+			...VVVV......
+			..VPPPPVP....
+			.VYYPPPPPV...
+			.PPYYYPPPV...
+			..PPYYPVV....
+			....PPV......
+			.............
+		</Frame>
+		<Frame>
+			...PPP.......
+			..VPPPV.N....
+			G.YKYKY.N....
+			..YYYYY.N....
+			V.VPPPVVY....
+			..NWLWN.N....
+			..VVVVV.N....
+			..NVVVNVN....
+		</Frame>
+	</Clip>
+
+</SpriteAnimation>

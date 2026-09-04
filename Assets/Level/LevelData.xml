@@ -13,7 +13,7 @@
 -->
 <LevelData>
 	<Levels>
-		<Level name="Cemetery" path="../Assets/Cemetery.level.xml"
-		                     layout="../Assets/Cemetery.LevelLayout.xml" />
+		<Level name="Cemetery" path="../Assets/Level/Cemetery/Cemetery.level.xml"
+		                     layout="../Assets/Level/Cemetery/Cemetery.LevelLayout.xml" />
 	</Levels>
 </LevelData>

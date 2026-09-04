@@ -36,6 +36,10 @@ public:
 
 	inline const std::string& GetCharacterName() const { return characterName; }
 
+	inline int32 GetHp() const { return hp; }
+	inline int32 GetMaxHp() const { return maxHp; }
+	inline bool IsAlive() const { return hp > 0; }
+
 protected:
 	// 이름표 색. 내 캐릭터와 남을 화면에서 구분하는 유일한 수단이다.
 	// (서버가 chartype을 안 보내서 스프라이트는 둘 다 같다)
@@ -66,6 +70,9 @@ protected:
 
 protected:
 	std::string animName = {};
+
+	int32 hp = 0;
+	int32 maxHp = 0;
 
 	// 스프라이트 애니메이션 재생 담당.
 	// 생성자가 아니라 BeginPlay에서 만든다(weak_from_this가 그때부터 유효).

@@ -53,12 +53,13 @@ enum ObjectType : int {
   OBJECT_PLAYER = 2,
   OBJECT_MONSTER = 3,
   OBJECT_WALL = 4,
+  OBJECT_PROJECTILE = 5,
   ObjectType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   ObjectType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool ObjectType_IsValid(int value);
 constexpr ObjectType ObjectType_MIN = OBJECT_NONE;
-constexpr ObjectType ObjectType_MAX = OBJECT_WALL;
+constexpr ObjectType ObjectType_MAX = OBJECT_PROJECTILE;
 constexpr int ObjectType_ARRAYSIZE = ObjectType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ObjectType_descriptor();
@@ -108,12 +109,16 @@ enum DirectionType : int {
   DIR_RIGHT = 2,
   DIR_UP = 3,
   DIR_DOWN = 4,
+  DIR_UP_LEFT = 5,
+  DIR_UP_RIGHT = 6,
+  DIR_DOWN_LEFT = 7,
+  DIR_DOWN_RIGHT = 8,
   DirectionType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   DirectionType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool DirectionType_IsValid(int value);
 constexpr DirectionType DirectionType_MIN = DIR_NONE;
-constexpr DirectionType DirectionType_MAX = DIR_DOWN;
+constexpr DirectionType DirectionType_MAX = DIR_DOWN_RIGHT;
 constexpr int DirectionType_ARRAYSIZE = DirectionType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DirectionType_descriptor();

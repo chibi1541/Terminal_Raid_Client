@@ -12,7 +12,7 @@ using namespace Craft;
 void LocalPlayer::BeginPlay()
 {
 	// TODO 나중에 서버로부터 인덱스를 받아서 해당 캐릭터 로딩하도록 수정
-	animName = "Knight";
+	animName = "Mage";
 
 	// 주의 - super::BeginPlay()는 이 함수의 "맨 마지막"에 불러야 한다.
 	//

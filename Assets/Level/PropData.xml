@@ -16,6 +16,6 @@
 -->
 <PropData>
 	<PropSets>
-		<PropSet name="Cemetery" path="../Assets/CemeteryProps.prop.xml" />
+		<PropSet name="Cemetery" path="../Assets/Level/Cemetery/CemeteryProps.prop.xml" />
 	</PropSets>
 </PropData>

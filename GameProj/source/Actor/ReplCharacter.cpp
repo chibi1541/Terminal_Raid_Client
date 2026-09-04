@@ -85,6 +85,9 @@ void ReplCharacter::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 {
 	super::ApplyObjectInfo(info);
 
+	hp = info.state().hp();
+	maxHp = info.state().maxhp();
+
 	// 플레이어가 아닌 개체에는 player 필드가 비어 있다.
 	// 그 경우 has_player()가 false라 이름을 덮어쓰지 않는다.
 	if (info.has_player())
@@ -101,7 +104,4 @@ void ReplCharacter::Draw()
 	{
 		return;
 	}
-
-	// TODO : Local, Remote Player쪽으로 이동
-
 }

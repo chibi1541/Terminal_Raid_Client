@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<SpriteAnimation>
+	<Clip name="Idle" facing="Down" fps="8" loop="true" width="8" height="9" pivot="3.5,5.5">
+		<Frame>
+			...PP...
+			..VPPV..
+			..VUUV..
+			.VUUUUV.
+			VVUUUUVV
+			.VUBBUV.
+			.VUBBUV.
+			.VUUUUV.
+			..VVVV..
+		</Frame>
+		<Frame>
+			..P..P..
+			..VPPV..
+			.VUUUUV.
+			..VUUV..
+			.VUUUUV.
+			VVUBBUVV
+			.VUBBUV.
+			.VUUUUV.
+			..VVVV..
+		</Frame>
+		<Frame>
+			........
+			...PP...
+			..VPPV..
+			.VUUUUV.
+			VVUUUUVV
+			.VUBBUV.
+			VVUBBUVV
+			.VUUUUV.
+			..VVVV..
+		</Frame>
+		<Frame>
+			...PP...
+			..VPPV..
+			.VUUUUV.
+			VVUUUUVV
+			.VUUUUV.
+			.VUBBUV.
+			VVUBBUVV
+			.VUUUUV.
+			..VVVV..
+		</Frame>
+	</Clip>
+
+</SpriteAnimation>

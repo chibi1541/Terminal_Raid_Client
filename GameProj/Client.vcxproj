@@ -104,6 +104,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Actor\ProjectileActor.cpp" />
     <ClCompile Include="source\Actor\Monster.cpp" />
     <ClCompile Include="source\Actor\LocalPlayer.cpp" />
     <ClCompile Include="source\Actor\ReplCharacter.cpp" />
@@ -133,6 +134,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Actor\ProjectileActor.h" />
     <ClInclude Include="source\Actor\Monster.h" />
     <ClInclude Include="source\Actor\LocalPlayer.h" />
     <ClInclude Include="source\Actor\ReplCharacter.h" />
