@@ -29,6 +29,8 @@ public:
 	void OnExitRoom();
 	void OnSpawn(const Protocol::S_SPAWN& pkt);
 	void OnDespawn(const Protocol::S_DESPAWN& pkt);
+	void OnMove(const Protocol::S_MOVE& pkt);
+	void OnMoveAck(const Protocol::S_MOVE_ACK& pkt);
 
 	std::shared_ptr<ReplicatedActor> Find(uint64 objectId) const;
 	std::shared_ptr<LocalPlayer> GetLocalPlayer() const;
@@ -52,6 +54,7 @@ private:
 	// 여기서 shared_ptr을 들면 Destroy() 뒤에도 액터가 살아남아 누수가 된다.
 	std::unordered_map<uint64, std::weak_ptr<ReplicatedActor>> objects;
 
+	// TODO 이건 여기에 박히면 안되는 정보라 GameState 클래스에 옮기기
 	// 내가 조종하는 개체. S_ENTER_ROOM의 myObject에서 온다.
 	uint64 myObjectId = 0;
 

@@ -99,6 +99,33 @@ void ObjectManager::OnDespawn(const Protocol::S_DESPAWN& pkt)
 	}
 }
 
+void ObjectManager::OnMove(const Protocol::S_MOVE& pkt)
+{
+	EnsureGameThread();
+
+	for (const Protocol::MoveInfo& info : pkt.moves())
+	{
+		// 내 캐릭터는 로컬 예측이 담당한다. S_MOVE_ACK로 따로 보정
+		if (info.objectid() == myObjectId)
+			continue;
+
+		std::shared_ptr<ReplicatedActor> actor = Find(info.objectid());
+		if (actor == nullptr)
+			continue;
+
+		// TODO : remote / moster/ projectile에 ApplyMove(MoveInfo&) 인터페이스 구현
+		//actor->
+	}
+}
+
+void ObjectManager::OnMoveAck(const Protocol::S_MOVE_ACK& pkt)
+{
+	EnsureGameThread();
+
+	// TODO : local 플레이어 prediction 처리
+
+}
+
 void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 {
 	const uint64 objectId = info.objectid();

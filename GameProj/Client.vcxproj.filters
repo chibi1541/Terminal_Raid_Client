@@ -63,6 +63,9 @@
     <ClCompile Include="source\Actor\ProjectileActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Network\MovementInterpolator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\pch.h">
@@ -117,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Actor\ProjectileActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Network\MovementInterpolator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

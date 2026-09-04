@@ -106,7 +106,13 @@ bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt)
 
 bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt)
 {
-	return true;
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnMove(pkt);
+		}
+	);
+
+	return;
 }
 
 bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt)
