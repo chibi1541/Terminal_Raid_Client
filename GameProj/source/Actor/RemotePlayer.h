@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "ReplCharacter.h"
 
@@ -7,8 +7,6 @@
 // 입력을 받지 않는다. 위치와 상태는 오직 서버가 보낸 ObjectInfo/MoveInfo로만 바뀐다.
 // 스폰 시점 위치는 ApplyObjectInfo(베이스)가, 그 뒤 매 이동은 ApplyMove(베이스)가
 // interpolator에 샘플로 쌓고, 여기 Tick이 매 프레임 재생 좌표를 꺼내 반영한다.
-
-//TODO : cpp 만들자 좀!
 class RemotePlayer : public ReplCharacter
 {
 	TYPE_DECLARATIONS(RemotePlayer, ReplCharacter)
@@ -16,24 +14,8 @@ class RemotePlayer : public ReplCharacter
 public:
 	RemotePlayer() = default;
 
-	virtual void BeginPlay() override
-	{
-		animName = "Knight";
-
-		super::BeginPlay();
-	}
-
-	virtual void Tick(float deltaTime) override
-	{
-		// 보간기가 시작된 뒤에만 반영한다 - ApplyObjectInfo(스폰)를 안 거친
-		// 액터(로컬 테스트 스폰 등)는 시작되지 않은 채라 원점으로 튀는 걸 막는다.
-		if (interpolator.IsStarted())
-		{
-			SetPosition(interpolator.Evaluate(deltaTime));
-		}
-
-		super::Tick(deltaTime);
-	}
+	virtual void BeginPlay() override;
+	virtual void Tick(float deltaTime) override;
 
 protected:
 	// 남의 캐릭터는 흰색 이름표.
@@ -44,15 +26,7 @@ protected:
 	// 공격이 이동을 이긴다 - 옆으로 물러나면서 앞을 때리는 동작에서 봐야 하는 것은
 	// 물러나는 쪽이 아니라 때리는 쪽이다. LocalPlayer가 마우스를 절대 기준으로 삼는 것과
 	// 같은 이유(= 보는 방향은 조준 방향이다)이고, 근거만 다르다.
-	virtual Craft::EFacing ComputeWorldFacing() const override
-	{
-		if (isAttacking && attackDirection != Craft::Vector2::Zero)
-		{
-			return Craft::FacingFromDelta(attackDirection, facing);
-		}
-
-		return FacingFromServerDirection(lastDirection, facing);
-	}
+	virtual Craft::EFacing ComputeWorldFacing() const override;
 
 protected:
 	// TODO : 공격 방향. 프로토콜에 아직 공격 패킷이 없어서 항상 꺼져 있다.

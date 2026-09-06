@@ -108,6 +108,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClCompile Include="source\Actor\ProjectileActor.cpp" />
     <ClCompile Include="source\Actor\Monster.cpp" />
     <ClCompile Include="source\Actor\LocalPlayer.cpp" />
+    <ClCompile Include="source\Actor\RemotePlayer.cpp" />
     <ClCompile Include="source\Actor\ReplCharacter.cpp" />
     <ClCompile Include="source\Actor\ReplicatedActor.cpp" />
     <ClCompile Include="source\Game\ObjectManager.cpp" />

@@ -51,6 +51,9 @@
     <ClCompile Include="source\Actor\LocalPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Actor\RemotePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\Actor\ReplCharacter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
