@@ -31,6 +31,9 @@ public:
 	void OnDespawn(const Protocol::S_DESPAWN& pkt);
 	void OnMove(const Protocol::S_MOVE& pkt);
 	void OnMoveAck(const Protocol::S_MOVE_ACK& pkt);
+	void OnHit(const Protocol::S_HIT& pkt);
+	void OnDeath(const Protocol::S_DEATH& pkt);
+	void OnAttackStart(const Protocol::S_ATTACK_START& pkt);
 
 	std::shared_ptr<ReplicatedActor> Find(uint64 objectId) const;
 	std::shared_ptr<LocalPlayer> GetLocalPlayer() const;

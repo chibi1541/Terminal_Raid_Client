@@ -17,6 +17,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
+	// 서버 공격 모션 트리거. "이 순간 재생하라"는 1회성 신호라 매 틱 리셋한다
+	// (Tick 끝에서 isAttacking = false) - LocalPlayer가 매 프레임 입력을 다시
+	// 채우고 끝에서 비우는 것과 같은 관례다.
+	virtual void ApplyAttackStart(const Protocol::S_ATTACK_START& pkt) override;
+
 protected:
 	// 남의 캐릭터는 흰색 이름표.
 	virtual Craft::Color GetNameColor() const override { return Craft::Color::White; }

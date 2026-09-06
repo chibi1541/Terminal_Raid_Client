@@ -42,6 +42,15 @@ void Monster::Tick(float deltaTime)
 		animator->GetParameters().SetFloat("IsAttack", isAttack ? 1.0f : 0.0f);
 		animator->GetParameters().SetFloat("IsDead", IsAlive() ? 0.0f : 1.0f);
 	}
+
+	// S_ATTACK_START는 "이 순간 재생하라"는 1회성 트리거다. 여기서 지우지
+	// 않으면 다음 패킷이 올 때까지 계속 공격 상태로 남는다.
+	isAttack = false;
+}
+
+void Monster::ApplyAttackStart(const Protocol::S_ATTACK_START& pkt)
+{
+	isAttack = true;
 }
 
 

@@ -2,6 +2,7 @@
 
 #include "Actor/Actor.h"
 #include "Protocol/Struct.pb.h"
+#include "Protocol/Protocol.pb.h"
 #include "Network/MovementInterpolator.h"
 
 // 서버와 동기화되는 모든 개체의 베이스.
@@ -33,6 +34,15 @@ public:
 	// 내 캐릭터(LocalPlayer)는 ObjectManager::OnMove가 애초에 이 함수를 부르지
 	// 않는다 - 로컬 예측이 담당하고, S_MOVE_ACK로 따로 보정한다.
 	virtual void ApplyMove(const Protocol::MoveInfo& info);
+
+	// 피격/사망/공격모션시작 통지. 기본은 아무것도 안 한다.
+	//
+	// HP나 공격 애니메이션 개념이 없는 액터(투사체 등)는 굳이 오버라이드할 필요가
+	// 없다 - ObjectManager는 액터 종류를 안 가리고 무조건 이 함수들을 부른다.
+	// HP를 갖는 ReplCharacter가 ApplyHit/ApplyDeath를 오버라이드해서 채운다.
+	virtual void ApplyHit(const Protocol::S_HIT& pkt) {}
+	virtual void ApplyDeath(const Protocol::S_DEATH& pkt) {}
+	virtual void ApplyAttackStart(const Protocol::S_ATTACK_START& pkt) {}
 
 	inline uint64 GetObjectId() const { return objectId; }
 

@@ -85,23 +85,33 @@ void ReplCharacter::UpdateFacing()
 	}
 }
 
+Vector2 ReplCharacter::DeltaFromServerDirection(Protocol::DirectionType dir)
+{
+	switch (dir)
+	{
+	case Protocol::DIR_LEFT:       return Vector2(-1, 0);
+	case Protocol::DIR_RIGHT:      return Vector2(1, 0);
+	case Protocol::DIR_UP:         return Vector2(0, -1);
+	case Protocol::DIR_DOWN:       return Vector2(0, 1);
+	case Protocol::DIR_UP_LEFT:    return Vector2(-1, -1);
+	case Protocol::DIR_UP_RIGHT:   return Vector2(1, -1);
+	case Protocol::DIR_DOWN_LEFT:  return Vector2(-1, 1);
+	case Protocol::DIR_DOWN_RIGHT: return Vector2(1, 1);
+	default:                       return Vector2::Zero;	// DIR_NONE(정지).
+	}
+}
+
 EFacing ReplCharacter::FacingFromServerDirection(Protocol::DirectionType dir, EFacing previous)
 {
+	if (dir == Protocol::DIR_NONE)
+	{
+		return previous;	// 판단 근거가 없다 - 보던 방향 유지.
+	}
+
 	// FacingFromDelta는 절댓값 비교로 우세한 축을 고르고, 정확히 같으면(대각선)
 	// previous를 유지한다. 대각 방향들이 축 성분 크기가 항상 같도록(±1,±1)
 	// 델타를 구성해서 그 규칙을 그대로 물려받는다.
-	switch (dir)
-	{
-	case Protocol::DIR_LEFT:       return FacingFromDelta(Vector2(-1, 0), previous);
-	case Protocol::DIR_RIGHT:      return FacingFromDelta(Vector2(1, 0), previous);
-	case Protocol::DIR_UP:         return FacingFromDelta(Vector2(0, -1), previous);
-	case Protocol::DIR_DOWN:       return FacingFromDelta(Vector2(0, 1), previous);
-	case Protocol::DIR_UP_LEFT:    return FacingFromDelta(Vector2(-1, -1), previous);
-	case Protocol::DIR_UP_RIGHT:   return FacingFromDelta(Vector2(1, -1), previous);
-	case Protocol::DIR_DOWN_LEFT:  return FacingFromDelta(Vector2(-1, 1), previous);
-	case Protocol::DIR_DOWN_RIGHT: return FacingFromDelta(Vector2(1, 1), previous);
-	default:                       return previous;	// DIR_NONE(정지) - 보던 방향 유지.
-	}
+	return FacingFromDelta(DeltaFromServerDirection(dir), previous);
 }
 
 void ReplCharacter::ApplyObjectInfo(const Protocol::ObjectInfo& info)
@@ -117,6 +127,17 @@ void ReplCharacter::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 	{
 		characterName = info.player().name();
 	}
+}
+
+void ReplCharacter::ApplyHit(const Protocol::S_HIT& pkt)
+{
+	// 데미지 계산은 서버 몫이다. 클라는 결과(newHp)를 그대로 반영만 한다.
+	hp = pkt.newhp();
+}
+
+void ReplCharacter::ApplyDeath(const Protocol::S_DEATH& pkt)
+{
+	hp = 0;
 }
 
 void ReplCharacter::Draw()

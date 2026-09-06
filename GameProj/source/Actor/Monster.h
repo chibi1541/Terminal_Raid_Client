@@ -23,6 +23,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
+	// 서버 공격 모션 트리거. 1회성 신호라 Tick 끝에서 isAttack을 다시 내린다.
+	virtual void ApplyAttackStart(const Protocol::S_ATTACK_START& pkt) override;
+
 protected:
 	// 마우스도 입력도 없다. 서버가 알려준 이동 방향(lastDirection)이 유일한 근거다.
 	// RemotePlayer와 같은 규칙 - ReplCharacter::FacingFromServerDirection 참고.

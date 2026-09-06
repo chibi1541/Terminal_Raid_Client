@@ -127,6 +127,47 @@ void ObjectManager::OnMoveAck(const Protocol::S_MOVE_ACK& pkt)
 
 }
 
+void ObjectManager::OnHit(const Protocol::S_HIT& pkt)
+{
+	EnsureGameThread();
+
+	// 피격자만 반영한다. 공격자(attackerId)는 표시할 UI가 아직 없다.
+	std::shared_ptr<ReplicatedActor> actor = Find(pkt.targetid());
+
+	if (actor != nullptr)
+	{
+		actor->ApplyHit(pkt);
+	}
+}
+
+void ObjectManager::OnDeath(const Protocol::S_DEATH& pkt)
+{
+	EnsureGameThread();
+
+	std::shared_ptr<ReplicatedActor> actor = Find(pkt.objectid());
+
+	if (actor != nullptr)
+	{
+		actor->ApplyDeath(pkt);
+	}
+
+	// 실제 제거는 여기서 하지 않는다. 주석대로 이 직후 S_DESPAWN이 뒤따라오고,
+	// OnDespawn이 Destroy()를 부른다. 여기서 먼저 지우면 그 사이 한두 프레임
+	// 재생돼야 할 사망 연출(IsDead)이 아예 안 뜬다.
+}
+
+void ObjectManager::OnAttackStart(const Protocol::S_ATTACK_START& pkt)
+{
+	EnsureGameThread();
+
+	std::shared_ptr<ReplicatedActor> actor = Find(pkt.objectid());
+
+	if (actor != nullptr)
+	{
+		actor->ApplyAttackStart(pkt);
+	}
+}
+
 void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 {
 	const uint64 objectId = info.objectid();

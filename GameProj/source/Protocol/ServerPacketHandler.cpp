@@ -119,3 +119,36 @@ bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt)
 {
 	return true;
 }
+
+bool Handle_S_HIT(const Session* session, Protocol::S_HIT& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnHit(pkt);
+		}
+	);
+
+	return true;
+}
+
+bool Handle_S_DEATH(const Session* session, Protocol::S_DEATH& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnDeath(pkt);
+		}
+	);
+
+	return true;
+}
+
+bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnAttackStart(pkt);
+		}
+	);
+
+	return true;
+}

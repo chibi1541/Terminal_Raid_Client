@@ -28,6 +28,9 @@ enum : uint16
 	PKT_C_MOVE = 1010,
 	PKT_S_MOVE = 1011,
 	PKT_S_MOVE_ACK = 1012,
+	PKT_S_HIT = 1013,
+	PKT_S_DEATH = 1014,
+	PKT_S_ATTACK_START = 1015,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -41,6 +44,9 @@ bool Handle_S_SPAWN(const Session* session, Protocol::S_SPAWN& pkt);
 bool Handle_S_DESPAWN(const Session* session, Protocol::S_DESPAWN& pkt);
 bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt);
 bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt);
+bool Handle_S_HIT(const Session* session, Protocol::S_HIT& pkt);
+bool Handle_S_DEATH(const Session* session, Protocol::S_DEATH& pkt);
+bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt);
 
 // PacketHandler 클래스 자동화
 class ServerPacketHandler
@@ -60,6 +66,9 @@ public:
 		GPacketHandler[PKT_S_DESPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DESPAWN>(Handle_S_DESPAWN, session, buffer, len); };
 		GPacketHandler[PKT_S_MOVE] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_MOVE>(Handle_S_MOVE, session, buffer, len); };
 		GPacketHandler[PKT_S_MOVE_ACK] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_MOVE_ACK>(Handle_S_MOVE_ACK, session, buffer, len); };
+		GPacketHandler[PKT_S_HIT] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_HIT>(Handle_S_HIT, session, buffer, len); };
+		GPacketHandler[PKT_S_DEATH] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEATH>(Handle_S_DEATH, session, buffer, len); };
+		GPacketHandler[PKT_S_ATTACK_START] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ATTACK_START>(Handle_S_ATTACK_START, session, buffer, len); };
 
 	}
 

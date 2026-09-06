@@ -34,6 +34,13 @@ public:
 	// PlayerInfo.name을 여기서 받는다.
 	virtual void ApplyObjectInfo(const Protocol::ObjectInfo& info) override;
 
+	// 서버가 권위인 hp를 그대로 반영한다. 데미지 계산은 클라에서 하지 않는다.
+	virtual void ApplyHit(const Protocol::S_HIT& pkt) override;
+
+	// hp가 0이 된 순간의 통지. S_HIT이 이미 0을 보냈어도 다시 한 번 확정한다 -
+	// 패킷 순서가 뒤바뀌어 도착해도(HIT 유실 등) 사망 연출은 반드시 뜨게 하기 위함.
+	virtual void ApplyDeath(const Protocol::S_DEATH& pkt) override;
+
 	inline const std::string& GetCharacterName() const { return characterName; }
 
 	inline int32 GetHp() const { return hp; }
@@ -56,6 +63,9 @@ protected:
 
 	// facing -> displaySlot -> 애니메이터. Tick이 super보다 먼저 부른다.
 	void UpdateFacing();
+
+	// 서버 8방향 -> 축당 -1/0/1 델타. FacingFromDelta·attackDirection이 공유한다.
+	static Craft::Vector2 DeltaFromServerDirection(Protocol::DirectionType dir);
 
 	// 서버가 보낸 8방향(lastDirection)을 4방향 화면 슬롯으로 접는다.
 	//
