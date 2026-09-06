@@ -28,7 +28,7 @@ class CRAFT_API Engine
 	// 엔진 설정 (데이터)
 	struct Setting
 	{
-		enum { BUFFER_SIZE = 2048, };
+		enum { BUFFER_SIZE = 2048, FACE_NAME_SIZE = 32, };
 
 		// 목표 프레임 수
 		float framerate = 0.f;
@@ -38,6 +38,21 @@ class CRAFT_API Engine
 
 		// 사용한 콘솔 화면 높이
 		int height = 0;
+
+		// 콘솔 셀 너비(px). 0이면 자동(높이에서 폰트 고유 비율로 계산).
+		// 래스터 폰트("Terminal")는 이 값을 그대로 지켜준다.
+		int fontWidth = 8;
+
+		// 콘솔 셀 높이(px).
+		//
+		// ★ 세로 줄 수를 직접 결정하는 값 ★
+		// 콘솔 창의 최대 줄 수는 "화면 세로 픽셀 / 셀 높이"다.
+		// 이 값을 줄이지 않으면 height를 아무리 키워도 줄 수는 늘어나지 않는다.
+		int fontHeight = 8;
+
+		// 콘솔 폰트 이름.
+		// "Terminal"(래스터)만 정사각 셀을 정확히 지킨다. TrueType은 항상 1:2다.
+		wchar_t fontFace[FACE_NAME_SIZE] = L"Terminal";
 	};
 
 public:

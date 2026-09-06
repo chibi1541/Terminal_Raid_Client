@@ -1,3 +1,23 @@
 framerate = 120
-width = 180
-height = 140
+width = 320
+height = 171
+
+# 콘솔 셀(글자 한 칸)의 픽셀 크기.
+#
+# ★ fontHeight가 세로 줄 수의 상한을 정한다 ★
+#     최대 줄 수 = (화면 세로 픽셀 - 작업표시줄 - 타이틀바) / fontHeight
+#
+# 2560x1440 화면에서 실측한 값 (GetLargestConsoleWindowSize):
+#     Terminal 8x8   -> 320 x 171    <- 정사각 셀, 지금 설정
+#     Terminal 8x12  -> 320 x 114
+#     Terminal 6x8   -> 426 x 171
+#     Terminal 4x6   -> 640 x 228
+#     Consolas 0x8   -> 640 x 171    (TrueType은 너비가 항상 높이의 절반)
+#     Consolas 0x16  -> 320 x 85     (예전 상태)
+#
+# "Terminal"은 래스터 폰트라 요청한 너비/높이를 그대로 지켜준다.
+# Consolas 같은 TrueType은 너비 지정을 무시하고 항상 1:2로 잡으므로
+# 정사각 셀이 나오지 않는다(엔진 곳곳의 "셀은 정사각" 가정이 깨짐).
+fontWidth = 8
+fontHeight = 8
+fontFace = Terminal
