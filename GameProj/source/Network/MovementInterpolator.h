@@ -104,6 +104,14 @@ public:
 	// 현재 이동 방향 (facing 계산용). 최신 스냅샷의 속도.
 	FVec2 GetVelocity() const { return _samples.empty() ? FVec2{} : FVec2{ _samples.back().vx, _samples.back().vy };}
 
+	// Reset()이 한 번도 안 불렸으면 false.
+	//
+	// 서버 스폰(ApplyObjectInfo)을 거치지 않고 로컬에서 직접 SetPosition으로 배치한
+	// 액터(테스트용 임시 스폰 등)는 이 값이 계속 false다. Tick에서 이 값을 확인하지
+	// 않고 매 프레임 Evaluate() 결과로 SetPosition을 덮으면, 시작하지 않은 보간기가
+	// 기본값 (0,0)을 돌려주면서 그런 액터를 원점으로 순간이동시켜 버린다.
+	bool IsStarted() const { return _started; }
+
 private:
 	struct Sample
 	{

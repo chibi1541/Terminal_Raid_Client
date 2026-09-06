@@ -112,7 +112,7 @@ bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt)
 		}
 	);
 
-	return;
+	return true;
 }
 
 bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt)

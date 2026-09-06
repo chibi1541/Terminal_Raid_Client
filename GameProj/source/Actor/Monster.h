@@ -24,9 +24,12 @@ public:
 	virtual void Tick(float deltaTime) override;
 
 protected:
-	// 컴포넌트
-	// 스프라이트 애니메이션 재생 담당.
-	std::shared_ptr<Craft::SpriteAnimatorComponent> animator;
+	// 마우스도 입력도 없다. 서버가 알려준 이동 방향(lastDirection)이 유일한 근거다.
+	// RemotePlayer와 같은 규칙 - ReplCharacter::FacingFromServerDirection 참고.
+	virtual Craft::EFacing ComputeWorldFacing() const override
+	{
+		return FacingFromServerDirection(lastDirection, facing);
+	}
 
 private:
 	float moveSpeed = 20.f;

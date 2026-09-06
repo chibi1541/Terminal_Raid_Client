@@ -5,6 +5,10 @@
 #include "Asset/AnimationDataAsset.h"
 #include "Camera/CameraManager.h"
 #include "Render/Renderer.h"
+#include "Render/RenderLayer.h"
+
+#include <algorithm>
+#include <cmath>
 
 using namespace Craft;
 
@@ -81,6 +85,25 @@ void ReplCharacter::UpdateFacing()
 	}
 }
 
+EFacing ReplCharacter::FacingFromServerDirection(Protocol::DirectionType dir, EFacing previous)
+{
+	// FacingFromDelta는 절댓값 비교로 우세한 축을 고르고, 정확히 같으면(대각선)
+	// previous를 유지한다. 대각 방향들이 축 성분 크기가 항상 같도록(±1,±1)
+	// 델타를 구성해서 그 규칙을 그대로 물려받는다.
+	switch (dir)
+	{
+	case Protocol::DIR_LEFT:       return FacingFromDelta(Vector2(-1, 0), previous);
+	case Protocol::DIR_RIGHT:      return FacingFromDelta(Vector2(1, 0), previous);
+	case Protocol::DIR_UP:         return FacingFromDelta(Vector2(0, -1), previous);
+	case Protocol::DIR_DOWN:       return FacingFromDelta(Vector2(0, 1), previous);
+	case Protocol::DIR_UP_LEFT:    return FacingFromDelta(Vector2(-1, -1), previous);
+	case Protocol::DIR_UP_RIGHT:   return FacingFromDelta(Vector2(1, -1), previous);
+	case Protocol::DIR_DOWN_LEFT:  return FacingFromDelta(Vector2(-1, 1), previous);
+	case Protocol::DIR_DOWN_RIGHT: return FacingFromDelta(Vector2(1, 1), previous);
+	default:                       return previous;	// DIR_NONE(정지) - 보던 방향 유지.
+	}
+}
+
 void ReplCharacter::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 {
 	super::ApplyObjectInfo(info);
@@ -100,8 +123,51 @@ void ReplCharacter::Draw()
 {
 	super::Draw();
 
-	if (characterName.empty())
+	if (characterName.empty() == false)
 	{
-		return;
+		// 이름표 - 화면 공간 오프셋으로 빌보드 처리한다(뷰가 회전해도 머리 위에 고정).
+		// 정렬 순서를 한 칸 올려서 스프라이트에 가리지 않게 한다.
+		Renderer::Get().SubmitWorld(
+			characterName,
+			GetPosition(),
+			GetNameColor(),
+			GetSortingOrder() + 1,
+			std::nullopt,
+			std::nullopt,
+			Vector2(0, nameTagScreenOffsetY));
+	}
+
+	// 체력바 - 발밑 아래 가운데 정렬, WorldUI 대역(액터보다 위, 뷰포트 UI보다 아래).
+	// 배경색 블록(SubmitPixelsWorld)으로 그려서 텍스트 색상보다 굵고 또렷하게 보이게 한다.
+	if (maxHp > 0)
+	{
+		const float fraction = std::clamp(static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f);
+		const int filledCount = static_cast<int>(std::lround(fraction * hpBarWidth));
+
+		const Color barColor =
+			(fraction > 0.5f) ? Color::Green :
+			(fraction > 0.25f) ? Color::Yellow : Color::Red;
+
+		// 캐릭터 발밑(x=0) 기준으로 좌우 가운데 오도록 왼쪽 끝을 절반만큼 당긴다.
+		const Vector2 hpBarScreenOffset(-hpBarWidth / 2, hpBarScreenOffsetY);
+
+		std::string hpBarPixelMap(hpBarWidth, 'E');
+		hpBarPixelMap.replace(0, filledCount, filledCount, 'F');
+
+		const std::unordered_map<char, Color> hpBarPalette =
+		{
+			{ 'F', barColor },
+			{ 'E', Color::DarkGray },
+		};
+
+		Renderer::Get().SubmitPixelsWorld(
+			hpBarPixelMap,
+			hpBarPalette,
+			GetPosition(),
+			RenderLayer::WorldUI,
+			'\0',	// 투명 취급할 기호 없음 - 빈 칸도 어두운 배경 블록으로 채운다.
+			1, 1,
+			std::nullopt,
+			hpBarScreenOffset);
 	}
 }

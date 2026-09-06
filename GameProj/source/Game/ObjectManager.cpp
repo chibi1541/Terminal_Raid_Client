@@ -3,6 +3,8 @@
 
 #include "Actor/LocalPlayer.h"
 #include "Actor/RemotePlayer.h"
+#include "Actor/Monster.h"
+#include "Actor/ProjectileActor.h"
 #include "Engine/Engine.h"
 #include "Level/Level.h"
 #include "Thread/ThreadManager.h"
@@ -113,8 +115,7 @@ void ObjectManager::OnMove(const Protocol::S_MOVE& pkt)
 		if (actor == nullptr)
 			continue;
 
-		// TODO : remote / moster/ projectile에 ApplyMove(MoveInfo&) 인터페이스 구현
-		//actor->
+		actor->ApplyMove(info);
 	}
 }
 
@@ -156,9 +157,16 @@ void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 			: std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<RemotePlayer>());
 		break;
 
+	case Protocol::OBJECT_MONSTER:
+		actor = std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<Monster>());
+		break;
+
+	case Protocol::OBJECT_PROJECTILE:
+		actor = std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<ProjectileActor>());
+		break;
+
 	default:
-		// TODO : OBJECT_MONSTER, 투사체.
-		// 아직 만들지 않은 타입이라 조용히 건너뛴다.
+		// 아직 클라이언트에 대응 타입이 없는 개체. 조용히 건너뛴다.
 		return;
 	}
 

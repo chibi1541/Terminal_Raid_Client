@@ -23,7 +23,6 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
-	virtual void Draw() override;
 
 protected:
 	// 내 캐릭터는 노란색 이름표로 구분한다.
@@ -56,8 +55,6 @@ private:
 	void OnRotateViewRight();
 
 private:
-	const int nameLabelOffsetY = -9;
-
 	std::shared_ptr<Craft::InputComponent> inputComponent;
 
 	// 이 클라이언트의 화면을 비추는 카메라.

@@ -57,6 +57,21 @@ protected:
 	// facing -> displaySlot -> 애니메이터. Tick이 super보다 먼저 부른다.
 	void UpdateFacing();
 
+	// 서버가 보낸 8방향(lastDirection)을 4방향 화면 슬롯으로 접는다.
+	//
+	// RemotePlayer/Monster가 공유한다 - 둘 다 마우스가 없어서 서버가 알려준
+	// 이동 방향이 유일한 근거다. 대각선은 FacingFromDelta의 동률 규칙을 그대로
+	// 따른다(보던 방향 유지) - 대각 이동 중 매 틱 두 방향을 오가지 않기 위함이다.
+	static Craft::EFacing FacingFromServerDirection(Protocol::DirectionType dir, Craft::EFacing previous);
+
+protected:
+	// 이름표: 머리 위로 띄우는 화면 공간 오프셋(빌보드 - 뷰 회전에 영향받지 않음).
+	static constexpr int nameTagScreenOffsetY = -9;
+
+	// 체력바: 발밑 아래로 띄우는 화면 공간 오프셋, 그리고 칸 수(너비).
+	static constexpr int hpBarScreenOffsetY = 2;
+	static constexpr int hpBarWidth = 10;
+
 protected:
 	// 월드에서 보고 있는 방향. 카메라와 무관하다.
 	// 나중에 서버와 주고받게 될 값도 이쪽이다(화면 슬롯은 클라마다 다르다).

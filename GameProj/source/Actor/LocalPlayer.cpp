@@ -3,7 +3,6 @@
 #include "Component/SpriteAnimatorComponent.h"
 #include "Camera/CameraManager.h"
 #include "Input/Input.h"
-#include "Render/Renderer.h"
 
 #include <cmath>
 
@@ -233,17 +232,4 @@ void LocalPlayer::Tick(float deltaTime)
 	// 다음 프레임의 디스패치가 이 Tick 뒤에 오므로 지금 비워도 안전하다.
 	inputDirection = Vector2::Zero;
 	isAttack = false;
-}
-
-void LocalPlayer::Draw()
-{
-	super::Draw();
-
-	// 액터는 월드 객체이므로 월드 좌표로 제출한다. 카메라가 화면 좌표로 옮긴다.
-// 정렬 순서를 한 칸 올려서 스프라이트에 가리지 않게 한다.
-	Renderer::Get().SubmitWorld(
-		characterName,
-		GetPosition() + Vector2(0, nameLabelOffsetY),
-		GetNameColor(),
-		GetSortingOrder() + 1);
 }
