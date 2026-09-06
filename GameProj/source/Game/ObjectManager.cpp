@@ -123,8 +123,10 @@ void ObjectManager::OnMoveAck(const Protocol::S_MOVE_ACK& pkt)
 {
 	EnsureGameThread();
 
-	// TODO : local 플레이어 prediction 처리
-
+	if (std::shared_ptr<LocalPlayer> localPlayer = GetLocalPlayer())
+	{
+		localPlayer->ReconcileMove(pkt);
+	}
 }
 
 void ObjectManager::OnHit(const Protocol::S_HIT& pkt)

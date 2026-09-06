@@ -117,6 +117,12 @@ bool Handle_S_MOVE(const Session* session, Protocol::S_MOVE& pkt)
 
 bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt)
 {
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnMoveAck(pkt);
+		}
+	);
+
 	return true;
 }
 

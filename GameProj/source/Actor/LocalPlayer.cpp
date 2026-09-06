@@ -3,10 +3,35 @@
 #include "Component/SpriteAnimatorComponent.h"
 #include "Camera/CameraManager.h"
 #include "Input/Input.h"
+#include "Network/NetSend.h"
+#include "Render/Renderer.h"
+#include "Render/RenderLayer.h"
 
 #include <cmath>
 
 using namespace Craft;
+
+namespace
+{
+	// 서버 8방향(DirectionType) <-> 클라 입력 델타(-1/0/1) 변환.
+	// ReplCharacter::DeltaFromServerDirection의 역방향이다 - 그쪽은
+	// "서버가 알려준 방향"을 델타로 풀고, 이쪽은 "내가 누른 키"를 방향으로 묶는다.
+	Protocol::DirectionType DirectionTypeFromInput(const Vector2& dir)
+	{
+		const int sx = (dir.x > 0) - (dir.x < 0);
+		const int sy = (dir.y > 0) - (dir.y < 0);
+
+		if (sx == 0 && sy == 0) return Protocol::DIR_NONE;
+		if (sx == 0 && sy < 0)  return Protocol::DIR_UP;
+		if (sx == 0 && sy > 0)  return Protocol::DIR_DOWN;
+		if (sy == 0 && sx < 0)  return Protocol::DIR_LEFT;
+		if (sy == 0 && sx > 0)  return Protocol::DIR_RIGHT;
+		if (sx < 0 && sy < 0)   return Protocol::DIR_UP_LEFT;
+		if (sx > 0 && sy < 0)   return Protocol::DIR_UP_RIGHT;
+		if (sx < 0 && sy > 0)   return Protocol::DIR_DOWN_LEFT;
+		return Protocol::DIR_DOWN_RIGHT;	// sx > 0 && sy > 0
+	}
+}
 
 void LocalPlayer::BeginPlay()
 {
@@ -45,6 +70,9 @@ void LocalPlayer::BeginPlay()
 	// Held로 걸면 키를 꾹 누르는 동안 매 프레임 목표 각도가 밀려서 보간이 끝나지 않는다.
 	inputComponent->BindKey('Q', EInputEvent::Pressed, this, &LocalPlayer::OnRotateViewLeft);
 	inputComponent->BindKey('E', EInputEvent::Pressed, this, &LocalPlayer::OnRotateViewRight);
+
+	// 롤백 디버그 마커 토글. 누를 때마다 뒤집으면 되므로 Pressed.
+	inputComponent->BindKey(VK_F3, EInputEvent::Pressed, this, &LocalPlayer::OnToggleServerPositionDebug);
 
 	// 화면의 기준점. 등록되는 순간 활성 카메라가 되어
 	// 이 액터의 위치가 화면 중앙에 오도록 CameraManager가 매 프레임 뷰를 갱신한다.
@@ -88,6 +116,20 @@ void LocalPlayer::OnAttack()
 void LocalPlayer::OnRollPressed()
 {
 	isRolling = true;
+}
+
+void LocalPlayer::OnToggleServerPositionDebug()
+{
+	showServerPositionDebug = !showServerPositionDebug;
+}
+
+void LocalPlayer::ApplyObjectInfo(const Protocol::ObjectInfo& info)
+{
+	super::ApplyObjectInfo(info);
+
+	// 스폰 시점에도 맞춰 둔다 - 안 그러면 첫 이동(첫 ack) 전까지 마커가
+	// 기본값인 원점(0,0)에 떠서 실제 위치와 아무 상관없어 보인다.
+	lastServerPosition = GetPosition();
 }
 
 void LocalPlayer::OnRotateViewLeft()
@@ -182,6 +224,9 @@ void LocalPlayer::Tick(float deltaTime)
 
 	const bool isMoving = (inputDirection != Vector2::Zero);
 
+	// 이번 프레임 입력이 확정된 시점 - 방향이 바뀌었으면 서버에 알린다.
+	SendMoveInputIfChanged();
+
 	// 예외 처리 - BeginPlay 전에는 컴포넌트가 없다.
 	if (nullptr != animator)
 	{
@@ -211,9 +256,9 @@ void LocalPlayer::Tick(float deltaTime)
 	{
 		// 초당 moveSpeed칸 속도로 이동 (프레임레이트가 달라져도 속도는 일정)
 		//
-		// 지금은 서버에 알리지 않는 순수 로컬 이동이다.
-		// 서버도 스폰 뒤에는 위치를 갱신하지 않으므로 좌표가 서로 어긋난 채로 간다.
-		// 다음 단계에서 C_MOVE 전송과 S_MOVE 보정이 여기 붙는다.
+		// 클라이언트 예측 - 서버 응답을 기다리지 않고 즉시 움직인다.
+		// 방향이 바뀔 때마다 위의 SendMoveInputIfChanged가 C_MOVE로 서버에 알리고,
+		// 서버가 돌려주는 S_MOVE_ACK를 ReconcileMove가 받아 위치를 보정한다.
 		moveAmount += deltaTime * moveSpeed;
 
 		while (moveAmount >= 1.0f)
@@ -232,4 +277,88 @@ void LocalPlayer::Tick(float deltaTime)
 	// 다음 프레임의 디스패치가 이 Tick 뒤에 오므로 지금 비워도 안전하다.
 	inputDirection = Vector2::Zero;
 	isAttack = false;
+
+	++localTick;
+}
+
+void LocalPlayer::SendMoveInputIfChanged()
+{
+	const Protocol::DirectionType currentDirection = DirectionTypeFromInput(inputDirection);
+
+	if (currentDirection == lastSentDirection)
+	{
+		return;
+	}
+
+	lastSentDirection = currentDirection;
+
+	Protocol::C_MOVE pkt;
+	pkt.set_inputseq(nextInputSeq++);
+	pkt.set_clienttick(localTick);
+	pkt.set_dir(currentDirection);
+
+	SendToServer(pkt);
+
+	{
+		char message[160];
+		sprintf_s(message,
+			"[LocalPlayer] C_MOVE sent - seq=%u dir=%d predictedPos=(%d, %d)\n",
+			pkt.inputseq(), static_cast<int>(currentDirection), GetPosition().x, GetPosition().y);
+		::OutputDebugStringA(message);
+	}
+}
+
+void LocalPlayer::Draw()
+{
+	super::Draw();
+
+	if (showServerPositionDebug == false)
+	{
+		return;
+	}
+
+	// 예측 위치(GetPosition(), 캐릭터 스프라이트가 그려지는 자리)와 이 마커
+	// 사이의 간격은 순수하게 참고용이다 - ReconcileMove가 더 이상 이 값으로
+	// 스냅하지 않으므로(왜인지는 ReconcileMove 주석 참고) 위치가 자동으로
+	// 따라붙지는 않는다. 방향을 바꿀 때마다 이 간격이 대략 왕복 지연시간만큼의
+	// 이동 거리로 나타나면 정상이다 - 계속 커지기만 한다면 그건 진짜 드리프트.
+	Renderer::Get().SubmitWorld(
+		"S",
+		lastServerPosition,
+		Color::Purple,
+		RenderLayer::WorldUI);
+}
+
+void LocalPlayer::ReconcileMove(const Protocol::S_MOVE_ACK& pkt)
+{
+	// 순서 역전 방어 - 서버의 lastProcessedInputSeq 방어와 대칭이다.
+	// 늦게 도착한 낡은 ack로 최신 위치를 덮어쓰면 안 된다.
+	if (pkt.lastprocessedinputseq() <= lastAckedInputSeq)
+	{
+		return;
+	}
+
+	lastAckedInputSeq = pkt.lastprocessedinputseq();
+
+	// 디버그 마커만 갱신한다 - 실제 위치는 건드리지 않는다.
+	//
+	// ack.pos는 "서버가 이 입력을 처리한 그 순간"의 위치라, 도착했을 때는
+	// 이미 왕복 지연시간(RTT)만큼 과거 값이다. 그 사이 클라는 새 방향으로
+	// 이미 RTT만큼 예측 이동을 마친 상태라, 여기서 SetPosition으로 스냅하면
+	// 방금 한 예측을 통째로 지우고 과거로 되돌리는 꼴이 된다 - 방향을 바꿀
+	// 때마다 "뒤로 끌려가는" 롤백처럼 보였던 원인이 이것이다.
+	//
+	// ★ 정정 ★ 서버(Room::IsFootprintBlocked)는 이미 벽 충돌 판정을 한다.
+	// 클라는 이걸 전혀 모르고 자유롭게 움직이므로 벽 근처에서는 진짜로
+	// 어긋난다 - "서버와 어긋날 이유가 없다"는 이전 가정은 틀렸다.
+	// snap을 다시 켤 때는(충돌 반영 등) 반드시 미확인 입력 재생(replay)
+	// 방식으로 해야 한다 - ack.pos로 그냥 스냅하면 이 주석 위쪽에 적은
+	// 롤백이 그대로 재현된다.
+	char message[192];
+	sprintf_s(message,
+		"[LocalPlayer] S_MOVE_ACK recv - seq=%u serverPos=(%d, %d) predictedPos=(%d, %d)\n",
+		pkt.lastprocessedinputseq(), pkt.pos().x(), pkt.pos().y(), GetPosition().x, GetPosition().y);
+	::OutputDebugStringA(message);
+
+	lastServerPosition = Vector2(pkt.pos().x(), pkt.pos().y());
 }

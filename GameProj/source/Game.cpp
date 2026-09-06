@@ -158,11 +158,5 @@ int main(int argc, char* argv[])
 	// NetStatus와 같은 이유로 메인 쓰레드에서 기준 쓰레드 ID를 기록해 둔다.
 	ObjectManager::Get().BindGameThread();
 
-	//temp
-	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
-	monster->SetPosition(Craft::Vector2(200, 130));
-	std::shared_ptr<ProjectileActor> projectile = Engine::Get().GetLevel()->SpawnActor<ProjectileActor>();
-	projectile->SetPosition(Craft::Vector2(170, 130));
-
 	Engine::Get().Run();
 }
