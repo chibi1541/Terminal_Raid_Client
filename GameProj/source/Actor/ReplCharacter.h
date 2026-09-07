@@ -48,6 +48,11 @@ public:
 	// 비어 있으면 각 서브클래스 BeginPlay 가 폴백 기본값을 쓴다.
 	void SetAnimName(const std::string& name) { animName = name; }
 
+	// 서버 충돌 박스 한 변(셀). ObjectManager::Spawn 이 Character/MonsterData 에서 꽂는다.
+	// 액터 기준점이 몸통 중심이라 발밑 = 중심 + collisionCells/2, 머리 = 중심 - collisionCells/2.
+	// 이름표 / 체력바 위치가 이 값으로 정해진다.
+	void SetCollisionCells(int32 cells) { collisionCells = (cells > 0) ? cells : 1; }
+
 	inline int32 GetHp() const { return hp; }
 	inline int32 GetMaxHp() const { return maxHp; }
 	inline bool IsAlive() const { return hp > 0; }
@@ -80,13 +85,10 @@ protected:
 	static Craft::EFacing FacingFromServerDirection(Protocol::DirectionType dir, Craft::EFacing previous);
 
 protected:
-	// 이름표: 머리 위로 띄우는 화면 공간 오프셋(빌보드 - 뷰 회전에 영향받지 않음).
-	// 액터 위치가 몸통 중심이라 스프라이트 절반 높이(약 4)만큼 더 위로 잡는다.
-	static constexpr int nameTagScreenOffsetY = -6;
-
-	// 체력바: 발밑 아래로 띄우는 화면 공간 오프셋, 그리고 칸 수(너비).
-	// 위치가 몸통 중심이므로 발밑(중심 + 약 4) 바로 아래에 오도록 잡는다.
-	static constexpr int hpBarScreenOffsetY = 6;
+	// 이름표 / 체력바는 몸통 중심에서 collisionCells/2(=발밑·머리) 만큼 나간 뒤 이 여유칸을 더 준다.
+	// 빌보드(화면 공간 오프셋)라 뷰 회전에 영향받지 않는다.
+	static constexpr int nameTagMarginY = 2;	// 머리 위쪽 여유
+	static constexpr int hpBarMarginY = 1;		// 발밑 아래쪽 여유
 	static constexpr int hpBarWidth = 10;
 
 protected:
@@ -102,6 +104,9 @@ protected:
 
 protected:
 	std::string animName = {};
+
+	// 서버 충돌 박스 한 변(셀). 기본값 = 플레이어(8). 스폰 시 데이터 테이블 값으로 덮인다.
+	int32 collisionCells = 8;
 
 	int32 hp = 0;
 	int32 maxHp = 0;

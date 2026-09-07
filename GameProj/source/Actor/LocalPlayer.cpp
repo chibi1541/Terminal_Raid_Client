@@ -9,6 +9,7 @@
 #include "Network/NetSend.h"
 #include "Render/Renderer.h"
 #include "Render/RenderLayer.h"
+#include "Math/ViewTransform.h"
 
 #include <cmath>
 
@@ -306,7 +307,13 @@ void LocalPlayer::Tick(float deltaTime)
 
 void LocalPlayer::SendMoveInputIfChanged()
 {
-	const Protocol::DirectionType currentDirection = DirectionTypeFromInput(inputDirection);
+	// WASD 입력은 화면 기준(W = 화면 위)이다. 카메라가 k*90° 회전했으면 월드 방향으로 되돌린다.
+	// world->screen 이 Rotate90(worldDelta, k) 이므로 역변환은 Rotate90(screenDelta, -k).
+	// (facing 은 ComputeWorldFacing 이 이미 같은 보정을 한다)
+	const int quarterTurns = CameraManager::Get().GetViewQuarterTurns();
+	const Vector2 worldInput = Rotate90(inputDirection, -quarterTurns);
+
+	const Protocol::DirectionType currentDirection = DirectionTypeFromInput(worldInput);
 
 	const bool changed = (currentDirection != lastSentDirection);
 

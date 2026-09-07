@@ -155,6 +155,9 @@ void ReplCharacter::Draw()
 {
 	super::Draw();
 
+	// 액터 기준점 = 몸통 중심. 발밑/머리는 여기서 collisionCells/2 만큼 떨어져 있다.
+	const int halfBox = collisionCells / 2;
+
 	if (characterName.empty() == false)
 	{
 		// 이름표 - 화면 공간 오프셋으로 빌보드 처리한다(뷰가 회전해도 머리 위에 고정).
@@ -166,30 +169,27 @@ void ReplCharacter::Draw()
 			GetSortingOrder() + 1,
 			std::nullopt,
 			std::nullopt,
-			Vector2(0, nameTagScreenOffsetY));
+			Vector2(0, -halfBox - nameTagMarginY));
 	}
 
-	// 체력바 - 몸통 아래 가운데 정렬, WorldUI 대역(액터보다 위, 뷰포트 UI보다 아래).
+	// 체력바 - 몸통(발밑) 아래 가운데 정렬, WorldUI 대역(액터보다 위, 뷰포트 UI보다 아래).
 	// 배경색 블록(SubmitPixelsWorld)으로 그려서 텍스트 색상보다 굵고 또렷하게 보이게 한다.
+	// 색: 남은 체력은 빨강, 닳은 부분은 검정 (초록 배경에서 초록/회색 바가 안 보여서).
 	if (maxHp > 0)
 	{
 		const float fraction = std::clamp(static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f);
 		const int filledCount = static_cast<int>(std::lround(fraction * hpBarWidth));
 
-		const Color barColor =
-			(fraction > 0.5f) ? Color::Green :
-			(fraction > 0.25f) ? Color::Yellow : Color::Red;
-
-		// 캐릭터 위치(몸통 중심) 기준으로 좌우 가운데 오도록 왼쪽 끝을 절반만큼 당긴다.
-		const Vector2 hpBarScreenOffset(-hpBarWidth / 2, hpBarScreenOffsetY);
+		// 좌우는 가운데 정렬(왼쪽 끝을 절반 당김), 세로는 발밑(중심 + collisionCells/2) 바로 아래.
+		const Vector2 hpBarScreenOffset(-hpBarWidth / 2, halfBox + hpBarMarginY);
 
 		std::string hpBarPixelMap(hpBarWidth, 'E');
 		hpBarPixelMap.replace(0, filledCount, filledCount, 'F');
 
 		const std::unordered_map<char, Color> hpBarPalette =
 		{
-			{ 'F', barColor },
-			{ 'E', Color::DarkGray },
+			{ 'F', Color::Red },
+			{ 'E', Color::Black },
 		};
 
 		Renderer::Get().SubmitPixelsWorld(

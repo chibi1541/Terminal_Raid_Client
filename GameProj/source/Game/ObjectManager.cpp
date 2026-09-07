@@ -283,7 +283,12 @@ std::shared_ptr<ReplicatedActor> ObjectManager::SpawnPlayer(const Protocol::Obje
 		: std::static_pointer_cast<ReplCharacter>(level->SpawnActor<RemotePlayer>());
 
 	if (const auto actorData = GetActorData())
-		chara->SetAnimName(actorData->Characters().GetAnimClip(info.player().chartype()));
+	{
+		const CharacterDataTable& chars = actorData->Characters();
+		const Protocol::CharacterType type = info.player().chartype();
+		chara->SetAnimName(chars.GetAnimClip(type));
+		chara->SetCollisionCells(chars.GetCollisionCells(type));
+	}
 
 	return chara;
 }
@@ -293,7 +298,12 @@ std::shared_ptr<ReplicatedActor> ObjectManager::SpawnMonster(const Protocol::Obj
 	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
 
 	if (const auto actorData = GetActorData())
-		monster->SetAnimName(actorData->Monsters().GetAnimClip(info.monster().monstertype()));
+	{
+		const MonsterDataTable& monsters = actorData->Monsters();
+		const Protocol::MonsterType type = info.monster().monstertype();
+		monster->SetAnimName(monsters.GetAnimClip(type));
+		monster->SetCollisionCells(monsters.GetCollisionCells(type));
+	}
 
 	return monster;
 }
