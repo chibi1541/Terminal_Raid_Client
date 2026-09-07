@@ -17,4 +17,5 @@
 	<Asset type="AnimationData" name="AnimationData" path="../Assets/Animation/AnimationData.xml" />
 	<Asset type="LevelData" name="LevelData" path="../Assets/Level/LevelData.xml" />
 	<Asset type="PropData" name="PropData" path="../Assets/Level/PropData.xml" />
+	<Asset type="ActorData" name="ActorData" path="../Assets/Actor/ActorData.xml" />
 </PrimaryAssets>

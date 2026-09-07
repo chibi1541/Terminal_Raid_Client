@@ -4,6 +4,8 @@
 #include "Camera/CameraManager.h"
 #include "Input/Input.h"
 #include "Level/Level.h"
+#include "Asset/AssetManager.h"
+#include "Game/ActorDataAsset.h"
 #include "Network/NetSend.h"
 #include "Render/Renderer.h"
 #include "Render/RenderLayer.h"
@@ -241,6 +243,9 @@ void LocalPlayer::Tick(float deltaTime)
 	// 이번 프레임 입력이 확정된 시점 - 방향이 바뀌었으면 서버에 알린다.
 	SendMoveInputIfChanged();
 
+	// 좌클릭이 눌려 있고 쿨다운이 지났으면 발사 요청.
+	SendAttackIfReady();
+
 	// 예외 처리 - BeginPlay 전에는 컴포넌트가 없다.
 	if (nullptr != animator)
 	{
@@ -341,6 +346,56 @@ void LocalPlayer::SendMoveInputIfChanged()
 			"[LocalPlayer] C_MOVE sent - seq=%u dir=%d t=%u %s predictedPos=(%d, %d)\n",
 			seq, static_cast<int>(currentDirection), nowMs,
 			changed ? "change" : "heartbeat", GetPosition().x, GetPosition().y);
+		::OutputDebugStringA(message);
+	}
+}
+
+void LocalPlayer::SendAttackIfReady()
+{
+	if (isAttack == false)
+	{
+		return;	// 이번 프레임 좌클릭 없음
+	}
+
+	const std::shared_ptr<const ActorDataAsset> actorData =
+		AssetManager::Get().GetPrimaryAsset<ActorDataAsset>("ActorData");
+	if (actorData == nullptr)
+	{
+		return;	// 데이터 아직 로드 전
+	}
+
+	const ProjectileDataTable& projData = actorData->Projectiles();
+	const Protocol::ProjectileType projType = projData.GetDefault();
+
+	const double intervalMs = static_cast<double>(projData.GetFireIntervalMs(projType));
+	if (lastAttackSendMs != 0.0 && localTimeMs - lastAttackSendMs < intervalMs)
+	{
+		return;	// 쿨다운
+	}
+
+	CameraManager& camera = CameraManager::Get();
+
+	// 카메라 회전 처리는 전부 화면 공간에서 (ComputeWorldFacing이 마우스 각을 재는 방식과 동일).
+	const Vector2 selfScreen = camera.WorldToScreen(GetPosition());
+	const int spawnUp = projData.GetSpawnUpCells(projType);
+	const Vector2 muzzleCell = camera.ScreenToWorld(selfScreen + Vector2(0, -spawnUp));
+	const Vector2 aimCell = camera.ScreenToWorld(Input::Get().GetMousePosition());
+
+	Protocol::C_ATTACK pkt;
+	pkt.mutable_aimcell()->set_x(aimCell.x);
+	pkt.mutable_aimcell()->set_y(aimCell.y);
+	pkt.mutable_muzzlecell()->set_x(muzzleCell.x);
+	pkt.mutable_muzzlecell()->set_y(muzzleCell.y);
+	pkt.set_clienttimems(static_cast<uint32>(localTimeMs));
+	SendToServer(pkt);
+
+	lastAttackSendMs = localTimeMs;
+
+	{
+		char message[160];
+		sprintf_s(message,
+			"[LocalPlayer] C_ATTACK sent - aim=(%d,%d) muzzle=(%d,%d)\n",
+			aimCell.x, aimCell.y, muzzleCell.x, muzzleCell.y);
 		::OutputDebugStringA(message);
 	}
 }

@@ -82,6 +82,10 @@ private:
 	// 보낸 입력은 pendingInputs에 쌓여 재조정 시 replay된다.
 	void SendMoveInputIfChanged();
 
+	// 좌클릭 중이고 쿨다운(ActorData 의 투사체 fireIntervalMs)이 지났으면 C_ATTACK를 보낸다.
+	// muzzle/aim은 화면 공간에서 계산해 월드로 변환(카메라 회전 자동 반영).
+	void SendAttackIfReady();
+
 	// ackFp(마지막 S_MOVE_ACK 권위 위치)에서 시작해 미확인 입력을 전부 재생하고
 	// 현재 시각까지 적분해 predFp(예측 위치)를 다시 구한다. 매 프레임 + ack 수신 시 부른다.
 	void RecomputePrediction();
@@ -147,6 +151,9 @@ private:
 	// 창(heldMsServer)도 촘촘하게 유지되어 이동량 검증 해상도가 확보된다.
 	static constexpr double moveHeartbeatMs = 250.0;
 	double lastMoveSendTimeMs = 0.0;
+
+	// 마지막 C_ATTACK 전송 시각(localTimeMs). 0 = 아직 안 쏨. 쿨다운 계산에 쓴다.
+	double lastAttackSendMs = 0.0;
 
 	// 보정 스무딩(B). 재조정으로 화면 위치가 튀는 만큼(서브유닛)을 여기 담아 몇 프레임에
 	// 걸쳐 0으로 감쇠시킨다. 서버가 서브유닛 위치를 정확히 주므로 벽이 없으면 이 값은

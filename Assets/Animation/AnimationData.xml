@@ -15,16 +15,15 @@
 -->
 <AnimationData>
 	<Clips>
-		<Clip name="TestActor" path="../Assets/Animation/TestActor.anim.xml" />
 		<Clip name="Knight" path="../Assets/Animation/Knight.anim.xml" />
 		<Clip name="Archer" path="../Assets/Animation/Archer.anim.xml" />
 		<Clip name="Mage" path="../Assets/Animation/Mage.anim.xml" />
 		<Clip name="Necromancer" path="../Assets/Animation/Necromancer.anim.xml" />
-		<Clip name="TestProjectile" path="../Assets/Animation/Projectile.anim.xml" />
+		<Clip name="Projectile" path="../Assets/Animation/Projectile.anim.xml" />
+		<Clip name="Effect" path="../Assets/Animation/Effect.anim.xml" />
 	</Clips>
 
 	<StateMachines>
-		<StateMachine name="TestActor" path="../Assets/StateMachine/player_anim_state_test.canvas" />
 		<StateMachine name="Knight" path="../Assets/StateMachine/player_anim_state_knight.canvas" />
 		<StateMachine name="Archer" path="../Assets/StateMachine/player_anim_state_archer.canvas" />
 		<StateMachine name="Mage" path="../Assets/StateMachine/player_anim_state_mage.canvas" />

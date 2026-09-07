@@ -34,6 +34,7 @@ enum : uint16
 	PKT_C_DEBUG_CONFIG = 1016,
 	PKT_S_DEBUG_LEVEL = 1017,
 	PKT_S_DEBUG_PATH = 1018,
+	PKT_C_ATTACK = 1019,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -92,6 +93,7 @@ public:
 	static BYTE* MakeSendBuffer(Protocol::C_EXIT_ROOM& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_EXIT_ROOM, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_MOVE& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_MOVE, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_DEBUG_CONFIG& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_DEBUG_CONFIG, size); }
+	static BYTE* MakeSendBuffer(Protocol::C_ATTACK& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_ATTACK, size); }
 
 
 private:

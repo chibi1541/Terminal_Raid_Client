@@ -23,6 +23,7 @@
 #include "Network/ServerSession.h"
 #include "Network/NetStatus.h"
 #include "Game/ObjectManager.h"
+#include "Game/ActorDataAsset.h"
 #include "Thread/ThreadManager.h"
 #include <memory>
 
@@ -77,6 +78,7 @@ int main(int argc, char* argv[])
 	AssetManager::Get().RegisterPrimaryAssetType<AnimationDataAsset>("AnimationData");
 	AssetManager::Get().RegisterPrimaryAssetType<LevelDataAsset>("LevelData");
 	AssetManager::Get().RegisterPrimaryAssetType<PropDataAsset>("PropData");
+	AssetManager::Get().RegisterPrimaryAssetType<ActorDataAsset>("ActorData");
 	AssetManager::Get().LoadPrimaryAssetManifest(L"../Assets/PrimaryAssets.xml");
 	// 프롭 배치는 Assets/Cemetery.LevelLayout.xml에 있다.
 	// TileMapLevel이 그 파일을 읽어서 세운다 - 여기서 스폰할 것이 없다.
