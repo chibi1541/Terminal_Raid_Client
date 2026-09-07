@@ -5,6 +5,7 @@
 #include "Actor/RemotePlayer.h"
 #include "Actor/Monster.h"
 #include "Actor/ProjectileActor.h"
+#include "Actor/ServerDebugActor.h"
 #include "Engine/Engine.h"
 #include "Level/Level.h"
 #include "Thread/ThreadManager.h"
@@ -54,6 +55,16 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 	for (const Protocol::ObjectInfo& info : pkt.objects())
 	{
 		Spawn(info, false);
+	}
+
+	// 디버그 오버레이 액터 하나. 이전 룸 것이 남아 있으면 정리하고 새로 만든다.
+	if (std::shared_ptr<ServerDebugActor> old = debugActor.lock())
+	{
+		old->Destroy();
+	}
+	if (std::shared_ptr<Level> level = Engine::Get().GetLevel())
+	{
+		debugActor = level->SpawnActor<ServerDebugActor>();
 	}
 }
 
@@ -167,6 +178,26 @@ void ObjectManager::OnAttackStart(const Protocol::S_ATTACK_START& pkt)
 	if (actor != nullptr)
 	{
 		actor->ApplyAttackStart(pkt);
+	}
+}
+
+void ObjectManager::OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt)
+{
+	EnsureGameThread();
+
+	if (std::shared_ptr<ServerDebugActor> actor = debugActor.lock())
+	{
+		actor->OnDebugLevel(pkt);
+	}
+}
+
+void ObjectManager::OnDebugPath(const Protocol::S_DEBUG_PATH& pkt)
+{
+	EnsureGameThread();
+
+	if (std::shared_ptr<ServerDebugActor> actor = debugActor.lock())
+	{
+		actor->OnDebugPath(pkt);
 	}
 }
 

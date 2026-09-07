@@ -158,3 +158,25 @@ bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt
 
 	return true;
 }
+
+bool Handle_S_DEBUG_LEVEL(const Session* session, Protocol::S_DEBUG_LEVEL& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnDebugLevel(pkt);
+		}
+	);
+
+	return true;
+}
+
+bool Handle_S_DEBUG_PATH(const Session* session, Protocol::S_DEBUG_PATH& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnDebugPath(pkt);
+		}
+	);
+
+	return true;
+}

@@ -31,6 +31,9 @@ enum : uint16
 	PKT_S_HIT = 1013,
 	PKT_S_DEATH = 1014,
 	PKT_S_ATTACK_START = 1015,
+	PKT_C_DEBUG_CONFIG = 1016,
+	PKT_S_DEBUG_LEVEL = 1017,
+	PKT_S_DEBUG_PATH = 1018,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -47,6 +50,8 @@ bool Handle_S_MOVE_ACK(const Session* session, Protocol::S_MOVE_ACK& pkt);
 bool Handle_S_HIT(const Session* session, Protocol::S_HIT& pkt);
 bool Handle_S_DEATH(const Session* session, Protocol::S_DEATH& pkt);
 bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt);
+bool Handle_S_DEBUG_LEVEL(const Session* session, Protocol::S_DEBUG_LEVEL& pkt);
+bool Handle_S_DEBUG_PATH(const Session* session, Protocol::S_DEBUG_PATH& pkt);
 
 // PacketHandler 클래스 자동화
 class ServerPacketHandler
@@ -69,6 +74,8 @@ public:
 		GPacketHandler[PKT_S_HIT] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_HIT>(Handle_S_HIT, session, buffer, len); };
 		GPacketHandler[PKT_S_DEATH] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEATH>(Handle_S_DEATH, session, buffer, len); };
 		GPacketHandler[PKT_S_ATTACK_START] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_ATTACK_START>(Handle_S_ATTACK_START, session, buffer, len); };
+		GPacketHandler[PKT_S_DEBUG_LEVEL] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEBUG_LEVEL>(Handle_S_DEBUG_LEVEL, session, buffer, len); };
+		GPacketHandler[PKT_S_DEBUG_PATH] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEBUG_PATH>(Handle_S_DEBUG_PATH, session, buffer, len); };
 
 	}
 
@@ -84,6 +91,7 @@ public:
 	static BYTE* MakeSendBuffer(Protocol::C_ENTER_ROOM& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_ENTER_ROOM, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_EXIT_ROOM& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_EXIT_ROOM, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_MOVE& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_MOVE, size); }
+	static BYTE* MakeSendBuffer(Protocol::C_DEBUG_CONFIG& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_DEBUG_CONFIG, size); }
 
 
 private:

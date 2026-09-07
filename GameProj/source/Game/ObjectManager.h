@@ -7,6 +7,7 @@
 
 class ReplicatedActor;
 class LocalPlayer;
+class ServerDebugActor;
 
 // objectId -> 레벨에 올라간 액터를 잇는 표.
 //
@@ -34,6 +35,8 @@ public:
 	void OnHit(const Protocol::S_HIT& pkt);
 	void OnDeath(const Protocol::S_DEATH& pkt);
 	void OnAttackStart(const Protocol::S_ATTACK_START& pkt);
+	void OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt);
+	void OnDebugPath(const Protocol::S_DEBUG_PATH& pkt);
 
 	std::shared_ptr<ReplicatedActor> Find(uint64 objectId) const;
 	std::shared_ptr<LocalPlayer> GetLocalPlayer() const;
@@ -56,6 +59,9 @@ private:
 	// 액터의 소유권은 Level이 가진다.
 	// 여기서 shared_ptr을 들면 Destroy() 뒤에도 액터가 살아남아 누수가 된다.
 	std::unordered_map<uint64, std::weak_ptr<ReplicatedActor>> objects;
+
+	// 룸 입장마다 하나 스폰하는 디버그 오버레이 액터. 소유권은 Level.
+	std::weak_ptr<ServerDebugActor> debugActor;
 
 	// TODO 이건 여기에 박히면 안되는 정보라 GameState 클래스에 옮기기
 	// 내가 조종하는 개체. S_ENTER_ROOM의 myObject에서 온다.

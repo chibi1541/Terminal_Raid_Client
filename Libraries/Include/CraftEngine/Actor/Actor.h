@@ -124,6 +124,7 @@ public:
 	// 화면에 고정되거나 항상 맨 앞/뒤여야 하는 액터를 만들면 이걸 끄고 직접 정한다.
 	inline bool UsesDepthSorting() const { return usesDepthSorting; }
 	inline void SetUsesDepthSorting(bool value) { usesDepthSorting = value; }
+	inline bool IsShouldDraw() const { return shouldDraw; }
 
 protected:
 	// BeginPlay
@@ -160,6 +161,10 @@ protected:
 	bool usesDepthSorting = true;
 
 	Vector2 position;
+
+	// 컬링처리에서 예외로 반드시 그려야하는 경우
+	bool shouldDraw = false;
+
 };
 
 NAME_SPACE_END
