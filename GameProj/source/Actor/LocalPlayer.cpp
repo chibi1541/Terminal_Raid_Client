@@ -3,6 +3,7 @@
 #include "Component/SpriteAnimatorComponent.h"
 #include "Camera/CameraManager.h"
 #include "Input/Input.h"
+#include "Level/Level.h"
 #include "Network/NetSend.h"
 #include "Render/Renderer.h"
 #include "Render/RenderLayer.h"
@@ -353,6 +354,25 @@ void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
 	uint32 cursorMs = startMs;
 	Protocol::DirectionType dir = startDir;
 
+	// 서버 Room 과 같은 격자·같은 풋프린트로 벽을 막는다. 레벨/프롭 로드 전이면
+	// IsCellBlocked 가 아직 false 라 자유 이동(오늘 동작) -> 로드 후 자동으로 유효해진다.
+	Level* const level = GetOwner().get();
+	const int32 tileSize = (level != nullptr) ? level->GetTileSize() : 0;
+
+	// 캐릭터 위치를 중심으로 한 풋프린트 박스 판정 (= Room::IsFootprintBlocked).
+	auto footprintBlocked = [level, tileSize](int32 centerX, int32 centerY) -> bool
+	{
+		if (level == nullptr)
+		{
+			return false;
+		}
+
+		return MoveMath::FootprintBlocked(centerX, centerY,
+			MoveMath::PLAYER_FOOTPRINT_TILES_WIDE, MoveMath::PLAYER_FOOTPRINT_TILES_HIGH,
+			tileSize,
+			[level](int32 x, int32 y) { return level->IsCellBlocked(x, y); });
+	};
+
 	auto integrate = [&](Protocol::DirectionType d, uint32 fromMs, uint32 toMs)
 	{
 		if (toMs <= fromMs)
@@ -361,12 +381,9 @@ void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
 		}
 
 		const Vector2 unit = DeltaFromServerDirection(d);
-		int32 dx = 0;
-		int32 dy = 0;
-		MoveMath::StepFixed(unit.x, unit.y, MoveMath::DEFAULT_MOVE_SPEED_SUBUNITS,
-			static_cast<int32>(toMs - fromMs), dx, dy);
-		fpX += dx;
-		fpY += dy;
+		MoveMath::IntegrateSlide(fpX, fpY, unit.x, unit.y,
+			MoveMath::DEFAULT_MOVE_SPEED_SUBUNITS, static_cast<int32>(toMs - fromMs),
+			footprintBlocked);
 	};
 
 	// startDir은 startMs부터 첫 미확인 입력 직전까지 유효했던 방향이다.

@@ -26,6 +26,13 @@ public:
 	virtual void Tick(float deltaTime);
 	virtual void Draw();
 
+	// 이 셀(콘솔 셀 좌표)이 이동으로 통행 불가능한가.
+	//
+	// 기본 레벨은 막는 것이 없다. TileMapLevel 이 프롭 타일 영역으로 격자를 구워
+	// 오버라이드한다. 이동형 액터(예측 이동)가 벽을 뚫지 않도록 이걸 참고한다.
+	// 서버 Room::IsFootprintBlocked / Level::IsCellBlocked 와 같은 의미다.
+	virtual bool IsCellBlocked(int cellX, int cellY) const { return false; }
+
 	// 액터 추가 함수(템플릿)
 	// Actor를 상속한 타입만 받도록 설정()
 	// Args가 타입 추론이 들어가야 하기 때문에 보편 참조가 됨

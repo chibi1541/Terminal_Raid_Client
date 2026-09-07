@@ -87,4 +87,20 @@ private:
 	EFacing displaySlot = EFacing::Up;
 };
 
+// 프롭 하나가 차지하는 타일 영역(셀 단위). 입력은 배치 파일의 값 그대로:
+// tileX/tileY = 타일 좌상단 셀, tileSpan = 프롭 정의의 스팬(타일 개수), tileSize = 레벨 타일 크기.
+//
+// StaticPropActor::GetTileBounds() 와 결과가 반드시 같아야 한다 (그쪽은 기준점에서 역산,
+// 이쪽은 타일 좌표에서 정산). TileMapLevel::SpawnProp 과 충돌 격자 빌드가 이걸 공유한다.
+inline Rect PropTileBounds(int tileX, int tileY, EFacing facing, int tileSpan, int tileSize)
+{
+	const int spanInCells = tileSpan * tileSize;
+	const bool isSide = IsSideFacing(facing);
+
+	const int width = isSide ? tileSize : spanInCells;
+	const int height = isSide ? spanInCells : tileSize;
+
+	return Rect(tileX, tileY, width, height);
+}
+
 NAME_SPACE_END

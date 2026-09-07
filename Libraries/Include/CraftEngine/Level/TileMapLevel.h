@@ -4,8 +4,10 @@
 #include "Actor/Facing.h"
 #include "Asset/PropSpriteSet.h"
 #include "Level/Level.h"
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 NAME_SPACE_BEGIN(Craft)
 
@@ -39,6 +41,10 @@ public:
 	virtual void OnInitialized() override;
 	virtual void Draw() override;
 
+	// 프롭 타일 영역으로 구운 충돌 격자. 월드 밖은 막힌 것으로 본다(레벨 끝 = 벽).
+	// 격자는 지형/배치/스프라이트가 모두 도착한 뒤 첫 질의에서 lazy 하게 굽는다.
+	virtual bool IsCellBlocked(int cellX, int cellY) const override;
+
 	// 프롭 하나를 타일 좌표에 세운다. 스프라이트 묶음이 도착한 뒤에만 동작한다.
 	//
 	// 기준점 변환(타일 좌표 -> 월드 좌표)이 여기 한 곳에만 있다.
@@ -48,6 +54,10 @@ public:
 		const std::string& propName, int tileX, int tileY, EFacing facing);
 
 private:
+	// 프롭 배치로 blocked 격자를 굽는다. levelMap + levelLayout + propSet 이 다 준비돼야
+	// 실제로 굽고 collisionBuilt 를 세운다. 아니면 아무것도 안 하고 다음에 다시 시도.
+	void BuildCollision() const;
+
 	// 화면 한 줄을 제출한다. 전부 투명이면 제출하지 않는다.
 	void SubmitRow(int screenY, int width);
 
@@ -78,6 +88,13 @@ private:
 	// 개행이 들어가면 안 된다 - Renderer::ForEachLine이 줄을 쪼개서
 	// 뒤쪽 칸들이 다음 행 위치에 그려진다.
 	std::string rowScratch;
+
+	// 충돌 격자. mutable - IsCellBlocked(const)가 lazy 하게 굽는다.
+	// blocked[cellY * collisionWidth + cellX], 1 = 통행 불가. 월드 원점이 (0,0)이라 오프셋 없음.
+	mutable std::vector<uint8_t> blocked;
+	mutable int collisionWidth = 0;
+	mutable int collisionHeight = 0;
+	mutable bool collisionBuilt = false;
 };
 
 NAME_SPACE_END
