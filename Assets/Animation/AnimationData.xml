@@ -19,6 +19,7 @@
 		<Clip name="Archer" path="../Assets/Animation/Archer.anim.xml" />
 		<Clip name="Mage" path="../Assets/Animation/Mage.anim.xml" />
 		<Clip name="Necromancer" path="../Assets/Animation/Necromancer.anim.xml" />
+		<Clip name="Zombie" path="../Assets/Animation/Zombie.anim.xml" />
 		<Clip name="Projectile" path="../Assets/Animation/Projectile.anim.xml" />
 		<Clip name="Effect" path="../Assets/Animation/Effect.anim.xml" />
 	</Clips>
@@ -28,5 +29,6 @@
 		<StateMachine name="Archer" path="../Assets/StateMachine/player_anim_state_archer.canvas" />
 		<StateMachine name="Mage" path="../Assets/StateMachine/player_anim_state_mage.canvas" />
 		<StateMachine name="Necromancer" path="../Assets/StateMachine/monster_anim_state_necromancer.canvas" />
+		<StateMachine name="Zombie" path="../Assets/StateMachine/monster_anim_state_zombie.canvas" />
 	</StateMachines>
 </AnimationData>

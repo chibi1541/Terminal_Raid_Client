@@ -29,7 +29,6 @@ void ProjectileActor::BeginPlay()
 {
 	// AnimationData.xml 에서 animSet("Projectile") 이름으로 클립 모음 파일을 찾고,
 	// 그 파일 안에서 animClip("Pellet") 논리 이름의 클립을 고른다.
-	// TODO: S_SPAWN 이 ProjectileType 을 실어 오면 projData.GetDefault() 대신 그 타입을 쓴다.
 	std::string animSet = "Projectile";
 	std::string clipName = "Pellet";
 
@@ -37,7 +36,9 @@ void ProjectileActor::BeginPlay()
 		Craft::AssetManager::Get().GetPrimaryAsset<ActorDataAsset>("ActorData"))
 	{
 		const ProjectileDataTable& projData = actorData->Projectiles();
-		const Protocol::ProjectileType type = projData.GetDefault();
+		// 서버가 준 타입. 없으면(구버전/디버그) 기본 투사체.
+		const Protocol::ProjectileType type =
+			(projType != Protocol::Projectile_None) ? projType : projData.GetDefault();
 		animSet = projData.GetAnimSet(type);
 		clipName = projData.GetAnimClip(type);
 	}

@@ -11,8 +11,9 @@ void Monster::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 
 void Monster::BeginPlay()
 {
-	// 나중에 수정
-	animName = "Necromancer";
+	// ObjectManager::Spawn 이 서버 MonsterType 으로 조회해 이미 꽂았다. 없으면(애셋 로드 실패) 폴백.
+	if (animName.empty())
+		animName = "Zombie";
 
 	super::BeginPlay();
 }

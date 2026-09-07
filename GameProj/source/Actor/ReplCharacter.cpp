@@ -18,7 +18,10 @@ void ReplCharacter::BeginPlay()
 
 	auto animData = AssetManager::Get().GetPrimaryAsset<AnimationDataAsset>("AnimationData");
 
-	if (animName.empty() == false)
+	const std::wstring clipPath =
+		(animName.empty() == false) ? animData->FindClipPath(animName) : std::wstring();
+
+	if (clipPath.empty() == false)
 	{
 		// 클립 로드는 워커 쓰레드가 한다. 여기서는 요청만 걸고 바로 다음 줄로 넘어간다.
 		// 클립이 도착할 때까지 몇 프레임 동안은 캐릭터가 안 보이지만 게임은 멈추지 않는다.
@@ -28,7 +31,7 @@ void ReplCharacter::BeginPlay()
 		// 그때는 아무것도 하지 않고 조용히 빠져나가야 한다.
 		std::weak_ptr<Actor> weakSelf = weak_from_this();
 
-		animator->LoadClipsFromFileAsync(animData->FindClipPath(animName).c_str(),
+		animator->LoadClipsFromFileAsync(clipPath.c_str(),
 			[weakSelf, stateMachinePath](int loadedClipCount)
 			{
 				std::shared_ptr<ReplCharacter> self = Cast<ReplCharacter>(weakSelf.lock());
@@ -49,6 +52,14 @@ void ReplCharacter::BeginPlay()
 
 		// scaleX/scaleY로 셀 비율 보정 + 크기 조절.
 		animator->SetScale(1, 1);
+	}
+	else if (animName.empty() == false)
+	{
+		// animName 은 있는데 AnimationData.xml 에 그 이름의 클립이 없다(아직 아트 미제작 등).
+		// 크래시 대신 안 그리고 넘어간다.
+		char msg[128];
+		sprintf_s(msg, "[ReplCharacter] no anim clip for '%s' - actor will be invisible\n", animName.c_str());
+		::OutputDebugStringA(msg);
 	}
 
 

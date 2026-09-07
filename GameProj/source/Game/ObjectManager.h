@@ -53,9 +53,15 @@ private:
 	// 게임 쓰레드에서 불렸는지 확인한다. 모든 진입점의 첫 줄에서 부른다.
 	void EnsureGameThread() const;
 
-	// ObjectInfo 하나를 액터로 만들어 레벨에 올린다.
-	// isLocal이면 LocalPlayer로, 아니면 RemotePlayer로 만든다.
+	// ObjectInfo 하나를 개체 타입(objectId 상위 16비트)에 따라 갈라 스폰한다.
+	// isLocal이면 플레이어를 LocalPlayer로, 아니면 RemotePlayer로 만든다.
 	void Spawn(const Protocol::ObjectInfo& info, bool isLocal);
+
+	// 타입별 스폰. 각각 info 의 하위 메시지에서 세부 종류를 꺼내 ActorDataAsset 으로 조회한다.
+	// 레벨에 올리고 shared_ptr 을 돌려준다 (ApplyObjectInfo / 표 등록은 Spawn 이 한다).
+	std::shared_ptr<ReplicatedActor> SpawnPlayer(const Protocol::ObjectInfo& info, bool isLocal);
+	std::shared_ptr<ReplicatedActor> SpawnMonster(const Protocol::ObjectInfo& info);
+	std::shared_ptr<ReplicatedActor> SpawnProjectile(const Protocol::ObjectInfo& info);
 
 	// 표에 있는 액터를 전부 제거한다(룸을 나가거나 새로 들어올 때).
 	void ClearAll();

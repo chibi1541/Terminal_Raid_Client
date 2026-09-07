@@ -43,6 +43,11 @@ public:
 
 	inline const std::string& GetCharacterName() const { return characterName; }
 
+	// 재생할 애니메이션 키(AnimationData.xml 의 Clip/StateMachine name). ObjectManager::Spawn 이
+	// 서버가 준 CharacterType/MonsterType 을 ActorDataAsset 으로 조회해 BeginPlay 전에 꽂는다.
+	// 비어 있으면 각 서브클래스 BeginPlay 가 폴백 기본값을 쓴다.
+	void SetAnimName(const std::string& name) { animName = name; }
+
 	inline int32 GetHp() const { return hp; }
 	inline int32 GetMaxHp() const { return maxHp; }
 	inline bool IsAlive() const { return hp > 0; }

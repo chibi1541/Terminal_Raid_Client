@@ -6,7 +6,9 @@
 #include "Actor/Monster.h"
 #include "Actor/ProjectileActor.h"
 #include "Actor/ServerDebugActor.h"
+#include "Asset/AssetManager.h"
 #include "Engine/Engine.h"
+#include "Game/ActorDataAsset.h"
 #include "Level/Level.h"
 #include "Thread/ThreadManager.h"
 #include "Utils/ObjectIdHandler.h"
@@ -222,54 +224,87 @@ void ObjectManager::ForEachActor(const std::function<void(ReplicatedActor&)>& fn
 	}
 }
 
+// ObjectInfo 하나를 개체 타입에 따라 갈라 스폰한다.
+//
+// 개체 타입은 objectId 상위 16비트에 들어 있고, 그 타입별 세부 종류
+// (CharacterType / MonsterType / ProjectileType) 는 info 의 하위 메시지(player/monster/projectile)
+// 로 온다. 각 Spawn 헬퍼가 그 종류로 ActorDataAsset 을 조회해 스프라이트를 정한다.
 void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 {
 	const uint64 objectId = info.objectid();
 
 	// 중복 스폰. S_ENTER_ROOM과 S_SPAWN이 겹쳐 도착하면 여기서 걸린다.
 	if (objects.find(objectId) != objects.end())
-	{
 		return;
-	}
 
-	std::shared_ptr<Level> level = Engine::Get().GetLevel();
-
-	if (level == nullptr)
-	{
+	if (Engine::Get().GetLevel() == nullptr)
 		return;
-	}
 
-	// 개체 타입은 objectId 상위 16비트에 들어 있다. 따로 실려오지 않는다.
 	const Protocol::ObjectType objectType = ObjectIdHandler::GetObjectType(objectId);
 
 	std::shared_ptr<ReplicatedActor> actor;
 
 	switch (objectType)
 	{
-	case Protocol::OBJECT_PLAYER:
-		actor = isLocal
-			? std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<LocalPlayer>())
-			: std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<RemotePlayer>());
-		break;
-
-	case Protocol::OBJECT_MONSTER:
-		actor = std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<Monster>());
-		break;
-
-	case Protocol::OBJECT_PROJECTILE:
-		actor = std::static_pointer_cast<ReplicatedActor>(level->SpawnActor<ProjectileActor>());
-		break;
-
+	case Protocol::OBJECT_PLAYER:     actor = SpawnPlayer(info, isLocal); break;
+	case Protocol::OBJECT_MONSTER:    actor = SpawnMonster(info);         break;
+	case Protocol::OBJECT_PROJECTILE: actor = SpawnProjectile(info);      break;
 	default:
 		// 아직 클라이언트에 대응 타입이 없는 개체. 조용히 건너뛴다.
 		return;
 	}
 
+	if (actor == nullptr)
+		return;
+
 	// SpawnActor는 액터를 추가 요청 목록에 넣고 shared_ptr을 바로 돌려준다.
-	// 그래서 레벨에 실제로 올라가기 전인 지금 초기 상태를 꽂을 수 있다.
+	// 그래서 레벨에 실제로 올라가기 전인 지금 초기 상태를 꽂을 수 있다(BeginPlay 전).
 	actor->ApplyObjectInfo(info);
 
 	objects[objectId] = actor;
+}
+
+namespace
+{
+	// ActorDataAsset 은 비동기 로드라 스폰 시점에 아직 없을 수 있다(초반 몇 프레임).
+	// 그때는 nullptr - 각 액터 BeginPlay 의 폴백 애니메이션이 뜬다.
+	std::shared_ptr<const ActorDataAsset> GetActorData()
+	{
+		return Craft::AssetManager::Get().GetPrimaryAsset<ActorDataAsset>("ActorData");
+	}
+}
+
+std::shared_ptr<ReplicatedActor> ObjectManager::SpawnPlayer(const Protocol::ObjectInfo& info, bool isLocal)
+{
+	std::shared_ptr<Level> level = Engine::Get().GetLevel();
+
+	std::shared_ptr<ReplCharacter> chara = isLocal
+		? std::static_pointer_cast<ReplCharacter>(level->SpawnActor<LocalPlayer>())
+		: std::static_pointer_cast<ReplCharacter>(level->SpawnActor<RemotePlayer>());
+
+	if (const auto actorData = GetActorData())
+		chara->SetAnimName(actorData->Characters().GetAnimClip(info.player().chartype()));
+
+	return chara;
+}
+
+std::shared_ptr<ReplicatedActor> ObjectManager::SpawnMonster(const Protocol::ObjectInfo& info)
+{
+	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
+
+	if (const auto actorData = GetActorData())
+		monster->SetAnimName(actorData->Monsters().GetAnimClip(info.monster().monstertype()));
+
+	return monster;
+}
+
+std::shared_ptr<ReplicatedActor> ObjectManager::SpawnProjectile(const Protocol::ObjectInfo& info)
+{
+	std::shared_ptr<ProjectileActor> proj = Engine::Get().GetLevel()->SpawnActor<ProjectileActor>();
+
+	proj->SetProjectileType(info.projectile().projectiletype());
+
+	return proj;
 }
 
 void ObjectManager::ClearAll()

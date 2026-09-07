@@ -8,7 +8,9 @@ using namespace Craft;
 
 void RemotePlayer::BeginPlay()
 {
-	animName = "Knight";
+	// ObjectManager::Spawn 이 서버 CharacterType 으로 조회해 이미 꽂았다. 없으면(애셋 로드 실패) 폴백.
+	if (animName.empty())
+		animName = "Knight";
 
 	super::BeginPlay();
 }
