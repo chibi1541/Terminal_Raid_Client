@@ -1,6 +1,6 @@
 framerate = 120
-width = 320
-height = 171
+width = 150
+height = 75
 
 # 콘솔 셀(글자 한 칸)의 픽셀 크기.
 #
