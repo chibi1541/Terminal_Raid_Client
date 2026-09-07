@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<SpriteAnimation>
+	<Clip name="HitImpact" facing="Down" fps="16" loop="false" width="5" height="5" pivot="2.5,2.5">
+		<Frame>
+			.....
+			..B..
+			.BBB.
+			..B..
+			.....
+		</Frame>
+		<Frame>
+			.LBL.
+			LBBBL
+			BB.BB
+			LBBBL
+			.LBL.
+		</Frame>
+		<Frame>
+			D.L.D
+			.....
+			L...L
+			.....
+			D.L.D
+		</Frame>
+	</Clip>
+	<Clip name="HitFire" facing="Down" fps="16" loop="false" width="5" height="5" pivot="2.5,2.5">
+		<Frame>
+			.....
+			..Y..
+			.YBY.
+			..Y..
+			.....
+		</Frame>
+		<Frame>
+			.ROR.
+			ROYOR
+			OYYYO
+			ROYOR
+			.ROR.
+		</Frame>
+		<Frame>
+			C.R.C
+			..C..
+			RC.CR
+			..C..
+			C.R.C
+		</Frame>
+	</Clip>
+	<Clip name="HitArcane" facing="Down" fps="16" loop="false" width="5" height="5" pivot="2.5,2.5">
+		<Frame>
+			.....
+			..B..
+			.BBB.
+			..B..
+			.....
+		</Frame>
+		<Frame>
+			.VPV.
+			VPPPV
+			PPBPP
+			VPPPV
+			.VPV.
+		</Frame>
+		<Frame>
+			V.P.V
+			.....
+			P...P
+			.....
+			V.P.V
+		</Frame>
+	</Clip>
+</SpriteAnimation>

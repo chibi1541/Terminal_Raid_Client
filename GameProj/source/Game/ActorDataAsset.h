@@ -2,6 +2,8 @@
 
 #include "Asset/PrimaryDataAsset.h"
 #include "Game/ProjectileDataTable.h"
+#include "Game/CharacterDataTable.h"
+#include "Game/MonsterDataTable.h"
 
 // 액터 관련 데이터의 단일 진입점. (PrimaryAssets.xml 의 type="ActorData")
 //
@@ -26,14 +28,12 @@ public:
 	// XmlNode 는 전역 네임스페이스 (엔진 PrimaryDataAsset::LoadFromXml 시그니처와 동일).
 	virtual bool LoadFromXml(XmlNode& root) override;
 
-	const ProjectileDataTable&	Projectiles() const { return _projectiles; }
-
-	// 나중에:
-	//   const PlayerDataTable&  Players() const  { return _players; }
-	//   const MonsterDataTable& Monsters() const { return _monsters; }
+	const ProjectileDataTable&	Projectiles() const	{ return _projectiles; }
+	const CharacterDataTable&	Characters() const	{ return _characters; }
+	const MonsterDataTable&		Monsters() const	{ return _monsters; }
 
 private:
 	ProjectileDataTable	_projectiles;
-	//  PlayerDataTable  _players;
-	//  MonsterDataTable _monsters;
+	CharacterDataTable	_characters;
+	MonsterDataTable		_monsters;
 };

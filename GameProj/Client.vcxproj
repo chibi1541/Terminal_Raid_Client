@@ -114,6 +114,8 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClCompile Include="source\Actor\ReplicatedActor.cpp" />
     <ClCompile Include="source\Game\ActorDataAsset.cpp" />
     <ClCompile Include="source\Game\ProjectileDataTable.cpp" />
+    <ClCompile Include="source\Game\CharacterDataTable.cpp" />
+    <ClCompile Include="source\Game\MonsterDataTable.cpp" />
     <ClCompile Include="source\Game\ObjectManager.cpp" />
     <ClCompile Include="source\Globals.cpp" />
     <ClCompile Include="source\Actor\TestActor.cpp" />
@@ -150,6 +152,8 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClInclude Include="source\Actor\ReplicatedActor.h" />
     <ClInclude Include="source\Game\ActorDataAsset.h" />
     <ClInclude Include="source\Game\ProjectileDataTable.h" />
+    <ClInclude Include="source\Game\CharacterDataTable.h" />
+    <ClInclude Include="source\Game\MonsterDataTable.h" />
     <ClInclude Include="source\Game\ObjectManager.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\Actor\TestActor.h" />

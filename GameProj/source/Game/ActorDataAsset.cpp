@@ -31,10 +31,10 @@ bool ActorDataAsset::LoadFromXml(XmlNode& root)
 {
 	LoadSubData(root, L"ProjectileData",
 		[this](const wchar_t* path) { return _projectiles.LoadFromFile(path); });
-
-	// 나중에:
-	//   LoadSubData(root, L"PlayerData",  [this](const wchar_t* p){ return _players.LoadFromFile(p); });
-	//   LoadSubData(root, L"MonsterData", [this](const wchar_t* p){ return _monsters.LoadFromFile(p); });
+	LoadSubData(root, L"CharacterData",
+		[this](const wchar_t* path) { return _characters.LoadFromFile(path); });
+	LoadSubData(root, L"MonsterData",
+		[this](const wchar_t* path) { return _monsters.LoadFromFile(path); });
 
 	return true;	// Primary 애셋이라 false 면 크래시. 결측은 각 Table 의 기본값으로 흡수.
 }
