@@ -46,11 +46,17 @@ public:
 
 	inline uint64 GetObjectId() const { return objectId; }
 
+	// 서버가 준 원형 충돌 반경(셀). 디버그 반경 원 시각화에 쓴다. 스폰 스냅샷에서만 갱신.
+	inline int32 GetRadius() const { return radius; }
+
 	// 개체 타입은 따로 실려오지 않는다. objectId 상위 16비트에 들어 있다.
 	Protocol::ObjectType GetObjectType() const;
 protected:
 	// 서버가 발급한 식별자. 클라이언트는 발급하지 않고 받아서 해석만 한다.
 	uint64 objectId = 0;
+
+	// 서버 CreatureState.radius. 충돌 판정은 서버 몫이고 클라는 시각화만 한다.
+	int32 radius = 0;
 
 	// 서버 위치 스냅샷을 재생해 보여줄 좌표를 계산한다.
 	//

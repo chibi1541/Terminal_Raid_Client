@@ -2,6 +2,7 @@
 
 #include "Protocol/Protocol.pb.h"
 
+#include <functional>
 #include <memory>
 #include <unordered_map>
 
@@ -37,8 +38,12 @@ public:
 	void OnAttackStart(const Protocol::S_ATTACK_START& pkt);
 	void OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt);
 	void OnDebugPath(const Protocol::S_DEBUG_PATH& pkt);
+	void OnDebugQuadtree(const Protocol::S_DEBUG_QUADTREE& pkt);
 
 	std::shared_ptr<ReplicatedActor> Find(uint64 objectId) const;
+
+	// 디버그 오버레이용 - 지금 살아있는 모든 복제 액터를 훑는다 (게임 스레드 전용).
+	void ForEachActor(const std::function<void(ReplicatedActor&)>& fn) const;
 	std::shared_ptr<LocalPlayer> GetLocalPlayer() const;
 
 	inline uint64 GetMyObjectId() const { return myObjectId; }

@@ -180,3 +180,14 @@ bool Handle_S_DEBUG_PATH(const Session* session, Protocol::S_DEBUG_PATH& pkt)
 
 	return true;
 }
+
+bool Handle_S_DEBUG_QUADTREE(const Session* session, Protocol::S_DEBUG_QUADTREE& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnDebugQuadtree(pkt);
+		}
+	);
+
+	return true;
+}

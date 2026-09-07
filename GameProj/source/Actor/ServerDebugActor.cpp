@@ -60,6 +60,7 @@ void ServerDebugActor::BeginPlay()
 	inputComponent->SetInputPriority(InputPriority::Gameplay);
 	inputComponent->BindKey(VK_F4, EInputEvent::Pressed, this, &ServerDebugActor::OnToggleGrid);
 	inputComponent->BindKey(VK_F5, EInputEvent::Pressed, this, &ServerDebugActor::OnTogglePaths);
+	inputComponent->BindKey(VK_F6, EInputEvent::Pressed, this, &ServerDebugActor::OnToggleCollision);
 
 	shouldDraw = true;
 	super::BeginPlay();
@@ -87,12 +88,38 @@ void ServerDebugActor::OnTogglePaths()
 	::OutputDebugStringA(msg);
 }
 
+void ServerDebugActor::OnToggleCollision()
+{
+	showCollision = !showCollision;
+	if (showCollision == false)
+		quadNodes.clear();
+	SendConfig();
+
+	char msg[96];
+	sprintf_s(msg, "[ServerDebug] collision overlay %s\n", showCollision ? "ON" : "off");
+	::OutputDebugStringA(msg);
+}
+
 void ServerDebugActor::SendConfig()
 {
 	Protocol::C_DEBUG_CONFIG pkt;
 	pkt.set_wantlevelgrid(showGrid);
 	pkt.set_wantpaths(showPaths);
+	pkt.set_wantquadtree(showCollision);
 	SendToServer(pkt);
+}
+
+void ServerDebugActor::OnDebugQuadtree(const Protocol::S_DEBUG_QUADTREE& pkt)
+{
+	quadNodes.clear();
+	quadNodes.reserve(pkt.nodes_size());
+	for (const Protocol::DebugRect& r : pkt.nodes())
+		quadNodes.push_back({ r.minx(), r.miny(), r.maxx(), r.maxy() });
+
+	quadObjectCount = pkt.objectcount();
+	quadBuildMicros = pkt.buildmicros();
+	quadCollisionMicros = pkt.collisionmicros();
+	quadServerTick = pkt.servertick();
 }
 
 void ServerDebugActor::OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt)
@@ -202,6 +229,72 @@ void ServerDebugActor::Draw()
 
 	if (showPaths)
 		DrawPaths();
+
+	if (showCollision)
+		DrawCollision();
+}
+
+void ServerDebugActor::DrawCollision()
+{
+	Renderer& renderer = Renderer::Get();
+
+	// 쿼드트리 노드 - 각 노드 경계의 네 변을 셀 단위 점으로. 깊은 노드일수록 밝게.
+	for (const QuadNode& n : quadNodes)
+	{
+		for (int x = n.minX; x <= n.maxX; ++x)
+		{
+			renderer.SubmitWorld("`", Vector2(x, n.minY), Color::DarkGray, RenderLayer::WorldUI);
+			renderer.SubmitWorld("`", Vector2(x, n.maxY), Color::DarkGray, RenderLayer::WorldUI);
+		}
+		for (int y = n.minY; y <= n.maxY; ++y)
+		{
+			renderer.SubmitWorld("`", Vector2(n.minX, y), Color::DarkGray, RenderLayer::WorldUI);
+			renderer.SubmitWorld("`", Vector2(n.maxX, y), Color::DarkGray, RenderLayer::WorldUI);
+		}
+	}
+
+	// 액터 반경 원 (미드포인트). 타입별 색.
+	ObjectManager::Get().ForEachActor([&renderer](ReplicatedActor& actor)
+	{
+		const int r = actor.GetRadius();
+		if (r <= 0)
+			return;
+
+		const Vector2 c = actor.GetPosition();
+
+		Color color = Color::Blue;
+		switch (actor.GetObjectType())
+		{
+		case Protocol::OBJECT_PLAYER:     color = Color::Green;  break;
+		case Protocol::OBJECT_MONSTER:    color = Color::Red;    break;
+		case Protocol::OBJECT_PROJECTILE: color = Color::Yellow; break;
+		default: break;
+		}
+
+		int x = r;
+		int y = 0;
+		int err = 1 - r;
+		while (x >= y)
+		{
+			const int px[8] = { c.x + x, c.x + y, c.x - y, c.x - x, c.x - x, c.x - y, c.x + y, c.x + x };
+			const int py[8] = { c.y + y, c.y + x, c.y + x, c.y + y, c.y - y, c.y - x, c.y - x, c.y - y };
+			for (int i = 0; i < 8; ++i)
+				renderer.SubmitWorld("o", Vector2(px[i], py[i]), color, RenderLayer::WorldUI);
+
+			y++;
+			if (err < 0)
+				err += 2 * y + 1;
+			else { x--; err += 2 * (y - x) + 1; }
+		}
+	});
+
+	// 타이밍 수치 - 화면 고정.
+	char line[160];
+	sprintf_s(line,
+		"[F6] quadtree  nodes %d  objs %u  |  build %u us  resolve %u us  (tick %u)",
+		static_cast<int>(quadNodes.size()), quadObjectCount,
+		quadBuildMicros, quadCollisionMicros, quadServerTick);
+	renderer.Submit(line, Vector2(1, 1), Color::White, RenderLayer::UI);
 }
 
 void ServerDebugActor::DrawGrid()

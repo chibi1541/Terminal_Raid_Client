@@ -17,6 +17,7 @@ void ReplicatedActor::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 	SetPosition(pos);
 
 	lastDirection = state.dir();
+	radius = state.radius();
 
 	// 스폰/재입장 스냅샷 - 보간 없이 그 자리에서 시작한다.
 	// state에 실려온 dir/speed로 속도를 채워 두면, 스폰 직후 아직 S_MOVE가

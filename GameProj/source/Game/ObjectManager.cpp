@@ -201,6 +201,27 @@ void ObjectManager::OnDebugPath(const Protocol::S_DEBUG_PATH& pkt)
 	}
 }
 
+void ObjectManager::OnDebugQuadtree(const Protocol::S_DEBUG_QUADTREE& pkt)
+{
+	EnsureGameThread();
+
+	if (std::shared_ptr<ServerDebugActor> actor = debugActor.lock())
+	{
+		actor->OnDebugQuadtree(pkt);
+	}
+}
+
+void ObjectManager::ForEachActor(const std::function<void(ReplicatedActor&)>& fn) const
+{
+	EnsureGameThread();
+
+	for (const auto& kv : objects)
+	{
+		if (std::shared_ptr<ReplicatedActor> actor = kv.second.lock())
+			fn(*actor);
+	}
+}
+
 void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 {
 	const uint64 objectId = info.objectid();

@@ -32,20 +32,32 @@ public:
 	// 네트워크 스레드가 게임 스레드로 넘긴 잡에서 ObjectManager가 부른다.
 	void OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt);
 	void OnDebugPath(const Protocol::S_DEBUG_PATH& pkt);
+	void OnDebugQuadtree(const Protocol::S_DEBUG_QUADTREE& pkt);
 
 private:
 	void OnToggleGrid();
 	void OnTogglePaths();
+	void OnToggleCollision();
 	void SendConfig();
 
 	void DrawGrid();
 	void DrawPaths();
+	void DrawCollision();
 
 private:
 	std::shared_ptr<Craft::InputComponent> inputComponent;
 
 	bool showGrid = false;
 	bool showPaths = false;
+	bool showCollision = false;
+
+	// --- 쿼드트리 + 타이밍 (S_DEBUG_QUADTREE) ---
+	struct QuadNode { int minX, minY, maxX, maxY; };
+	std::vector<QuadNode> quadNodes;
+	uint32_t quadObjectCount = 0;
+	uint32_t quadBuildMicros = 0;
+	uint32_t quadCollisionMicros = 0;
+	uint32_t quadServerTick = 0;
 
 	// --- 서버 충돌 격자 (S_DEBUG_LEVEL) ---
 	int gridWidth = 0;
