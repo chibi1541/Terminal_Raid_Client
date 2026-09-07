@@ -22,7 +22,9 @@ void Monster::Tick(float deltaTime)
 {
 	// 보간기가 시작된 뒤에만 반영한다 - ApplyObjectInfo(스폰)를 안 거친 액터
 	// (Game.cpp의 "//temp" 테스트 스폰 등)는 시작되지 않은 채라 원점으로 튀는 걸 막는다.
-	if (interpolator.IsStarted())
+	// 사망 상태면 그 자리에 고정한다 - 서버도 죽은 개체는 움직이지 않으므로 보간을 멈춰
+	// Death 모션이 재생되는 동안 시체가 미끄러지지 않게 한다.
+	if (interpolator.IsStarted() && IsDeadState() == false)
 	{
 		SetPosition(interpolator.Evaluate(deltaTime));
 	}
@@ -41,7 +43,8 @@ void Monster::Tick(float deltaTime)
 
 		animator->GetParameters().SetFloat("speed", currentSpeed);
 		animator->GetParameters().SetFloat("IsAttack", isAttack ? 1.0f : 0.0f);
-		animator->GetParameters().SetFloat("IsDead", IsAlive() ? 0.0f : 1.0f);
+		animator->GetParameters().SetFloat("IsHit", IsHitReacting() ? 1.0f : 0.0f);
+		animator->GetParameters().SetFloat("IsDead", IsDeadState() ? 1.0f : 0.0f);
 	}
 
 	// S_ATTACK_START는 "이 순간 재생하라"는 1회성 트리거다. 여기서 지우지

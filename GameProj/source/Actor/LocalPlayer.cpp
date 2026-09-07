@@ -235,7 +235,24 @@ Craft::EFacing LocalPlayer::ComputeWorldFacing() const
 void LocalPlayer::Tick(float deltaTime)
 {
 	// 컴포넌트(= 애니메이션 평가/재생)로 deltaTime을 전달하는 처리가 여기 들어있다.
+	// super::Tick(ReplCharacter::Tick)이 HitEnd 노티파이로 isHit 를 풀어준다.
 	super::Tick(deltaTime);
+
+	// 피격 경직 / 사망 중에는 입력을 버린다.
+	//  - 경직 : 이동 · 공격 차단 (구르기는 진행 중이면 유지).
+	//  - 사망 : 전부 차단.
+	// 예측·전송이 모두 DIR_NONE 이 되고 서버도 이 창 동안 플레이어를 고정시키므로 위치가 어긋나지 않는다.
+	if (IsDeadState())
+	{
+		inputDirection = Vector2::Zero;
+		isAttack = false;
+		isRolling = false;
+	}
+	else if (IsHitReacting())
+	{
+		inputDirection = Vector2::Zero;
+		isAttack = false;
+	}
 
 	// 로컬 단조 시계 갱신. 아래 SendMoveInputIfChanged가 이 값을 C_MOVE에 싣는다.
 	localTimeMs += static_cast<double>(deltaTime) * 1000.0;
@@ -267,6 +284,8 @@ void LocalPlayer::Tick(float deltaTime)
 			isMoving ? static_cast<float>(MoveMath::DEFAULT_MOVE_SPEED_CELLS) : 0.0f);
 		animator->GetParameters().SetFloat("IsAttack", isAttack ? 1.0f : 0.0f);
 		animator->GetParameters().SetFloat("IsRolling", isRolling ? 1.0f : 0.0f);
+		animator->GetParameters().SetFloat("IsHit", IsHitReacting() ? 1.0f : 0.0f);
+		animator->GetParameters().SetFloat("IsDead", IsDeadState() ? 1.0f : 0.0f);
 
 		// 좌우 반전은 여기서 하지 않는다.
 		// 어느 방향 그림을 쓸지와 그걸 뒤집을지는 PlayerActor::UpdateFacing이 고른

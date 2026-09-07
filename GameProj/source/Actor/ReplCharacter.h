@@ -57,6 +57,11 @@ public:
 	inline int32 GetMaxHp() const { return maxHp; }
 	inline bool IsAlive() const { return hp > 0; }
 
+	// 피격 경직 중인가 (S_HIT.stunMs 로 켜지고, Hit 클립 끝 HitEnd 노티파이/타임아웃으로 꺼짐).
+	inline bool IsHitReacting() const { return isHit; }
+	// 사망 상태인가 (S_DEATH 로 켜짐, 해제 없음 - 게임오버/리스폰은 나중).
+	inline bool IsDeadState() const { return isDead; }
+
 protected:
 	// 이름표 색. 내 캐릭터와 남을 화면에서 구분하는 유일한 수단이다.
 	// (서버가 chartype을 안 보내서 스프라이트는 둘 다 같다)
@@ -110,6 +115,11 @@ protected:
 
 	int32 hp = 0;
 	int32 maxHp = 0;
+
+	// 피격 / 사망 상태. ApplyHit/ApplyDeath 가 켜고, ReplCharacter::Tick 이 HitEnd 노티파이로 isHit 를 끈다.
+	bool  isHit = false;
+	bool  isDead = false;
+	float hitFallbackSec = 0.0f;	// 노티파이 유실 대비 isHit 자동 해제 타이머.
 
 	// 스프라이트 애니메이션 재생 담당.
 	// 생성자가 아니라 BeginPlay에서 만든다(weak_from_this가 그때부터 유효).

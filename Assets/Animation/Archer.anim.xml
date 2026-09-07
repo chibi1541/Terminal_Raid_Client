@@ -271,5 +271,170 @@
 			..N..WN......
 		</Frame>
 	</Clip>
+	
+		<!-- 피격 · Down -->
+	<Clip name="Hit" facing="Down" fps="14" loop="false" width="8" height="8" pivot="4,3.5">
+		<Notify frame="end" name="HitEnd" />
+		<Frame>
+			..BBB.W.
+			.BBBBB.W
+			.BBBBB.W
+			.BBBBB.W
+			BBBBBBBW
+			BBBBBB.W
+			.BBBBB.W
+			.B...BW.
+		</Frame>
+		<Frame>
+			........
+			..FFF.W.
+			.FFFFF.W
+			.CKCKC.W
+			.CCCCC.W
+			FFFFFFFY
+			CNWLWN.W
+			.N...NW.
+		</Frame>
+	</Clip>
+
+	<!-- 피격 · Up -->
+	<Clip name="Hit" facing="Up" fps="14" loop="false" width="8" height="8" pivot="4,3.5">
+		<Notify frame="end" name="HitEnd" />
+		<Frame>
+			.W.BBB..
+			W.BBBBB.
+			W.BBBBB.
+			W.BBBBB.
+			BBBBBBBB
+			W.BBBBBB
+			W.BBBBB.
+			.WB...B.
+		</Frame>
+		<Frame>
+			........
+			.W.FFF..
+			W.FFFFF.
+			W.FFFFF.
+			W.CCCCC.
+			YFFFFFFF
+			W.NWWWNY
+			.W.F.FN.
+		</Frame>
+	</Clip>
+
+	<!-- 피격 · Side -->
+	<Clip name="Hit" facing="Side" fps="14" loop="false" width="8" height="8" pivot="3,3.5">
+		<Notify frame="end" name="HitEnd" />
+		<Frame>
+			BBBBB.W.
+			.BBBBB.W
+			.BBBBB.W
+			.BBBBB.W
+			BBBBBBBB
+			BBBBBB.W
+			.BBBBB.W
+			.B...BW.
+		</Frame>
+		<Frame>
+			........
+			.FFFFF.W
+			..FFFFFW
+			..CKCKCW
+			..CCCCCW
+			.FFFFFFF
+			.CNWWLNW
+			..N...NW
+		</Frame>
+	</Clip>
+
+	<!-- 사망 · Down -->
+	<Clip name="Death" facing="Down" fps="8" loop="false" width="8" height="8" pivot="4,3.5">
+		<Notify frame="end" name="DeathEnd" />
+		<Frame>
+			.FFF..W.
+			.FFFFF.W
+			.CKCKC..
+			.CCCCC.W
+			FFFFFF.W
+			.NWLWN.W
+			.FFFFF..
+			N.....N.
+		</Frame>
+		<Frame>
+			........
+			..FFF...
+			..FFFF.W
+			..CKCC.W
+			.FFFFFFW
+			.NWLWN..
+			.FFFFFF.
+			N.....N.
+		</Frame>
+		<Frame>
+			........
+			........
+			........
+			.CCCC...
+			FCKCCF.W
+			FFFFFFFW
+			NFFFFFN.
+			........
+		</Frame>
+		<Frame>
+			........
+			........
+			........
+			........
+			........
+			.CCC....
+			FCCCFFFW
+			NFFFFFN.
+		</Frame>
+	</Clip>
+
+	<!-- 사망 · Up -->
+	<Clip name="Death" facing="Up" fps="8" loop="false" width="8" height="8" pivot="4,3.5">
+		<Notify frame="end" name="DeathEnd" />
+		<Frame>
+			.FFF..W.
+			.FFFFF.W
+			.FFFFF..
+			.CCCCC.W
+			FFFFFF.W
+			.NWWWN.W
+			.FFFFF..
+			N.....N.
+		</Frame>
+		<Frame>
+			........
+			..FFF...
+			..FFFF.W
+			..CCCC.W
+			.FFFFFFW
+			.NWWWN..
+			.FFFFFF.
+			N.....N.
+		</Frame>
+		<Frame>
+			........
+			........
+			........
+			.CCCC...
+			FCCCCF.W
+			FFFFFFFW
+			NFFFFFN.
+			........
+		</Frame>
+		<Frame>
+			........
+			........
+			........
+			........
+			........
+			.CCC....
+			FCCCFFFW
+			NFFFFFN.
+		</Frame>
+	</Clip>
 
 </SpriteAnimation>

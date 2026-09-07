@@ -79,6 +79,15 @@ void ReplCharacter::Tick(float deltaTime)
 	UpdateFacing();
 
 	super::Tick(deltaTime);
+
+	// 피격 상태 해제 : Hit 클립 끝의 HitEnd 노티파이(애니메이션 흐름), 또는 노티파이 유실 대비 폴백 타임아웃.
+	// (super::Tick 이 애니메이터를 돌린 뒤라야 이번 프레임 노티파이가 읽힌다)
+	if (isHit)
+	{
+		hitFallbackSec -= deltaTime;
+		if (hitFallbackSec <= 0.0f || (nullptr != animator && animator->HasNotify("HitEnd")))
+			isHit = false;
+	}
 }
 
 void ReplCharacter::UpdateFacing()
@@ -144,11 +153,21 @@ void ReplCharacter::ApplyHit(const Protocol::S_HIT& pkt)
 {
 	// 데미지 계산은 서버 몫이다. 클라는 결과(newHp)를 그대로 반영만 한다.
 	hp = pkt.newhp();
+
+	// stunMs > 0 이면 피격 경직 상태로. (보스 등 경직 면역은 서버가 stunMs=0 으로 보낸다)
+	// 이 창 동안 로컬 플레이어는 이동/공격 입력이 막히고, Hit 클립이 재생된다.
+	if (hp > 0 && pkt.stunms() > 0)
+	{
+		isHit = true;
+		hitFallbackSec = pkt.stunms() * 0.001f + 0.15f;	// 서버 경직 + 약간 여유. 보통 HitEnd 노티파이가 먼저 풀어준다.
+	}
 }
 
 void ReplCharacter::ApplyDeath(const Protocol::S_DEATH& pkt)
 {
 	hp = 0;
+	isDead = true;
+	isHit = false;
 }
 
 void ReplCharacter::Draw()
