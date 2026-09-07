@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <optional>
 
 using namespace Craft;
 
@@ -88,6 +89,24 @@ void ReplCharacter::Tick(float deltaTime)
 		if (hitFallbackSec <= 0.0f || (nullptr != animator && animator->HasNotify("HitEnd")))
 			isHit = false;
 	}
+
+	// 흰색 피격 깜빡임(경직 없는 피격 연출). 현재 클립은 그대로 재생되고 색만 토글된다.
+	if (hitFlashSec > 0.0f && nullptr != animator)
+	{
+		hitFlashSec -= deltaTime;
+		if (hitFlashSec <= 0.0f)
+		{
+			hitFlashSec = 0.0f;
+			animator->SetTint(std::nullopt);
+		}
+		else
+		{
+			// 주기의 앞 절반은 흰색, 뒤 절반은 원색.
+			const float phase = std::fmod(hitFlashSec, hitFlashPeriod);
+			const bool white = phase > (hitFlashPeriod * 0.5f);
+			animator->SetTint(white ? std::optional<Craft::Color>(Craft::Color::White) : std::nullopt);
+		}
+	}
 }
 
 void ReplCharacter::UpdateFacing()
@@ -161,6 +180,11 @@ void ReplCharacter::ApplyHit(const Protocol::S_HIT& pkt)
 		isHit = true;
 		hitFallbackSec = pkt.stunms() * 0.001f + 0.15f;	// 서버 경직 + 약간 여유. 보통 HitEnd 노티파이가 먼저 풀어준다.
 	}
+	else if (hp > 0)
+	{
+		// 경직이 없는 피격(보스 등 서버가 stunMs=0 으로 보냄) - 상태 이상 없이 흰색 깜빡임만.
+		hitFlashSec = hitFlashDuration;
+	}
 }
 
 void ReplCharacter::ApplyDeath(const Protocol::S_DEATH& pkt)
@@ -168,6 +192,11 @@ void ReplCharacter::ApplyDeath(const Protocol::S_DEATH& pkt)
 	hp = 0;
 	isDead = true;
 	isHit = false;
+
+	// 사망 연출(Death 클립)은 원래 색으로 보여야 한다.
+	hitFlashSec = 0.0f;
+	if (nullptr != animator)
+		animator->SetTint(std::nullopt);
 }
 
 void ReplCharacter::Draw()

@@ -10,6 +10,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <optional>
 
 NAME_SPACE_BEGIN(Craft)
 
@@ -119,6 +120,12 @@ public:
 	inline void SetOffset(const Vector2& newOffset) { offset = newOffset; }
 	inline Vector2 GetOffset() const { return offset; }
 
+	// 이번 프레임부터 스프라이트를 단색으로 덮어 그린다(실루엣/모션은 그대로, 색만 통짜).
+	// 피격 흰색 플래시 등 연출용. std::nullopt 를 넣으면 원래 색으로 복귀.
+	// 게임플레이가 매 프레임 켜고 끄며 깜빡임을 만든다.
+	inline void SetTint(std::optional<Color> newTint) { tint = newTint; }
+	inline std::optional<Color> GetTint() const { return tint; }
+
 private:
 	// 파라미터 + 레이어 + 상태 머신 + 합성을 전부 들고 있는 애니메이션의 주체.
 	AnimInstance animInstance;
@@ -129,6 +136,9 @@ private:
 	std::shared_ptr<const AnimationClipSet> loadedClips;
 
 	Vector2 offset = Vector2::Zero;
+
+	// 설정 시 GetTable() 대신 이 색의 단색 테이블로 제출한다(피격 플래시 등).
+	std::optional<Color> tint;
 
 	int scaleX = 1;
 	int scaleY = 1;

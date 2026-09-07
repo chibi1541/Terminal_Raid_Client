@@ -121,6 +121,12 @@ protected:
 	bool  isDead = false;
 	float hitFallbackSec = 0.0f;	// 노티파이 유실 대비 isHit 자동 해제 타이머.
 
+	// 경직 없는 피격(보스 등 stunMs=0)에 쓰는 흰색 깜빡임. 상태 이상 없이 연출만.
+	// ApplyHit 이 채우고, Tick 이 깎으면서 주기적으로 animator tint 를 White <-> 원색으로 토글한다.
+	float hitFlashSec = 0.0f;
+	static constexpr float hitFlashDuration = 0.24f;	// 총 지속
+	static constexpr float hitFlashPeriod   = 0.12f;	// 한 깜빡임 주기(절반은 흰색, 절반은 원색)
+
 	// 스프라이트 애니메이션 재생 담당.
 	// 생성자가 아니라 BeginPlay에서 만든다(weak_from_this가 그때부터 유효).
 	std::shared_ptr<Craft::SpriteAnimatorComponent> animator;

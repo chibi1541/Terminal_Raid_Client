@@ -29,6 +29,12 @@ public:
 	// Renderer::SubmitPixels()에 그대로 넘길 수 있는 변환표.
 	static const std::unordered_map<char, Color>& GetTable();
 
+	// GetTable()의 모든 기호를 단색 하나로 덮은 변환표.
+	// 피격 흰색 플래시처럼 스프라이트 실루엣은 유지하되 색만 통짜로 바꿀 때 쓴다.
+	// (투명 기호 '.'는 표에 없으므로 그대로 건너뛴다 = 실루엣 보존)
+	// 색깔별로 한 번만 만들어 캐시한다.
+	static const std::unordered_map<char, Color>& GetSolidTable(Color color);
+
 	// 표에 있는 기호인지 확인. 투명 기호('.')는 false다.
 	static bool Contains(char symbol);
 
