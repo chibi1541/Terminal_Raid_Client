@@ -158,7 +158,7 @@ void ReplCharacter::Draw()
 			Vector2(0, nameTagScreenOffsetY));
 	}
 
-	// 체력바 - 발밑 아래 가운데 정렬, WorldUI 대역(액터보다 위, 뷰포트 UI보다 아래).
+	// 체력바 - 몸통 아래 가운데 정렬, WorldUI 대역(액터보다 위, 뷰포트 UI보다 아래).
 	// 배경색 블록(SubmitPixelsWorld)으로 그려서 텍스트 색상보다 굵고 또렷하게 보이게 한다.
 	if (maxHp > 0)
 	{
@@ -169,7 +169,7 @@ void ReplCharacter::Draw()
 			(fraction > 0.5f) ? Color::Green :
 			(fraction > 0.25f) ? Color::Yellow : Color::Red;
 
-		// 캐릭터 발밑(x=0) 기준으로 좌우 가운데 오도록 왼쪽 끝을 절반만큼 당긴다.
+		// 캐릭터 위치(몸통 중심) 기준으로 좌우 가운데 오도록 왼쪽 끝을 절반만큼 당긴다.
 		const Vector2 hpBarScreenOffset(-hpBarWidth / 2, hpBarScreenOffsetY);
 
 		std::string hpBarPixelMap(hpBarWidth, 'E');

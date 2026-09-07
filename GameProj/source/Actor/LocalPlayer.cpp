@@ -375,11 +375,12 @@ void LocalPlayer::SendAttackIfReady()
 
 	CameraManager& camera = CameraManager::Get();
 
-	// 카메라 회전 처리는 전부 화면 공간에서 (ComputeWorldFacing이 마우스 각을 재는 방식과 동일).
-	const Vector2 selfScreen = camera.WorldToScreen(GetPosition());
-	const int spawnUp = projData.GetSpawnUpCells(projType);
-	const Vector2 muzzleCell = camera.ScreenToWorld(selfScreen + Vector2(0, -spawnUp));
+	// 마우스는 화면 셀 좌표 -> 월드로 변환(카메라 회전이 여기서만 들어간다, 마우스가 원래 화면 점이라).
 	const Vector2 aimCell = camera.ScreenToWorld(Input::Get().GetMousePosition());
+
+	// 머즐 = 몸통 중심(오프셋 없음). 전방 오프셋 산수는 서버가 권위 위치로 전담한다.
+	// 스프라이트가 위치 중심에 정렬돼 있어 화면 공간 보정(발밑 y-6)이 필요 없다.
+	const Vector2 muzzleCell = GetPosition();
 
 	Protocol::C_ATTACK pkt;
 	pkt.mutable_aimcell()->set_x(aimCell.x);
@@ -409,22 +410,20 @@ void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
 	uint32 cursorMs = startMs;
 	Protocol::DirectionType dir = startDir;
 
-	// 서버 Room 과 같은 격자·같은 풋프린트로 벽을 막는다. 레벨/프롭 로드 전이면
+	// 서버 Room 과 같은 격자·같은 충돌 박스로 벽을 막는다. 레벨/프롭 로드 전이면
 	// IsCellBlocked 가 아직 false 라 자유 이동(오늘 동작) -> 로드 후 자동으로 유효해진다.
 	Level* const level = GetOwner().get();
-	const int32 tileSize = (level != nullptr) ? level->GetTileSize() : 0;
 
-	// 캐릭터 위치를 중심으로 한 풋프린트 박스 판정 (= Room::IsFootprintBlocked).
-	auto footprintBlocked = [level, tileSize](int32 centerX, int32 centerY) -> bool
+	// 캐릭터 위치를 중심으로 한 셀 박스 판정 (= Room::IsActorBoxBlocked). 스프라이트 8x8 전체.
+	auto footprintBlocked = [level](int32 centerX, int32 centerY) -> bool
 	{
 		if (level == nullptr)
 		{
 			return false;
 		}
 
-		return MoveMath::FootprintBlocked(centerX, centerY,
-			MoveMath::PLAYER_FOOTPRINT_TILES_WIDE, MoveMath::PLAYER_FOOTPRINT_TILES_HIGH,
-			tileSize,
+		return MoveMath::BoxBlockedCells(centerX, centerY,
+			MoveMath::PLAYER_COLLISION_CELLS_WIDE, MoveMath::PLAYER_COLLISION_CELLS_HIGH,
 			[level](int32 x, int32 y) { return level->IsCellBlocked(x, y); });
 	};
 

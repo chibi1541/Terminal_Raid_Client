@@ -23,7 +23,7 @@
 <SpriteAnimation>
 
 	<!-- 앞모습 대기 -->
-	<Clip name="Idle" facing="Down" fps="3" loop="true" width="26" height="32" pivot="13,31">
+	<Clip name="Idle" facing="Down" fps="3" loop="true" width="26" height="32" pivot="13,15.5">
 		<Frame>
 			......UU..UU..UU..........
 			......UU..UU..UU..........
@@ -61,7 +61,7 @@
 	</Clip>
 
 	<!-- 측면 이동 -->
-	<Clip name="Walk" facing="Side" fps="8" loop="true" width="26" height="32" pivot="13,31">
+	<Clip name="Walk" facing="Side" fps="8" loop="true" width="26" height="32" pivot="13,15.5">
 		<Frame>
 			......UU..UU..UU..........
 			......UU..UU..UU..........
@@ -201,7 +201,7 @@
 	</Clip>
 
 	<!-- 앞모습 공격 -->
-	<Clip name="Attack" facing="Down" fps="12" loop="false" width="26" height="32" pivot="13,31">
+	<Clip name="Attack" facing="Down" fps="12" loop="false" width="26" height="32" pivot="13,15.5">
 		<Frame>
 			......UU..UU..UU..........
 			......UU..UU..UU..........

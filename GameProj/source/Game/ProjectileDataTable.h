@@ -21,7 +21,6 @@ public:
 
 	const std::string&	GetAnimSet(Protocol::ProjectileType type) const;
 	const std::string&	GetAnimClip(Protocol::ProjectileType type) const;
-	int					GetSpawnUpCells(Protocol::ProjectileType type) const;
 	int					GetFireIntervalMs(Protocol::ProjectileType type) const;
 
 private:
@@ -29,7 +28,6 @@ private:
 	{
 		std::string	animSet = "Projectile";
 		std::string	animClip = "Pellet";
-		int			spawnUpCells = 6;
 		int			spawnForwardCells = 3;
 		int			fireIntervalMs = 250;
 	};

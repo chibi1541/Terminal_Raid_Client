@@ -76,10 +76,12 @@ protected:
 
 protected:
 	// 이름표: 머리 위로 띄우는 화면 공간 오프셋(빌보드 - 뷰 회전에 영향받지 않음).
-	static constexpr int nameTagScreenOffsetY = -9;
+	// 액터 위치가 몸통 중심이라 스프라이트 절반 높이(약 4)만큼 더 위로 잡는다.
+	static constexpr int nameTagScreenOffsetY = -6;
 
 	// 체력바: 발밑 아래로 띄우는 화면 공간 오프셋, 그리고 칸 수(너비).
-	static constexpr int hpBarScreenOffsetY = 2;
+	// 위치가 몸통 중심이므로 발밑(중심 + 약 4) 바로 아래에 오도록 잡는다.
+	static constexpr int hpBarScreenOffsetY = 6;
 	static constexpr int hpBarWidth = 10;
 
 protected:

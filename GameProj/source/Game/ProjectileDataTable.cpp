@@ -48,7 +48,6 @@ bool ProjectileDataTable::LoadFromFile(const wchar_t* path)
 		Entry entry;
 		entry.animSet = ToNarrow(node.GetStringAttr(L"animSet", L"Projectile"));
 		entry.animClip = ToNarrow(node.GetStringAttr(L"animClip", L"Pellet"));
-		entry.spawnUpCells = node.GetInt32Attr(L"spawnUpCells", 6);
 		entry.spawnForwardCells = node.GetInt32Attr(L"spawnForwardCells", 3);
 		entry.fireIntervalMs = node.GetInt32Attr(L"fireIntervalMs", 250);
 
@@ -78,11 +77,6 @@ const std::string& ProjectileDataTable::GetAnimSet(Protocol::ProjectileType type
 const std::string& ProjectileDataTable::GetAnimClip(Protocol::ProjectileType type) const
 {
 	return Find(type).animClip;
-}
-
-int ProjectileDataTable::GetSpawnUpCells(Protocol::ProjectileType type) const
-{
-	return Find(type).spawnUpCells;
 }
 
 int ProjectileDataTable::GetFireIntervalMs(Protocol::ProjectileType type) const

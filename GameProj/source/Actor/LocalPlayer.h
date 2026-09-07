@@ -22,10 +22,9 @@
 //    돌려준다. ReconcileMove가 그 위치로 기준점을 옮기고 남은 미확인 입력을 replay하므로
 //    스냅해도 방향 전환 롤백이 보이지 않는다.
 //
-// ★ 클라는 벽 충돌을 모른다 ★ 서버(Room::IsFootprintBlocked)만 벽 판정을 한다.
-// 벽 근처에서 서버가 슬라이드시키면 예측과 갈라지고, 다음 ack에서 그쪽으로 보정된다
-// (이 보정은 눈에 보이는 게 정상 - replay가 흡수하는 건 "지연", 충돌은 진짜 차이).
-// C_ATTACK 전송은 아직 없다(TODO로 남은 별개 사안).
+// 클라도 벽 충돌을 예측한다 - 서버 Room::IsActorBoxBlocked 와 같은 격자·같은 셀 박스
+// (MoveMath::BoxBlockedCells, PLAYER_COLLISION_CELLS_*). 레벨/프롭 로드 전에는 IsCellBlocked 가
+// false 라 자유 이동. 벽 근처에서 예측과 서버가 갈라지면 다음 ack 의 replay 가 흡수한다.
 class LocalPlayer : public ReplCharacter
 {
 
@@ -83,7 +82,7 @@ private:
 	void SendMoveInputIfChanged();
 
 	// 좌클릭 중이고 쿨다운(ActorData 의 투사체 fireIntervalMs)이 지났으면 C_ATTACK를 보낸다.
-	// muzzle/aim은 화면 공간에서 계산해 월드로 변환(카메라 회전 자동 반영).
+	// muzzle = 몸통 중심, aim = 마우스 월드 좌표. 전방 오프셋은 서버가 적용(카메라 회전값 안 씀).
 	void SendAttackIfReady();
 
 	// ackFp(마지막 S_MOVE_ACK 권위 위치)에서 시작해 미확인 입력을 전부 재생하고
@@ -111,10 +110,8 @@ private:
 
 	// 마우스 각도를 재는 기준점을 액터 위치에서 얼마나 위로 올릴지(칸).
 	//
-	// 액터 위치는 발밑이고 스프라이트는 거기서 위로 뻗어 있다. 발밑을 기준으로 각을 재면
-	// 캐릭터의 "가슴"보다 아래에 원점이 놓여서, 커서를 캐릭터 몸통 위에 얹어도
-	// 아래쪽(앞모습) 섹터로 계산된다. 몸 한가운데로 올려야 화면에서 보이는 대로 맞는다.
-	static constexpr int facingAnchorOffsetY = -4;
+	// 액터 위치가 이제 스프라이트(몸통) 중심이라 위치를 그대로 기준점으로 쓰면 된다.
+	static constexpr int facingAnchorOffsetY = 0;
 
 	// 섹터 경계에서 방향을 유지하는 여유각(도).
 	//

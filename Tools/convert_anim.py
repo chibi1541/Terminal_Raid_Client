@@ -60,10 +60,13 @@ pivot 규칙
     액터 위치에 놓이는 점이라 대기와 이동이 서로 다른 값을 쓰면 걷기 시작할 때마다
     캐릭터가 옆으로 한 칸 튄다. 걸음이 좌우로 흔들리는 것보다 그쪽이 훨씬 눈에 띈다.
 
-    값은 발 위치에서 뽑는다. 그 방향에 대기(Idle) 클립이 있으면 그 첫 프레임의 발을
+    x는 발 위치에서 뽑는다. 그 방향에 대기(Idle) 클립이 있으면 그 첫 프레임의 발을
     쓰고(서 있는 자세가 기준이다), 없으면 그 방향 모든 프레임의 평균을 쓴다.
     x는 반드시 정수다 - 반쪽 값은 박스 중심 (W-1)/2와 정확히 같을 때만 안전하고,
     아니면 좌우 반전에서 한 칸 튄다(AnimInstance::GetCurrentPivotCell 참고).
+
+    y는 스프라이트 박스 세로 중앙 (H-1)/2로 고정한다. 액터 로직 위치 = 몸통 중심이라
+    카메라를 돌려도(빌보드) 스프라이트가 충돌 박스와 어긋나지 않는다.
 
     자동으로 잡힌 값이 마음에 안 들면 --pivot Up=4 로 방향 하나만 덮어쓴다.
 
@@ -271,8 +274,10 @@ def resolve_pivots(clips, overrides):
     for facing, group in by_facing.items():
         height = len(group[0].rows_list()[0])
 
+        cy = (height - 1) / 2   # 스프라이트 박스 세로 중앙
+
         if facing in overrides:
-            pivots[facing] = '%d,%d' % (overrides[facing], height - 1)
+            pivots[facing] = '%g,%g' % (overrides[facing], cy)
 
             continue
 
@@ -285,8 +290,8 @@ def resolve_pivots(clips, overrides):
             centers = [feet_center(rows) for clip in group for rows in clip.rows_list()]
             center = sum(centers) / len(centers)
 
-        # x는 정수여야 한다. 반올림은 한 번만.
-        pivots[facing] = '%d,%d' % (int(center + 0.5), height - 1)
+        # x는 정수여야 한다. 반올림은 한 번만. y는 박스 세로 중앙.
+        pivots[facing] = '%g,%g' % (int(center + 0.5), cy)
 
     return pivots
 

@@ -23,7 +23,7 @@
 <SpriteAnimation>
 
 	<!-- 앞모습 대기 -->
-	<Clip name="Idle" facing="Down" fps="3" loop="true" width="8" height="8" pivot="4,7">
+	<Clip name="Idle" facing="Down" fps="3" loop="true" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			..GGG.W.
 			.FGGGF.W
@@ -37,7 +37,7 @@
 	</Clip>
 
 	<!-- 뒷모습 대기 -->
-	<Clip name="Idle" facing="Up" fps="3" loop="true" width="8" height="8" pivot="4,7">
+	<Clip name="Idle" facing="Up" fps="3" loop="true" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			.W.GGG..
 			W.FGGGF.
@@ -51,7 +51,7 @@
 	</Clip>
 
 	<!-- 앞모습 이동 -->
-	<Clip name="Walk" facing="Down" fps="8" loop="true" width="8" height="8" pivot="4,7">
+	<Clip name="Walk" facing="Down" fps="8" loop="true" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			..GGG.W.
 			.FGGGF.W
@@ -75,7 +75,7 @@
 	</Clip>
 
 	<!-- 측면 이동 -->
-	<Clip name="Walk" facing="Side" fps="8" loop="true" width="8" height="8" pivot="3,7">
+	<Clip name="Walk" facing="Side" fps="8" loop="true" width="8" height="8" pivot="3,3.5">
 		<Frame>
 			FFGGF.W.
 			.FGGFF.W
@@ -99,7 +99,7 @@
 	</Clip>
 
 	<!-- 뒷모습 이동 -->
-	<Clip name="Walk" facing="Up" fps="8" loop="true" width="8" height="8" pivot="4,7">
+	<Clip name="Walk" facing="Up" fps="8" loop="true" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			.W.GGG..
 			W.FGGGF.
@@ -123,7 +123,7 @@
 	</Clip>
 	
 	<!-- 앞모습 공격 -->
-	<Clip name="Attack" facing="Down" fps="12" loop="false" width="8" height="8" pivot="3,7">
+	<Clip name="Attack" facing="Down" fps="12" loop="false" width="8" height="8" pivot="3,3.5">
 		<Frame>
 			.GGWFF..
 			FGGWF...
@@ -147,7 +147,7 @@
 	</Clip>
 
 	<!-- 측면 공격 -->
-	<Clip name="Attack" facing="Side" fps="12" loop="false" width="8" height="8" pivot="4,7">
+	<Clip name="Attack" facing="Side" fps="12" loop="false" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			FFGGF.W.
 			.FGGFF.W
@@ -171,7 +171,7 @@
 	</Clip>
 
 	<!-- 뒷모습 공격 -->
-	<Clip name="Attack" facing="Up" fps="12" loop="false" width="8" height="8" pivot="4,7">
+	<Clip name="Attack" facing="Up" fps="12" loop="false" width="8" height="8" pivot="4,3.5">
 		<Frame>
 			.WGGG...
 			.FGGGF..
@@ -195,7 +195,7 @@
 	</Clip>
 	
 	<!-- ARCHER — Rolling -->
-	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="4,7">
+	<Clip name="Rolling" fps="20" loop="false" width="13" height="8" pivot="4,3.5">
 			<!-- 구르기가 실제로 끝나는 순간을 게임플레이에게 알린다.
 		     이게 없으면 IsRolling이 계속 참으로 남아서 Any->Roll이 매번 다시 잡아채
 		     구르기 상태를 영영 못 빠져나온다. -->
