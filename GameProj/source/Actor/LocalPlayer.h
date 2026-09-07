@@ -4,26 +4,27 @@
 #include "Input/InputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Protocol/Protocol.pb.h"
+#include "Shared/MovementMath.h"
 
 #include <memory>
+#include <deque>
 
 // 이 클라이언트의 유저가 조종하는 플레이어.
 //
 // 서버가 S_ENTER_ROOM.myObject로 알려준 개체 하나만 이 타입으로 스폰된다.
 // 나머지는 전부 RemotePlayer다.
 //
-// 이동은 클라이언트 예측 구조다 - 입력이 오면 즉시 로컬에서 움직이고(Tick의
-// 이동 계산), 방향이 바뀔 때마다 C_MOVE로 서버에 알린다. 서버는 S_MOVE_ACK로
-// 그 입력을 처리한 순간의 위치를 돌려주는데, 그 값은 도착 시점엔 이미 왕복
-// 지연시간만큼 과거라 ReconcileMove는 이걸로 위치를 스냅하지 않는다(스냅하면
-// 그 사이 예측 이동을 지우고 되돌리는 꼴이라 방향 전환마다 롤백처럼 보인다) -
-// 지금은 디버그 마커(F3)용으로만 저장해 둔다.
+// 이동은 클라이언트 예측 + 서버 재조정(reconciliation) 구조다.
+//  - 입력이 오면 즉시 로컬에서 움직인다. 예측은 서버와 같은 고정소수점 적분식
+//    (Shared/MovementMath.h)으로, 마지막 ack 위치에서 미확인 입력을 전부 재생한다.
+//  - 방향이 바뀌거나 하트비트(250ms) 주기가 되면 C_MOVE(inputSeq, clientTimeMs, dir)를 보낸다.
+//  - 서버는 클라 타임스탬프 차이로 "그 입력 시각까지"만 정확히 적분한 위치를 S_MOVE_ACK로
+//    돌려준다. ReconcileMove가 그 위치로 기준점을 옮기고 남은 미확인 입력을 replay하므로
+//    스냅해도 방향 전환 롤백이 보이지 않는다.
 //
-// ★ 클라는 벽 충돌을 모른다 ★ 서버(Room::IsFootprintBlocked)는 이미 벽
-// 충돌 판정을 하는데 클라는 아무 검사 없이 자유롭게 움직인다 - 벽 근처에서는
-// 진짜로 위치가 어긋난다. 나중에 이걸 반영하려면(예: 충돌 시 스냅) 위의
-// SetPosition 스냅 문제 때문에 반드시 미확인 입력 재생(replay) 방식으로
-// 붙여야 한다 - ack.pos로 그냥 스냅하면 방향 전환마다 롤백이 재현된다.
+// ★ 클라는 벽 충돌을 모른다 ★ 서버(Room::IsFootprintBlocked)만 벽 판정을 한다.
+// 벽 근처에서 서버가 슬라이드시키면 예측과 갈라지고, 다음 ack에서 그쪽으로 보정된다
+// (이 보정은 눈에 보이는 게 정상 - replay가 흡수하는 건 "지연", 충돌은 진짜 차이).
 // C_ATTACK 전송은 아직 없다(TODO로 남은 별개 사안).
 class LocalPlayer : public ReplCharacter
 {
@@ -76,9 +77,21 @@ private:
 	void OnRotateViewLeft();
 	void OnRotateViewRight();
 
-	// 방향이 바뀌었을 때만 C_MOVE를 보낸다("방향-홀드" 모델 - 서버는 다음
-	// C_MOVE가 올 때까지 스스로 그 방향으로 계속 이동시킨다).
+	// 방향이 바뀌었을 때(또는 하트비트 주기마다) C_MOVE를 보낸다("방향-홀드" 모델 -
+	// 서버는 다음 C_MOVE가 올 때까지 스스로 그 방향으로 계속 이동시킨다).
+	// 보낸 입력은 pendingInputs에 쌓여 재조정 시 replay된다.
 	void SendMoveInputIfChanged();
+
+	// ackFp(마지막 S_MOVE_ACK 권위 위치)에서 시작해 미확인 입력을 전부 재생하고
+	// 현재 시각까지 적분해 predFp(예측 위치)를 다시 구한다. 매 프레임 + ack 수신 시 부른다.
+	void RecomputePrediction();
+
+	// 주어진 기준점(start*)에서 startDir로 시작해, endMs 시점까지 pendingInputs를 재생한다.
+	// endMs를 넘어서는(또는 같은) 입력은 아직 적용하지 않는다. RecomputePrediction과
+	// ReconcileMove(특정 시점의 과거 예측을 되짚을 때)가 공유한다.
+	void ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
+		Protocol::DirectionType startDir, uint32 endMs,
+		int32& outFpX, int32& outFpY) const;
 
 private:
 	std::shared_ptr<Craft::InputComponent> inputComponent;
@@ -104,14 +117,44 @@ private:
 	// 없으면 커서가 경계에 걸쳐 있을 때 1칸 흔들림에도 앞뒤 그림이 매 프레임 교차한다.
 	static constexpr float facingHysteresisDegrees = 8.0f;
 
-	// 초당 이동할 칸 수. 서버 DEFAULT_MOVE_SPEED_CELLS와 일치시킨다 - 어긋나면
-	// 한 방향을 오래 누르고 있는 동안 서버와 계속 벌어지다가 방향을 바꿀 때마다
-	// (그때만 S_MOVE_ACK가 오므로) 눈에 띄게 되돌아간다.
-	float moveSpeed = 6.0f;
+	// --- 클라이언트 예측 & 서버 재조정(reconciliation) ---
+	//
+	// 예측 위치는 서버와 같은 1/256 셀 고정소수점으로 굴린다(적분식은 Shared/MovementMath.h).
+	// 렌더/충돌이 보는 정수 셀 위치(SetPosition)는 매 프레임 predFp >> POS_SHIFT로 파생한다.
+	int32 predFpX = 0;
+	int32 predFpY = 0;
 
-	// 이동 누적값. 1.0을 넘으면 한 칸 움직인다.
-	// (프레임마다 무조건 한 칸씩 움직이면 프레임레이트에 따라 속도가 달라짐)
-	float moveAmount = 0.0f;
+	// 마지막 S_MOVE_ACK가 준 권위 상태 = replay의 기준점.
+	// ack.pos는 "그 입력을 만든 클라 시각(ackClientTimeMs)"의 위치다 - 서버가 클라
+	// 타임스탬프 차이로 정확히 그 지점까지만 적분하므로. 그래서 스냅해도 그 뒤 입력은
+	// replay로 되살아나 방향 전환 롤백이 보이지 않는다.
+	int32 ackFpX = 0;
+	int32 ackFpY = 0;
+	Protocol::DirectionType ackDir = Protocol::DIR_NONE;
+	uint32 ackClientTimeMs = 0;
+
+	// 아직 ack되지 않은 입력들. 방향이 바뀐 순간(또는 하트비트)마다 하나씩 쌓인다.
+	struct PendingInput
+	{
+		uint32 seq;
+		Protocol::DirectionType dir;
+		uint32 clientTimeMs;	// 이 입력을 만든 시점의 localTimeMs
+	};
+	std::deque<PendingInput> pendingInputs;
+
+	// 방향을 안 바꾸고 계속 눌러도 이 주기로 C_MOVE를 재전송한다. 서버가 최소 이 간격으로
+	// 정확한 ack를 주므로 예측 드리프트가 이 시간 이상 누적되지 않는다. 서버의 실측 시간
+	// 창(heldMsServer)도 촘촘하게 유지되어 이동량 검증 해상도가 확보된다.
+	static constexpr double moveHeartbeatMs = 250.0;
+	double lastMoveSendTimeMs = 0.0;
+
+	// 보정 스무딩(B). 재조정으로 화면 위치가 튀는 만큼(서브유닛)을 여기 담아 몇 프레임에
+	// 걸쳐 0으로 감쇠시킨다. 서버가 서브유닛 위치를 정확히 주므로 벽이 없으면 이 값은
+	// 거의 0이고, 벽 슬라이드 같은 실제 보정만 부드럽게 흡수된다.
+	int32 smoothOffsetX = 0;
+	int32 smoothOffsetY = 0;
+	static constexpr double smoothDurationMs = 150.0;			// 이 시간에 걸쳐 오프셋을 0으로
+	static constexpr int32 smoothMaxSub = MoveMath::POS_SCALE * 8;	// 8칸 초과 보정은 텔레포트 - 즉시 스냅
 
 	// 구르기 상태.
 	// 스페이스로 켜지고, 구르기 클립의 RollEnd 노티파이를 받으면 꺼진다.

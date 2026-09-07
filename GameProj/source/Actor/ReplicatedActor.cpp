@@ -29,9 +29,14 @@ void ReplicatedActor::ApplyMove(const Protocol::MoveInfo& info)
 {
 	lastDirection = info.dir();
 
+	// 서버가 서브유닛(1셀=256) 권위 위치를 실어 보낸다. 셀로 잘라 쓰면 셀 내부 위치가
+	// 사라져 원격 캐릭터가 계단식으로 움직인다 - 256으로 나눠 소수 셀로 보간한다.
+	const float cellX = static_cast<float>(info.possubx()) / MovementInterpolator::POS_SUBUNITS;
+	const float cellY = static_cast<float>(info.possuby()) / MovementInterpolator::POS_SUBUNITS;
+
 	interpolator.AddSample(
 		info.servertick(),
-		Vector2(info.pos().x(), info.pos().y()),
+		cellX, cellY,
 		MovementInterpolator::VelocityFromServer(info.dir(), info.speed()));
 }
 

@@ -137,6 +137,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Network\MovementInterpolator.h" />
+    <ClInclude Include="source\Shared\MovementMath.h" />
     <ClInclude Include="source\Actor\ProjectileActor.h" />
     <ClInclude Include="source\Actor\Monster.h" />
     <ClInclude Include="source\Actor\LocalPlayer.h" />

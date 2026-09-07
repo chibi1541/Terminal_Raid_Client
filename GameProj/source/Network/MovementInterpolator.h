@@ -59,8 +59,9 @@ public:
 		_started = true;
 	}
 
-	// S_MOVE 패킷 정보를 Sample로 저장.
-	void AddSample(uint32 serverTick, Craft::Vector2 cell, FVec2 vel)
+	// S_MOVE 패킷 정보를 Sample로 저장. 위치는 셀 단위(소수 허용) - 서버가 보낸
+	// 서브유닛 좌표를 256으로 나눠 넘기면 셀 내부 위치까지 보존된다.
+	void AddSample(uint32 serverTick, float cellX, float cellY, FVec2 vel)
 	{
 		const float sTick = static_cast<float>(serverTick);
 
@@ -68,16 +69,22 @@ public:
 		if (!_samples.empty() && sTick <= _samples.back().tick)
 			return;
 
-		_samples.emplace_back(std::move(Sample{ sTick, static_cast<float>(cell.x), static_cast<float>(cell.y), vel.x, vel.y }));
+		_samples.emplace_back(std::move(Sample{ sTick, cellX, cellY, vel.x, vel.y }));
 		while (_samples.size() > MAX_SAMPLES)
 			_samples.pop_front();
 
 		if (!_started)
 		{
 			_playbackTick = sTick - INTERP_DELAY_TICKS;
-			_rendered = { static_cast<float>(cell.x), static_cast<float>(cell.y) };
+			_rendered = { cellX, cellY };
 			_started = true;
 		}
+	}
+
+	// 정수 셀 좌표 편의 오버로드 (스폰 스냅샷 등 소수부가 없는 경우).
+	void AddSample(uint32 serverTick, Craft::Vector2 cell, FVec2 vel)
+	{
+		AddSample(serverTick, static_cast<float>(cell.x), static_cast<float>(cell.y), vel);
 	}
 
 	// 매 프레임. dt(초). 그릴 칸 좌표를 돌려준다.

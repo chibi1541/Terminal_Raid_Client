@@ -13,6 +13,8 @@ using namespace Craft;
 
 namespace
 {
+	int32 Abs32(int32 v) { return (v < 0) ? -v : v; }
+
 	// 서버 8방향(DirectionType) <-> 클라 입력 델타(-1/0/1) 변환.
 	// ReplCharacter::DeltaFromServerDirection의 역방향이다 - 그쪽은
 	// "서버가 알려준 방향"을 델타로 풀고, 이쪽은 "내가 누른 키"를 방향으로 묶는다.
@@ -127,9 +129,17 @@ void LocalPlayer::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 {
 	super::ApplyObjectInfo(info);
 
+	// 예측 기준점을 스폰 위치(셀 중심)로 시드한다. 서버 GameObject::SetPos와 같은 식.
+	const Vector2 spawn = GetPosition();
+	predFpX = ackFpX = spawn.x * MoveMath::POS_SCALE + MoveMath::POS_SCALE / 2;
+	predFpY = ackFpY = spawn.y * MoveMath::POS_SCALE + MoveMath::POS_SCALE / 2;
+	ackDir = info.state().dir();
+	ackClientTimeMs = static_cast<uint32>(localTimeMs);
+	pendingInputs.clear();
+
 	// 스폰 시점에도 맞춰 둔다 - 안 그러면 첫 이동(첫 ack) 전까지 마커가
 	// 기본값인 원점(0,0)에 떠서 실제 위치와 아무 상관없어 보인다.
-	lastServerPosition = GetPosition();
+	lastServerPosition = spawn;
 }
 
 void LocalPlayer::OnRotateViewLeft()
@@ -245,7 +255,8 @@ void LocalPlayer::Tick(float deltaTime)
 
 		// 게임플레이가 애니메이션에 넘기는 건 이 값들뿐이다.
 		// 어떤 클립을 틀지는 상태 머신의 전이 규칙이 정한다.
-		animator->GetParameters().SetFloat("speed", isMoving ? moveSpeed : 0.0f);
+		animator->GetParameters().SetFloat("speed",
+			isMoving ? static_cast<float>(MoveMath::DEFAULT_MOVE_SPEED_CELLS) : 0.0f);
 		animator->GetParameters().SetFloat("IsAttack", isAttack ? 1.0f : 0.0f);
 		animator->GetParameters().SetFloat("IsRolling", isRolling ? 1.0f : 0.0f);
 
@@ -255,26 +266,30 @@ void LocalPlayer::Tick(float deltaTime)
 		// 여기서 SetFlipX를 부르면 다음 틱에 슬롯 값으로 덮어써져 아무 효과가 없다.
 	}
 
-	if (isMoving)
-	{
-		// 초당 moveSpeed칸 속도로 이동 (프레임레이트가 달라져도 속도는 일정)
-		//
-		// 클라이언트 예측 - 서버 응답을 기다리지 않고 즉시 움직인다.
-		// 방향이 바뀔 때마다 위의 SendMoveInputIfChanged가 C_MOVE로 서버에 알리고,
-		// 서버가 돌려주는 S_MOVE_ACK를 ReconcileMove가 받아 위치를 보정한다.
-		moveAmount += deltaTime * moveSpeed;
+	// 클라이언트 예측 - 서버 응답을 기다리지 않고 즉시 움직인다.
+	//
+	// 서버와 같은 고정소수점 적분식(Shared/MovementMath.h)으로, ackFp 기준점에서
+	// 미확인 입력을 전부 재생한 뒤 현재까지 적분한다. 방향이 바뀌거나 하트비트 주기가
+	// 되면 SendMoveInputIfChanged가 C_MOVE를 보내고, 서버의 S_MOVE_ACK를 ReconcileMove가
+	// 받아 기준점을 정확한 권위 위치로 옮긴다(그 뒤 입력은 replay로 유지되어 롤백이 안 보임).
+	RecomputePrediction();
 
-		while (moveAmount >= 1.0f)
-		{
-			moveAmount -= 1.0f;
-			SetPosition(GetPosition() + inputDirection);
-		}
-	}
-	else
+	// 보정 스무딩 오프셋을 이번 프레임만큼 0으로 감쇠시킨다(smoothDurationMs에 걸쳐 소멸).
+	if (smoothOffsetX != 0 || smoothOffsetY != 0)
 	{
-		// 키를 뗀 상태. 다음 입력에 바로 반응하도록 누적값을 비운다.
-		moveAmount = 0.0f;
+		double retain = 1.0 - static_cast<double>(deltaTime) * 1000.0 / smoothDurationMs;
+		if (retain < 0.0)
+		{
+			retain = 0.0;
+		}
+		smoothOffsetX = static_cast<int32>(smoothOffsetX * retain);
+		smoothOffsetY = static_cast<int32>(smoothOffsetY * retain);
+		if (Abs32(smoothOffsetX) < 2) smoothOffsetX = 0;
+		if (Abs32(smoothOffsetY) < 2) smoothOffsetY = 0;
 	}
+
+	SetPosition(Vector2((predFpX + smoothOffsetX) >> MoveMath::POS_SHIFT,
+		(predFpY + smoothOffsetY) >> MoveMath::POS_SHIFT));
 
 	// 이번 프레임에 모인 입력은 여기까지만 유효하다.
 	// 다음 프레임의 디스패치가 이 Tick 뒤에 오므로 지금 비워도 안전하다.
@@ -286,27 +301,95 @@ void LocalPlayer::SendMoveInputIfChanged()
 {
 	const Protocol::DirectionType currentDirection = DirectionTypeFromInput(inputDirection);
 
-	if (currentDirection == lastSentDirection)
+	const bool changed = (currentDirection != lastSentDirection);
+
+	// 방향이 그대로여도 움직이는 중이면 하트비트 주기마다 재전송한다.
+	// (정지 상태는 서버가 이미 멈춰 있으니 보낼 필요 없다)
+	const bool heartbeatDue =
+		(currentDirection != Protocol::DIR_NONE) &&
+		(localTimeMs - lastMoveSendTimeMs >= moveHeartbeatMs);
+
+	if (!changed && !heartbeatDue)
 	{
 		return;
 	}
 
 	lastSentDirection = currentDirection;
+	lastMoveSendTimeMs = localTimeMs;
+
+	const uint32 seq = nextInputSeq++;
+	const uint32 nowMs = static_cast<uint32>(localTimeMs);
+
+	// 재조정 replay용으로 보관. 서버가 ack로 확인해 준 것부터 앞은 ReconcileMove가 제거한다.
+	pendingInputs.push_back({ seq, currentDirection, nowMs });
+	while (pendingInputs.size() > 128)	// 폭주 방어. 정상적으론 RTT 안쪽 몇 개.
+	{
+		pendingInputs.pop_front();
+	}
 
 	Protocol::C_MOVE pkt;
-	pkt.set_inputseq(nextInputSeq++);
-	pkt.set_clienttick(static_cast<uint32>(localTimeMs));	// 로컬 단조 시계(ms). 서버가 이동 시간 검증에 쓴다.
+	pkt.set_inputseq(seq);
+	pkt.set_clienttick(nowMs);	// 로컬 단조 시계(ms). 서버가 직전 입력과의 차이로 이동 시간을 검증/적분한다.
 	pkt.set_dir(currentDirection);
 
 	SendToServer(pkt);
 
 	{
-		char message[160];
+		char message[176];
 		sprintf_s(message,
-			"[LocalPlayer] C_MOVE sent - seq=%u dir=%d predictedPos=(%d, %d)\n",
-			pkt.inputseq(), static_cast<int>(currentDirection), GetPosition().x, GetPosition().y);
+			"[LocalPlayer] C_MOVE sent - seq=%u dir=%d t=%u %s predictedPos=(%d, %d)\n",
+			seq, static_cast<int>(currentDirection), nowMs,
+			changed ? "change" : "heartbeat", GetPosition().x, GetPosition().y);
 		::OutputDebugStringA(message);
 	}
+}
+
+void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
+	Protocol::DirectionType startDir, uint32 endMs,
+	int32& outFpX, int32& outFpY) const
+{
+	int32 fpX = startFpX;
+	int32 fpY = startFpY;
+	uint32 cursorMs = startMs;
+	Protocol::DirectionType dir = startDir;
+
+	auto integrate = [&](Protocol::DirectionType d, uint32 fromMs, uint32 toMs)
+	{
+		if (toMs <= fromMs)
+		{
+			return;
+		}
+
+		const Vector2 unit = DeltaFromServerDirection(d);
+		int32 dx = 0;
+		int32 dy = 0;
+		MoveMath::StepFixed(unit.x, unit.y, MoveMath::DEFAULT_MOVE_SPEED_SUBUNITS,
+			static_cast<int32>(toMs - fromMs), dx, dy);
+		fpX += dx;
+		fpY += dy;
+	};
+
+	// startDir은 startMs부터 첫 미확인 입력 직전까지 유효했던 방향이다.
+	for (const PendingInput& p : pendingInputs)
+	{
+		if (p.clientTimeMs >= endMs)
+		{
+			break;	// endMs 시점엔 아직 이 입력이 적용되지 않았다.
+		}
+		integrate(dir, cursorMs, p.clientTimeMs);
+		dir = p.dir;
+		cursorMs = p.clientTimeMs;
+	}
+	integrate(dir, cursorMs, endMs);
+
+	outFpX = fpX;
+	outFpY = fpY;
+}
+
+void LocalPlayer::RecomputePrediction()
+{
+	ReplayInputs(ackFpX, ackFpY, ackClientTimeMs, ackDir,
+		static_cast<uint32>(localTimeMs), predFpX, predFpY);
 }
 
 void LocalPlayer::Draw()
@@ -318,11 +401,10 @@ void LocalPlayer::Draw()
 		return;
 	}
 
-	// 예측 위치(GetPosition(), 캐릭터 스프라이트가 그려지는 자리)와 이 마커
-	// 사이의 간격은 순수하게 참고용이다 - ReconcileMove가 더 이상 이 값으로
-	// 스냅하지 않으므로(왜인지는 ReconcileMove 주석 참고) 위치가 자동으로
-	// 따라붙지는 않는다. 방향을 바꿀 때마다 이 간격이 대략 왕복 지연시간만큼의
-	// 이동 거리로 나타나면 정상이다 - 계속 커지기만 한다면 그건 진짜 드리프트.
+	// 예측 위치(GetPosition(), 스프라이트가 그려지는 자리)와 이 마커(마지막 ack 권위
+	// 위치) 사이의 간격. 재조정이 제대로 물리면 이 간격은 대략 왕복 지연시간만큼의
+	// 이동 거리 안에서 오르내리기만 하고 평균이 0이어야 한다 - 한쪽으로 계속
+	// 커지기만 한다면 그건 진짜 드리프트(좌표 계산식이 서버와 어긋난 것).
 	Renderer::Get().SubmitWorld(
 		"S",
 		lastServerPosition,
@@ -341,25 +423,77 @@ void LocalPlayer::ReconcileMove(const Protocol::S_MOVE_ACK& pkt)
 
 	lastAckedInputSeq = pkt.lastprocessedinputseq();
 
-	// 디버그 마커만 갱신한다 - 실제 위치는 건드리지 않는다.
-	//
-	// ack.pos는 "서버가 이 입력을 처리한 그 순간"의 위치라, 도착했을 때는
-	// 이미 왕복 지연시간(RTT)만큼 과거 값이다. 그 사이 클라는 새 방향으로
-	// 이미 RTT만큼 예측 이동을 마친 상태라, 여기서 SetPosition으로 스냅하면
-	// 방금 한 예측을 통째로 지우고 과거로 되돌리는 꼴이 된다 - 방향을 바꿀
-	// 때마다 "뒤로 끌려가는" 롤백처럼 보였던 원인이 이것이다.
-	//
-	// ★ 정정 ★ 서버(Room::IsFootprintBlocked)는 이미 벽 충돌 판정을 한다.
-	// 클라는 이걸 전혀 모르고 자유롭게 움직이므로 벽 근처에서는 진짜로
-	// 어긋난다 - "서버와 어긋날 이유가 없다"는 이전 가정은 틀렸다.
-	// snap을 다시 켤 때는(충돌 반영 등) 반드시 미확인 입력 재생(replay)
-	// 방식으로 해야 한다 - ack.pos로 그냥 스냅하면 이 주석 위쪽에 적은
-	// 롤백이 그대로 재현된다.
-	char message[192];
-	sprintf_s(message,
-		"[LocalPlayer] S_MOVE_ACK recv - seq=%u serverPos=(%d, %d) predictedPos=(%d, %d)\n",
-		pkt.lastprocessedinputseq(), pkt.pos().x(), pkt.pos().y(), GetPosition().x, GetPosition().y);
-	::OutputDebugStringA(message);
+	// 보정 스무딩 기준 - 재조정 직전에 화면에 보이던 위치(예측 + 현재 스무딩 오프셋).
+	const Vector2 before = GetPosition();
+	const int32 shownBeforeX = predFpX + smoothOffsetX;
+	const int32 shownBeforeY = predFpY + smoothOffsetY;
+
+	// 이 ack가 대응하는 입력의 "클라 시각"을 pending에서 찾는다.
+	// 서버는 그 입력의 clientTimeMs 지점까지만 정확히 적분했으므로, ack.pos는
+	// 바로 그 시각의 위치다 -> 그 시각을 기준점으로 삼아야 replay가 맞물린다.
+	uint32 ackedInputTimeMs = 0;
+	bool found = false;
+	for (const PendingInput& p : pendingInputs)
+	{
+		if (p.seq == pkt.lastprocessedinputseq())
+		{
+			ackedInputTimeMs = p.clientTimeMs;
+			found = true;
+			break;
+		}
+	}
+
+	// 확인된 입력과 그 이전 입력을 버퍼에서 제거한다.
+	while (pendingInputs.empty() == false &&
+		pendingInputs.front().seq <= pkt.lastprocessedinputseq())
+	{
+		pendingInputs.pop_front();
+	}
+
+	// 권위 기준점 갱신. 서버가 서브유닛(posSubX/Y)을 그대로 보내주므로 셀 중앙 가정 없이
+	// 정확히 앵커링한다 - 벽이 없으면 예측과 서브유닛 단위로 일치해 스냅이 사실상 no-op다.
+	// 남은 미확인 입력은 RecomputePrediction의 replay로 되살아나 방향 전환 롤백이 없다.
+	ackFpX = pkt.possubx();
+	ackFpY = pkt.possuby();
+	ackDir = pkt.dir();
+
+	if (found)
+		ackClientTimeMs = ackedInputTimeMs;
+	else if (pendingInputs.empty() == false)
+		ackClientTimeMs = pendingInputs.front().clientTimeMs;	// 버퍼에서 밀려남 - 남은 첫 입력 기준
+	else
+		ackClientTimeMs = static_cast<uint32>(localTimeMs);		// 미확인 입력 없음 - 현재로
+
+	RecomputePrediction();
+
+	// 보정 스무딩(B) : 재조정으로 화면 위치가 튀는 만큼을 오프셋에 실어 몇 프레임에 걸쳐
+	// 0으로 감쇠시킨다(Tick). 벽 슬라이드처럼 실제 어긋남이 있을 때만 값이 실린다.
+	// 텔레포트 급(smoothMaxSub 초과)이면 스무딩 없이 즉시 스냅한다.
+	const int32 corrX = shownBeforeX - predFpX;
+	const int32 corrY = shownBeforeY - predFpY;
+	if (Abs32(corrX) <= smoothMaxSub && Abs32(corrY) <= smoothMaxSub)
+	{
+		smoothOffsetX = corrX;
+		smoothOffsetY = corrY;
+	}
+	else
+	{
+		smoothOffsetX = 0;
+		smoothOffsetY = 0;
+	}
+
+	SetPosition(Vector2((predFpX + smoothOffsetX) >> MoveMath::POS_SHIFT,
+		(predFpY + smoothOffsetY) >> MoveMath::POS_SHIFT));
 
 	lastServerPosition = Vector2(pkt.pos().x(), pkt.pos().y());
+
+	{
+		char message[208];
+		sprintf_s(message,
+			"[LocalPlayer] S_MOVE_ACK recv - seq=%u serverPos=(%d, %d) pred %d,%d -> %d,%d delta=(%d, %d)\n",
+			pkt.lastprocessedinputseq(), pkt.pos().x(), pkt.pos().y(),
+			before.x, before.y, GetPosition().x, GetPosition().y,
+			GetPosition().x - before.x, GetPosition().y - before.y);
+		::OutputDebugStringA(message);
+	}
 }
