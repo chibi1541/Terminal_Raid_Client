@@ -133,9 +133,10 @@ private:
 	// 걸러낸다 - 서버의 lastProcessedInputSeq 역전 방어와 대칭이다.
 	uint32 lastAckedInputSeq = 0;
 
-	// C_MOVE.clientTick에 실어 보내는 로컬 틱 카운터.
-	// 서버는 지금 로깅용으로만 갖고 있다(Room::HandleMove가 버림) - 정밀할 필요 없다.
-	uint32 localTick = 0;
+	// C_MOVE.clientTick에 실어 보내는 로컬 단조 시계(ms).
+	// 서버(Room::HandleMove)가 이 값의 "차이"를 자기 실측 시간과 대조해
+	// 클라가 이동 시간을 부풀렸는지 검증한다 - 프레임 카운트가 아니라 실제 경과 ms여야 한다.
+	double localTimeMs = 0.0;
 
 	// 디버그: 서버가 마지막 S_MOVE_ACK로 알려준 위치(= 예측 보정이 스냅하는 목표).
 	// 내 캐릭터의 실제 위치(예측)와 이 마커 사이의 간격이 곧 "롤백 크기"다.

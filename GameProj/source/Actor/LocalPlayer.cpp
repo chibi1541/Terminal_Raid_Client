@@ -222,6 +222,9 @@ void LocalPlayer::Tick(float deltaTime)
 	// 컴포넌트(= 애니메이션 평가/재생)로 deltaTime을 전달하는 처리가 여기 들어있다.
 	super::Tick(deltaTime);
 
+	// 로컬 단조 시계 갱신. 아래 SendMoveInputIfChanged가 이 값을 C_MOVE에 싣는다.
+	localTimeMs += static_cast<double>(deltaTime) * 1000.0;
+
 	const bool isMoving = (inputDirection != Vector2::Zero);
 
 	// 이번 프레임 입력이 확정된 시점 - 방향이 바뀌었으면 서버에 알린다.
@@ -277,8 +280,6 @@ void LocalPlayer::Tick(float deltaTime)
 	// 다음 프레임의 디스패치가 이 Tick 뒤에 오므로 지금 비워도 안전하다.
 	inputDirection = Vector2::Zero;
 	isAttack = false;
-
-	++localTick;
 }
 
 void LocalPlayer::SendMoveInputIfChanged()
@@ -294,7 +295,7 @@ void LocalPlayer::SendMoveInputIfChanged()
 
 	Protocol::C_MOVE pkt;
 	pkt.set_inputseq(nextInputSeq++);
-	pkt.set_clienttick(localTick);
+	pkt.set_clienttick(static_cast<uint32>(localTimeMs));	// 로컬 단조 시계(ms). 서버가 이동 시간 검증에 쓴다.
 	pkt.set_dir(currentDirection);
 
 	SendToServer(pkt);
