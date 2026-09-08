@@ -10,6 +10,7 @@
 #include "Engine/Engine.h"
 #include "Game/ActorDataAsset.h"
 #include "Level/Level.h"
+#include "Level/TileMapLevel.h"
 #include "Thread/ThreadManager.h"
 #include "Utils/ObjectIdHandler.h"
 
@@ -44,6 +45,17 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 		return;
 	}
 
+	// 메뉴(MenuLevel)에서 넘어온 첫 입장이면 여기서 게임 레벨로 교체한다.
+	// AddNewLevel 은 nextLevel 만 세우고 교체는 프레임 끝 - 그래서 이 프레임 동안
+	// Engine::GetLevel() 은 아직 MenuLevel 을 돌려준다. AddNewLevel 이 돌려준
+	// 새 레벨을 pendingSpawnLevel 에 잡아두고, 아래 스폰들은 SpawnLevel() 로 그쪽에 올린다.
+	// OnEnterRoom 은 게임 쓰레드 잡에서 도므로 AddNewLevel 호출이 안전하다.
+	pendingSpawnLevel.reset();
+	if (Cast<TileMapLevel>(Engine::Get().GetLevel()) == nullptr)
+	{
+		pendingSpawnLevel = Engine::Get().AddNewLevel<TileMapLevel>();
+	}
+
 	// 재입장일 수 있다. 이전 룸의 액터가 남아있으면 안 된다.
 	ClearAll();
 
@@ -64,10 +76,19 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 	{
 		old->Destroy();
 	}
-	if (std::shared_ptr<Level> level = Engine::Get().GetLevel())
+	if (std::shared_ptr<Level> level = SpawnLevel())
 	{
 		debugActor = level->SpawnActor<ServerDebugActor>();
 	}
+}
+
+std::shared_ptr<Craft::Level> ObjectManager::SpawnLevel() const
+{
+	if (std::shared_ptr<Craft::Level> pending = pendingSpawnLevel.lock())
+	{
+		return pending;
+	}
+	return Engine::Get().GetLevel();
 }
 
 void ObjectManager::OnExitRoom()
@@ -237,7 +258,7 @@ void ObjectManager::Spawn(const Protocol::ObjectInfo& info, bool isLocal)
 	if (objects.find(objectId) != objects.end())
 		return;
 
-	if (Engine::Get().GetLevel() == nullptr)
+	if (SpawnLevel() == nullptr)
 		return;
 
 	const Protocol::ObjectType objectType = ObjectIdHandler::GetObjectType(objectId);
@@ -276,7 +297,7 @@ namespace
 
 std::shared_ptr<ReplicatedActor> ObjectManager::SpawnPlayer(const Protocol::ObjectInfo& info, bool isLocal)
 {
-	std::shared_ptr<Level> level = Engine::Get().GetLevel();
+	std::shared_ptr<Level> level = SpawnLevel();
 
 	std::shared_ptr<ReplCharacter> chara = isLocal
 		? std::static_pointer_cast<ReplCharacter>(level->SpawnActor<LocalPlayer>())
@@ -295,7 +316,7 @@ std::shared_ptr<ReplicatedActor> ObjectManager::SpawnPlayer(const Protocol::Obje
 
 std::shared_ptr<ReplicatedActor> ObjectManager::SpawnMonster(const Protocol::ObjectInfo& info)
 {
-	std::shared_ptr<Monster> monster = Engine::Get().GetLevel()->SpawnActor<Monster>();
+	std::shared_ptr<Monster> monster = SpawnLevel()->SpawnActor<Monster>();
 
 	if (const auto actorData = GetActorData())
 	{
@@ -310,7 +331,7 @@ std::shared_ptr<ReplicatedActor> ObjectManager::SpawnMonster(const Protocol::Obj
 
 std::shared_ptr<ReplicatedActor> ObjectManager::SpawnProjectile(const Protocol::ObjectInfo& info)
 {
-	std::shared_ptr<ProjectileActor> proj = Engine::Get().GetLevel()->SpawnActor<ProjectileActor>();
+	std::shared_ptr<ProjectileActor> proj = SpawnLevel()->SpawnActor<ProjectileActor>();
 
 	proj->SetProjectileType(info.projectile().projectiletype());
 

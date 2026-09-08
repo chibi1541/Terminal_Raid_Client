@@ -10,6 +10,8 @@ class ReplicatedActor;
 class LocalPlayer;
 class ServerDebugActor;
 
+namespace Craft { class Level; }
+
 // objectId -> 레벨에 올라간 액터를 잇는 표.
 //
 // 서버가 보낸 스폰/디스폰 패킷을 실제 액터 생성/제거로 옮기는 유일한 통로다.
@@ -66,6 +68,14 @@ private:
 	// 표에 있는 액터를 전부 제거한다(룸을 나가거나 새로 들어올 때).
 	void ClearAll();
 
+	// 이번 스폰이 올라갈 레벨.
+	//
+	// 보통은 Engine::GetLevel() 이지만, OnEnterRoom 이 MenuLevel 위에서 불리면
+	// 그 프레임엔 GetLevel() 이 아직 MenuLevel 을 돌려준다(레벨 교체는 프레임 끝).
+	// OnEnterRoom 이 만들어 둔 다음 레벨(TileMapLevel)이 있으면 그쪽에 스폰해야
+	// 액터가 곧 버려질 MenuLevel 에 들어가지 않는다.
+	std::shared_ptr<Craft::Level> SpawnLevel() const;
+
 private:
 	// 액터의 소유권은 Level이 가진다.
 	// 여기서 shared_ptr을 들면 Destroy() 뒤에도 액터가 살아남아 누수가 된다.
@@ -73,6 +83,10 @@ private:
 
 	// 룸 입장마다 하나 스폰하는 디버그 오버레이 액터. 소유권은 Level.
 	std::weak_ptr<ServerDebugActor> debugActor;
+
+	// OnEnterRoom 이 MenuLevel 위에서 만든 다음 레벨(TileMapLevel).
+	// 그 프레임의 스폰들이 이쪽으로 가야 한다. 교체 후엔 mainLevel 이 되어 GetLevel() 과 같아진다.
+	std::weak_ptr<Craft::Level> pendingSpawnLevel;
 
 	// TODO 이건 여기에 박히면 안되는 정보라 GameState 클래스에 옮기기
 	// 내가 조종하는 개체. S_ENTER_ROOM의 myObject에서 온다.
