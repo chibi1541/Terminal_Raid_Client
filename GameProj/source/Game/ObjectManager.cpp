@@ -6,6 +6,7 @@
 #include "Actor/Monster.h"
 #include "Actor/ProjectileActor.h"
 #include "Actor/ServerDebugActor.h"
+#include "Actor/PauseMenuActor.h"
 #include "Asset/AssetManager.h"
 #include "Engine/Engine.h"
 #include "Game/ActorDataAsset.h"
@@ -79,6 +80,16 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 	if (std::shared_ptr<Level> level = SpawnLevel())
 	{
 		debugActor = level->SpawnActor<ServerDebugActor>();
+	}
+
+	// 인게임 일시정지 메뉴(ESC). 디버그 오버레이와 같은 규약 - 재입장 시 이전 것 정리.
+	if (std::shared_ptr<PauseMenuActor> old = pauseMenu.lock())
+	{
+		old->Destroy();
+	}
+	if (std::shared_ptr<Level> level = SpawnLevel())
+	{
+		pauseMenu = level->SpawnActor<PauseMenuActor>();
 	}
 }
 

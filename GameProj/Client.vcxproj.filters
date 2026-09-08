@@ -51,6 +51,12 @@
     <ClCompile Include="source\Level\MenuLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Actor\PauseMenuActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\PixelText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\Actor\LocalPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -108,6 +114,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Level\MenuLevel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\PauseMenuActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\PixelText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Network\NetSend.h">

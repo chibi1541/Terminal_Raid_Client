@@ -9,6 +9,7 @@
 class ReplicatedActor;
 class LocalPlayer;
 class ServerDebugActor;
+class PauseMenuActor;
 
 namespace Craft { class Level; }
 
@@ -83,6 +84,9 @@ private:
 
 	// 룸 입장마다 하나 스폰하는 디버그 오버레이 액터. 소유권은 Level.
 	std::weak_ptr<ServerDebugActor> debugActor;
+
+	// 룸 입장마다 하나 스폰하는 ESC 일시정지 메뉴. 소유권은 Level.
+	std::weak_ptr<PauseMenuActor> pauseMenu;
 
 	// OnEnterRoom 이 MenuLevel 위에서 만든 다음 레벨(TileMapLevel).
 	// 그 프레임의 스폰들이 이쪽으로 가야 한다. 교체 후엔 mainLevel 이 되어 GetLevel() 과 같아진다.

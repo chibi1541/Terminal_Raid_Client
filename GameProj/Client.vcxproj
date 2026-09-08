@@ -118,6 +118,8 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClCompile Include="source\Game\MonsterDataTable.cpp" />
     <ClCompile Include="source\Game\ObjectManager.cpp" />
     <ClCompile Include="source\Level\MenuLevel.cpp" />
+    <ClCompile Include="source\Actor\PauseMenuActor.cpp" />
+    <ClCompile Include="source\UI\PixelText.cpp" />
     <ClCompile Include="source\Globals.cpp" />
     <ClCompile Include="source\Actor\TestActor.cpp" />
     <ClCompile Include="source\Network\ServerSession.cpp" />
@@ -157,6 +159,8 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClInclude Include="source\Game\MonsterDataTable.h" />
     <ClInclude Include="source\Game\ObjectManager.h" />
     <ClInclude Include="source\Level\MenuLevel.h" />
+    <ClInclude Include="source\Actor\PauseMenuActor.h" />
+    <ClInclude Include="source\UI\PixelText.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\Actor\TestActor.h" />
     <ClInclude Include="source\Network\NetSend.h" />

@@ -8,9 +8,8 @@
 #include "Math/Color.h"
 
 #include "Globals.h"
+#include "UI/PixelText.h"
 
-#include <array>
-#include <cctype>
 #include <cstring>
 #include <string>
 #include <unordered_map>
@@ -19,117 +18,12 @@ using namespace Craft;
 
 namespace
 {
-	// ---------------------------------------------------------------------------
-	// 5x7 대문자 블록 폰트. 타이틀 + 버튼에 나오는 글자만:
-	//   TERMINAL RAID / GAME START / EXIT GAME -> A D E G I L M N R S T X + 공백.
-	// ---------------------------------------------------------------------------
-	constexpr int kGlyphW = 5;
-	constexpr int kGlyphH = 7;
-	constexpr int kGlyphGap = 1;
-
-	using Glyph = std::array<const char*, kGlyphH>;
-
-	const std::unordered_map<char, Glyph>& Font()
-	{
-		static const std::unordered_map<char, Glyph> table = {
-			{ ' ', { ".....", ".....", ".....", ".....", ".....", ".....", "....." } },
-			{ 'A', { ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" } },
-			{ 'D', { "####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####." } },
-			{ 'E', { "#####", "#....", "#....", "####.", "#....", "#....", "#####" } },
-			{ 'G', { ".####", "#....", "#....", "#.###", "#...#", "#...#", ".####" } },
-			{ 'I', { "#####", "..#..", "..#..", "..#..", "..#..", "..#..", "#####" } },
-			{ 'L', { "#....", "#....", "#....", "#....", "#....", "#....", "#####" } },
-			{ 'M', { "#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#" } },
-			{ 'N', { "#...#", "##..#", "#.#.#", "#.#.#", "#..##", "#...#", "#...#" } },
-			{ 'R', { "####.", "#...#", "#...#", "####.", "#.#..", "#..#.", "#...#" } },
-			{ 'S', { ".####", "#....", "#....", ".###.", "....#", "....#", "####." } },
-			{ 'T', { "#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.." } },
-			{ 'X', { "#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#" } },
-		};
-		return table;
-	}
-
-	std::string MakePixelText(const std::string& text, char ink)
-	{
-		std::array<std::string, kGlyphH> rows;
-
-		for (size_t i = 0; i < text.size(); ++i)
-		{
-			const char upper = static_cast<char>(std::toupper(static_cast<unsigned char>(text[i])));
-
-			auto it = Font().find(upper);
-			const Glyph& glyph = (it != Font().end()) ? it->second : Font().at(' ');
-
-			for (int r = 0; r < kGlyphH; ++r)
-			{
-				for (int c = 0; c < kGlyphW; ++c)
-				{
-					rows[r] += (glyph[r][c] == '#') ? ink : '.';
-				}
-				if (i + 1 < text.size())
-				{
-					rows[r].append(kGlyphGap, '.');
-				}
-			}
-		}
-
-		std::string out;
-		for (int r = 0; r < kGlyphH; ++r)
-		{
-			out += rows[r];
-			if (r + 1 < kGlyphH)
-			{
-				out += '\n';
-			}
-		}
-		return out;
-	}
-
-	int PixelTextWidth(size_t charCount)
-	{
-		if (charCount == 0)
-		{
-			return 0;
-		}
-		return static_cast<int>(charCount) * kGlyphW + (static_cast<int>(charCount) - 1) * kGlyphGap;
-	}
-
-	// w x h 를 전부 채운 픽셀맵(하이라이트 배경용).
-	std::string SolidBlock(int w, int h, char ink)
-	{
-		std::string row(static_cast<size_t>(w > 0 ? w : 0), ink);
-		std::string out;
-		for (int r = 0; r < h; ++r)
-		{
-			out += row;
-			if (r + 1 < h)
-			{
-				out += '\n';
-			}
-		}
-		return out;
-	}
-
-	const std::unordered_map<char, Color>& InkPalette(char key, Color color)
-	{
-		// key 는 항상 'W'(잉크) 또는 '#'(배경). 두 팔레트만 있으면 된다.
-		static const std::unordered_map<char, Color> title = { { 'W', Color::Green } };
-		static const std::unordered_map<char, Color> white = { { 'W', Color::White } };
-		static const std::unordered_map<char, Color> highlight = { { 'W', Color::Black } };
-		static const std::unordered_map<char, Color> bg = { { '#', Color::White } };
-
-		if (key == '#') return bg;
-		if (color == Color::Green) return title;
-		if (color == Color::Black) return highlight;
-		return white;
-	}
-
 	// --- 레이아웃 (콘솔 셀 단위) ---
 	constexpr int kTitleY = 6;
 	constexpr int kTitleScale = 2;
 	constexpr int kTitleLineGap = 3;
 
-	// 버튼: 타이틀과 같은 픽셀 폰트를 배율 1 로. (예전 1셀 텍스트의 약 5배 크기)
+	// 버튼: 타이틀과 같은 5x7 폰트를 배율 1 로.
 	constexpr int kButtonScale = 1;
 	constexpr int kButtonPadX = 2;
 	constexpr int kButtonPadY = 1;
@@ -139,29 +33,46 @@ namespace
 	const char* kStartLabel = "GAME START";
 	const char* kExitLabel = "EXIT GAME";
 
+	const std::unordered_map<char, Color>& TitlePalette()
+	{
+		static const std::unordered_map<char, Color> p = { { 'W', Color::Green } };
+		return p;
+	}
+	const std::unordered_map<char, Color>& ButtonPalette(bool hot)
+	{
+		static const std::unordered_map<char, Color> normal = { { 'W', Color::White } };
+		static const std::unordered_map<char, Color> hovered = { { 'W', Color::Black } };
+		return hot ? hovered : normal;
+	}
+	const std::unordered_map<char, Color>& HighlightBgPalette()
+	{
+		static const std::unordered_map<char, Color> p = { { '#', Color::White } };
+		return p;
+	}
+
 	int ButtonHeight()
 	{
-		return kGlyphH * kButtonScale + kButtonPadY * 2;
+		return PixelText::Height(false) * kButtonScale + kButtonPadY * 2;
 	}
 
 	int FirstButtonY()
 	{
-		const int titleBlock = kGlyphH * kTitleScale + kTitleLineGap + kGlyphH * kTitleScale;
+		const int titleBlock = PixelText::kBigH * kTitleScale + kTitleLineGap + PixelText::kBigH * kTitleScale;
 		return kTitleY + titleBlock + kButtonBlockGap;
 	}
 
 	Rect ButtonRect(const char* label, int screenW, int y)
 	{
-		const int textW = PixelTextWidth(std::strlen(label)) * kButtonScale;
+		const int textW = PixelText::Width(std::strlen(label), false) * kButtonScale;
 		const int w = textW + kButtonPadX * 2;
 		return Rect((screenW - w) / 2, y, w, ButtonHeight());
 	}
 
 	void SubmitTitleLine(const std::string& text, int screenW, int y)
 	{
-		const int widthCells = PixelTextWidth(text.size()) * kTitleScale;
+		const int widthCells = PixelText::Width(text.size(), false) * kTitleScale;
 		Renderer::Get().SubmitPixels(
-			MakePixelText(text, 'W'), InkPalette('W', Color::Green),
+			PixelText::Make(text, 'W', false), TitlePalette(),
 			Vector2((screenW - widthCells) / 2, y), RenderLayer::UI, '.', kTitleScale, kTitleScale);
 	}
 
@@ -170,12 +81,12 @@ namespace
 		if (hot)
 		{
 			Renderer::Get().SubmitPixels(
-				SolidBlock(rect.size.x, rect.size.y, '#'), InkPalette('#', Color::White),
+				PixelText::SolidBlock(rect.size.x, rect.size.y, '#'), HighlightBgPalette(),
 				rect.position, RenderLayer::UI - 1, ' ', 1, 1);
 		}
 
 		Renderer::Get().SubmitPixels(
-			MakePixelText(label, 'W'), InkPalette('W', hot ? Color::Black : Color::White),
+			PixelText::Make(label, 'W', false), ButtonPalette(hot),
 			Vector2(rect.position.x + kButtonPadX, rect.position.y + kButtonPadY),
 			RenderLayer::UI, '.', kButtonScale, kButtonScale);
 	}
@@ -254,7 +165,7 @@ void MenuLevel::Draw()
 
 	// 타이틀 - 큰 픽셀 문자, 초록, 두 줄.
 	SubmitTitleLine("TERMINAL", screenW, kTitleY);
-	SubmitTitleLine("RAID", screenW, kTitleY + kGlyphH * kTitleScale + kTitleLineGap);
+	SubmitTitleLine("RAID", screenW, kTitleY + PixelText::kBigH * kTitleScale + kTitleLineGap);
 
 	SubmitButton(kStartLabel, _startRect, _hovered == Button::Start);
 	SubmitButton(kExitLabel, _exitRect, _hovered == Button::Exit);
