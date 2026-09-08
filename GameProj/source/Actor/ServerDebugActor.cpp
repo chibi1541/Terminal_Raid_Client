@@ -110,7 +110,10 @@ void ServerDebugActor::OnTogglePaths()
 {
 	showPaths = !showPaths;
 	if (showPaths == false)
+	{
 		paths.clear();
+		lastPathExpanded = lastPathScanned = lastPathMicros = 0;
+	}
 	SendConfig();
 
 	char msg[96];
@@ -206,6 +209,17 @@ void ServerDebugActor::OnDebugPath(const Protocol::S_DEBUG_PATH& pkt)
 	PathDebug& pd = paths[id];
 	pd.currentIndex = pkt.currentindex();
 	pd.boxCells = static_cast<int>(pkt.boxcells());
+
+	// 활성 알고리즘은 모든 패킷이 싣는다.
+	lastPathAlgo = static_cast<int>(pkt.pathalgo());
+
+	// 새 탐색 통계는 repath 때만 온다 (expandedNodes > 0). F5 라벨용.
+	if (pkt.expandednodes() > 0)
+	{
+		lastPathExpanded = pkt.expandednodes();
+		lastPathScanned = pkt.scannednodes();
+		lastPathMicros = pkt.computemicros();
+	}
 
 	pd.waypoints.clear();
 	pd.waypoints.reserve(pkt.waypoints_size());
@@ -462,9 +476,13 @@ void ServerDebugActor::DrawPaths()
 		}
 	}
 
-	// 길찾기에 적용된 "타일"(= 충돌 박스) 크기 - 화면 고정 라벨.
-	char line[128];
-	sprintf_s(line, "[F5] pathfinding  box %dx%d cells  (= nav inflation = move collision)  paths %d",
-		labelBoxCells, labelBoxCells, static_cast<int>(paths.size()));
+	// 활성 알고리즘 + 마지막 repath 통계 + 박스 크기 - 화면 고정 라벨.
+	// expanded = open 에서 꺼낸 노드(JPS 는 점프포인트), scanned = 검사한 셀 수(두 알고리즘 공통 척도).
+	char line[224];
+	sprintf_s(line, "[F5] pathfinding  %s  box %dx%d  expanded %u  scanned %u  %u us  paths %d",
+		lastPathAlgo ? "A*" : "JPS",
+		labelBoxCells, labelBoxCells,
+		lastPathExpanded, lastPathScanned, lastPathMicros,
+		static_cast<int>(paths.size()));
 	renderer.Submit(line, Vector2(1, 2), Color::White, RenderLayer::UI);
 }

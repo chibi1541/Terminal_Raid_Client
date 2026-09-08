@@ -77,6 +77,12 @@ private:
 	};
 	std::unordered_map<uint64_t, PathDebug> paths;
 
+	// 마지막으로 도착한 "새 탐색" 통계 (개체 무관, 가장 최근 repath). F5 라벨이 이것만 쓴다.
+	int      lastPathAlgo = 0;			// 0 = JPS, 1 = A*
+	uint32_t lastPathExpanded = 0;
+	uint32_t lastPathScanned = 0;
+	uint32_t lastPathMicros = 0;
+
 	static constexpr size_t kTrailMax = 256;
 	float trailSampleAccumSec = 0.0f;
 
