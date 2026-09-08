@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	TestActor 애니메이션 상태 머신.
+
+	클립 정의는 TestActor.anim.xml에 있고, 여기서는 "언제 어떤 클립을 트는지"만 정한다.
+	게임플레이 코드는 Parameters에 선언된 값만 갱신하고 클립 이름은 모른다.
+
+	레이어는 정확히 2개, 역할이 고정이다: name="Base"(필수, 항상 전신) / name="Overlay"(선택).
+	이 파일은 Base 하나만 쓴다 - TestActor는 상하체를 나누지 않는다.
+
+	Parameter  : 조건에서 쓸 파라미터 선언 + 기본값.
+	             선언하지 않은 이름을 조건에 쓰면 로드할 때 크래시한다(오타 방지).
+	State rows : Overlay의 State에서만 쓴다. 생략하거나 "all"이면 전체, "4-7"이면 4~7행만.
+	             Base의 State에 rows를 쓰면 크래시한다(의미 없는 자리).
+	State blend: 생략하면 true. Base 상태에서 false면 이 상태인 동안 Overlay를 통째로 숨긴다
+	             (구르기/사망 등). Overlay 상태에서 false면 담당 행을 통째로 가져가 Base를 가린다.
+	Condition  : "파라미터 연산자 값" 3토큰. 여러 개면 전부 참이어야 전이(AND).
+	             연산자는 기호(> >= == != < <=)와 단어(gt ge eq ne lt le) 둘 다 된다.
+	             XML 속성값에 '<'는 그대로 못 넣으니 단어형(le, lt)이 편하다.
+	             내장 파라미터: animTime(0~1), animFinished, stateTime(초)
+
+	이 파일은 UTF-8(BOM 없이)로 저장할 것.
+-->
+<AnimStateMachine>
+
+	<Parameters>
+		<!-- 초당 이동 칸 수. 0보다 크면 걷는 중. -->
+		<Parameter name="speed" value="0" />
+	</Parameters>
+
+	<Layer name="Base">
+
+		<States entry="Idle">
+			<State name="Idle" clip="Idle" />
+			<State name="Walk" clip="Walk" />
+		</States>
+
+		<!-- 쓴 순서가 곧 우선순위다. -->
+		<Transitions>
+			<Transition from="Idle" to="Walk">
+				<Condition test="speed gt 0" />
+			</Transition>
+			<Transition from="Walk" to="Idle">
+				<Condition test="speed le 0" />
+			</Transition>
+		</Transitions>
+
+	</Layer>
+
+</AnimStateMachine>
