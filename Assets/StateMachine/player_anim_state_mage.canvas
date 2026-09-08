@@ -170,6 +170,14 @@
 			"toNode": "c5906e3a8d417b2e",
 			"toSide": "bottom",
 			"label": "animFinished"
+		},
+		{
+			"id": "e_death_exit",
+			"fromNode": "2222222222222222",
+			"fromSide": "right",
+			"toNode": "c5906e3a8d417b2e",
+			"toSide": "bottom",
+			"label": "IsDead == false"
 		}
 	]
 }

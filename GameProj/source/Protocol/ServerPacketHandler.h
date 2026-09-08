@@ -36,6 +36,8 @@ enum : uint16
 	PKT_S_DEBUG_PATH = 1018,
 	PKT_C_ATTACK = 1019,
 	PKT_S_DEBUG_QUADTREE = 1020,
+	PKT_C_RESPAWN = 1021,
+	PKT_S_RESPAWN = 1022,
 };
 
 bool Handle_INVALID(const Session* session, BYTE* buffer, int32 len);
@@ -55,6 +57,7 @@ bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt
 bool Handle_S_DEBUG_LEVEL(const Session* session, Protocol::S_DEBUG_LEVEL& pkt);
 bool Handle_S_DEBUG_PATH(const Session* session, Protocol::S_DEBUG_PATH& pkt);
 bool Handle_S_DEBUG_QUADTREE(const Session* session, Protocol::S_DEBUG_QUADTREE& pkt);
+bool Handle_S_RESPAWN(const Session* session, Protocol::S_RESPAWN& pkt);
 
 // PacketHandler 클래스 자동화
 class ServerPacketHandler
@@ -80,6 +83,7 @@ public:
 		GPacketHandler[PKT_S_DEBUG_LEVEL] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEBUG_LEVEL>(Handle_S_DEBUG_LEVEL, session, buffer, len); };
 		GPacketHandler[PKT_S_DEBUG_PATH] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEBUG_PATH>(Handle_S_DEBUG_PATH, session, buffer, len); };
 		GPacketHandler[PKT_S_DEBUG_QUADTREE] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_DEBUG_QUADTREE>(Handle_S_DEBUG_QUADTREE, session, buffer, len); };
+		GPacketHandler[PKT_S_RESPAWN] = [](const Session* session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_RESPAWN>(Handle_S_RESPAWN, session, buffer, len); };
 
 	}
 
@@ -97,6 +101,7 @@ public:
 	static BYTE* MakeSendBuffer(Protocol::C_MOVE& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_MOVE, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_DEBUG_CONFIG& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_DEBUG_CONFIG, size); }
 	static BYTE* MakeSendBuffer(Protocol::C_ATTACK& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_ATTACK, size); }
+	static BYTE* MakeSendBuffer(Protocol::C_RESPAWN& pkt, OUT int32& size) {return MakeSendBuffer(pkt, PKT_C_RESPAWN, size); }
 
 
 private:

@@ -57,6 +57,9 @@
     <ClCompile Include="source\Actor\CrosshairActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Actor\DeathScreenActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\UI\PixelText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Actor\CrosshairActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Actor\DeathScreenActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\UI\PixelText.h">

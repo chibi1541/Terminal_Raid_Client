@@ -90,6 +90,14 @@ void ReplCharacter::Tick(float deltaTime)
 			isHit = false;
 	}
 
+	// 사망 연출 완료 감지 : Death 클립 끝의 DeathEnd 노티파이, 또는 노티파이 유실 대비 폴백.
+	if (isDead && deathAnimDone == false)
+	{
+		deathFallbackSec -= deltaTime;
+		if (deathFallbackSec <= 0.0f || (nullptr != animator && animator->HasNotify("DeathEnd")))
+			deathAnimDone = true;
+	}
+
 	// 흰색 피격 깜빡임(경직 없는 피격 연출). 현재 클립은 그대로 재생되고 색만 토글된다.
 	if (hitFlashSec > 0.0f && nullptr != animator)
 	{
@@ -193,8 +201,29 @@ void ReplCharacter::ApplyDeath(const Protocol::S_DEATH& pkt)
 	isDead = true;
 	isHit = false;
 
+	// 사망 연출은 지금부터. Death 클립이 끝나면(DeathEnd) 사망 화면이 뜬다.
+	// 폴백 2초 - 노티파이가 유실돼도 UI 가 영영 안 뜨는 일은 없게.
+	deathAnimDone = false;
+	deathFallbackSec = 2.0f;
+
 	// 사망 연출(Death 클립)은 원래 색으로 보여야 한다.
 	hitFlashSec = 0.0f;
+	if (nullptr != animator)
+		animator->SetTint(std::nullopt);
+}
+
+void ReplCharacter::ApplyRespawn(const Protocol::ObjectInfo& info)
+{
+	// 위치 스냅 + hp/maxHp + (LocalPlayer 예측 / RemotePlayer 보간) 리셋.
+	super::ApplyRespawn(info);
+
+	// 사망/피격 연출 해제 - ApplyDeath 의 역동작.
+	isDead = false;
+	isHit = false;
+	hitFallbackSec = 0.0f;
+	hitFlashSec = 0.0f;
+	deathAnimDone = false;
+	deathFallbackSec = 0.0f;
 	if (nullptr != animator)
 		animator->SetTint(std::nullopt);
 }

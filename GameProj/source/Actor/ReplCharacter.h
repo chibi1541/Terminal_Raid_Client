@@ -41,6 +41,9 @@ public:
 	// 패킷 순서가 뒤바뀌어 도착해도(HIT 유실 등) 사망 연출은 반드시 뜨게 하기 위함.
 	virtual void ApplyDeath(const Protocol::S_DEATH& pkt) override;
 
+	// 부활: 위치/hp 복구(super) + 사망/피격 연출 상태 해제.
+	virtual void ApplyRespawn(const Protocol::ObjectInfo& info) override;
+
 	inline const std::string& GetCharacterName() const { return characterName; }
 
 	// 재생할 애니메이션 키(AnimationData.xml 의 Clip/StateMachine name). ObjectManager::Spawn 이
@@ -59,8 +62,12 @@ public:
 
 	// 피격 경직 중인가 (S_HIT.stunMs 로 켜지고, Hit 클립 끝 HitEnd 노티파이/타임아웃으로 꺼짐).
 	inline bool IsHitReacting() const { return isHit; }
-	// 사망 상태인가 (S_DEATH 로 켜짐, 해제 없음 - 게임오버/리스폰은 나중).
+	// 사망 상태인가 (S_DEATH 로 켜지고, ApplyRespawn 이 해제).
 	inline bool IsDeadState() const { return isDead; }
+
+	// 사망 연출(Death 클립)까지 다 끝났는가. 사망 화면 UI 는 이게 참일 때만 띄운다.
+	// DeathEnd 노티파이 또는 폴백 타임아웃으로 켜진다.
+	inline bool IsDeathAnimDone() const { return isDead && deathAnimDone; }
 
 protected:
 	// 이름표 색. 내 캐릭터와 남을 화면에서 구분하는 유일한 수단이다.
@@ -120,6 +127,11 @@ protected:
 	bool  isHit = false;
 	bool  isDead = false;
 	float hitFallbackSec = 0.0f;	// 노티파이 유실 대비 isHit 자동 해제 타이머.
+
+	// 사망 연출 완료 플래그. ApplyDeath 가 false 로 두고, Tick 이 DeathEnd 노티파이 /
+	// 폴백 타임아웃으로 true 로 만든다. 사망 화면 UI 표시 타이밍 게이트.
+	bool  deathAnimDone = false;
+	float deathFallbackSec = 0.0f;
 
 	// 경직 없는 피격(보스 등 stunMs=0)에 쓰는 흰색 깜빡임. 상태 이상 없이 연출만.
 	// ApplyHit 이 채우고, Tick 이 깎으면서 주기적으로 animator tint 를 White <-> 원색으로 토글한다.

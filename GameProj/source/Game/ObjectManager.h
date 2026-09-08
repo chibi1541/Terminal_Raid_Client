@@ -11,6 +11,7 @@ class LocalPlayer;
 class ServerDebugActor;
 class PauseMenuActor;
 class CrosshairActor;
+class DeathScreenActor;
 
 namespace Craft { class Level; }
 
@@ -39,6 +40,7 @@ public:
 	void OnMoveAck(const Protocol::S_MOVE_ACK& pkt);
 	void OnHit(const Protocol::S_HIT& pkt);
 	void OnDeath(const Protocol::S_DEATH& pkt);
+	void OnRespawn(const Protocol::S_RESPAWN& pkt);
 	void OnAttackStart(const Protocol::S_ATTACK_START& pkt);
 	void OnDebugLevel(const Protocol::S_DEBUG_LEVEL& pkt);
 	void OnDebugPath(const Protocol::S_DEBUG_PATH& pkt);
@@ -91,6 +93,9 @@ private:
 
 	// 마우스 십자선 오버레이. 소유권은 Level.
 	std::weak_ptr<CrosshairActor> crosshair;
+
+	// 로컬 플레이어 사망 시 뜨는 리스폰 화면. 소유권은 Level.
+	std::weak_ptr<DeathScreenActor> deathScreen;
 
 	// OnEnterRoom 이 MenuLevel 위에서 만든 다음 레벨(TileMapLevel).
 	// 그 프레임의 스폰들이 이쪽으로 가야 한다. 교체 후엔 mainLevel 이 되어 GetLevel() 과 같아진다.

@@ -8,6 +8,7 @@
 #include "Actor/ServerDebugActor.h"
 #include "Actor/PauseMenuActor.h"
 #include "Actor/CrosshairActor.h"
+#include "Actor/DeathScreenActor.h"
 #include "Asset/AssetManager.h"
 #include "Engine/Engine.h"
 #include "Game/ActorDataAsset.h"
@@ -101,6 +102,16 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 	if (std::shared_ptr<Level> level = SpawnLevel())
 	{
 		crosshair = level->SpawnActor<CrosshairActor>();
+	}
+
+	// 사망/리스폰 화면.
+	if (std::shared_ptr<DeathScreenActor> old = deathScreen.lock())
+	{
+		old->Destroy();
+	}
+	if (std::shared_ptr<Level> level = SpawnLevel())
+	{
+		deathScreen = level->SpawnActor<DeathScreenActor>();
 	}
 }
 
@@ -212,6 +223,16 @@ void ObjectManager::OnDeath(const Protocol::S_DEATH& pkt)
 	// 실제 제거는 여기서 하지 않는다. 주석대로 이 직후 S_DESPAWN이 뒤따라오고,
 	// OnDespawn이 Destroy()를 부른다. 여기서 먼저 지우면 그 사이 한두 프레임
 	// 재생돼야 할 사망 연출(IsDead)이 아예 안 뜬다.
+}
+
+void ObjectManager::OnRespawn(const Protocol::S_RESPAWN& pkt)
+{
+	EnsureGameThread();
+
+	if (std::shared_ptr<ReplicatedActor> actor = Find(pkt.object().objectid()))
+	{
+		actor->ApplyRespawn(pkt.object());
+	}
 }
 
 void ObjectManager::OnAttackStart(const Protocol::S_ATTACK_START& pkt)

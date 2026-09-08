@@ -148,6 +148,17 @@ bool Handle_S_DEATH(const Session* session, Protocol::S_DEATH& pkt)
 	return true;
 }
 
+bool Handle_S_RESPAWN(const Session* session, Protocol::S_RESPAWN& pkt)
+{
+	Engine::Get().RunOnGameThread([pkt]()
+		{
+			ObjectManager::Get().OnRespawn(pkt);
+		}
+	);
+
+	return true;
+}
+
 bool Handle_S_ATTACK_START(const Session* session, Protocol::S_ATTACK_START& pkt)
 {
 	Engine::Get().RunOnGameThread([pkt]()

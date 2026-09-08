@@ -374,7 +374,7 @@
 		</Frame>
 	</Clip>
 	
-	<Clip name="Death" facing="Down" fps="6" loop="false" width="26" height="32" pivot="13,32">
+	<Clip name="Death" facing="Down" fps="6" loop="false" width="26" height="32" pivot="13,15.5">
 		<Notify frame="end" name="DeathEnd" />
 		<Frame>
 			..........................

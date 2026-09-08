@@ -44,6 +44,11 @@ public:
 	virtual void ApplyDeath(const Protocol::S_DEATH& pkt) {}
 	virtual void ApplyAttackStart(const Protocol::S_ATTACK_START& pkt) {}
 
+	// S_RESPAWN 통지. 부활한 개체의 전체 스냅샷으로 위치/hp 를 되돌린다.
+	// 기본은 ApplyObjectInfo 재사용(원격 보간기 Reset / 로컬 예측 앵커 재시드).
+	// ReplCharacter 가 사망 상태(isDead) 해제까지 덧붙인다.
+	virtual void ApplyRespawn(const Protocol::ObjectInfo& info);
+
 	inline uint64 GetObjectId() const { return objectId; }
 
 	// 서버가 준 원형 충돌 반경(셀). 디버그 반경 원 시각화에 쓴다. 스폰 스냅샷에서만 갱신.

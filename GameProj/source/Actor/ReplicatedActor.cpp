@@ -41,6 +41,12 @@ void ReplicatedActor::ApplyMove(const Protocol::MoveInfo& info)
 		MovementInterpolator::VelocityFromServer(info.dir(), info.speed()));
 }
 
+void ReplicatedActor::ApplyRespawn(const Protocol::ObjectInfo& info)
+{
+	// 스폰 스냅샷과 같은 처리 - 위치 스냅 + interpolator.Reset(원격) / 예측 앵커 재시드(LocalPlayer override).
+	ApplyObjectInfo(info);
+}
+
 Protocol::ObjectType ReplicatedActor::GetObjectType() const
 {
 	return ObjectIdHandler::GetObjectType(objectId);
