@@ -69,8 +69,10 @@ private:
 	struct PathDebug
 	{
 		std::vector<Craft::Vector2> waypoints;
-		std::vector<Craft::Vector2> searchNodes;
+		std::vector<Craft::Vector2> searchNodes;		// JPS 탐색 흔적 (작은 점)
+		std::vector<Craft::Vector2> pathJumpNodes;	// 최종 경로가 지나는 점프 포인트 (오렌지 3x3)
 		uint32_t currentIndex = 0;
+		int boxCells = 0;					// 이 경로를 구운 액터 충돌 박스 한 변 (셀). = 길찾기에 적용된 "타일" 크기
 		std::deque<Craft::Vector2> trail;	// 실제 이동 궤적(클라가 매 틱 샘플)
 	};
 	std::unordered_map<uint64_t, PathDebug> paths;

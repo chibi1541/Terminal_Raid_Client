@@ -28,6 +28,36 @@ namespace
 		return table;
 	}
 
+	// 한 셀을 중심으로 3x3 블록을 같은 심볼/색으로 채운다. (길찾기 오버레이 강조용)
+	void SubmitBlock3x3(Renderer& renderer, Vector2 center, const char* symbol, Color color)
+	{
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx)
+				renderer.SubmitWorld(symbol, Vector2(center.x + dx, center.y + dy), color, RenderLayer::WorldUI);
+	}
+
+	// 위치 중심 boxCells x boxCells 사각형의 테두리 셀들. (= MoveMath::BoxBlockedCells 앵커 : 중심 - box/2, 폭 box)
+	void SubmitBoxOutline(Renderer& renderer, Vector2 center, int boxCells, Color color)
+	{
+		if (boxCells <= 1)
+			return;
+		const int minX = center.x - boxCells / 2;
+		const int maxX = minX + boxCells - 1;
+		const int minY = center.y - boxCells / 2;
+		const int maxY = minY + boxCells - 1;
+
+		for (int x = minX; x <= maxX; ++x)
+		{
+			renderer.SubmitWorld("-", Vector2(x, minY), color, RenderLayer::WorldUI);
+			renderer.SubmitWorld("-", Vector2(x, maxY), color, RenderLayer::WorldUI);
+		}
+		for (int y = minY; y <= maxY; ++y)
+		{
+			renderer.SubmitWorld("|", Vector2(minX, y), color, RenderLayer::WorldUI);
+			renderer.SubmitWorld("|", Vector2(maxX, y), color, RenderLayer::WorldUI);
+		}
+	}
+
 	// 두 셀 사이를 브레젠험으로 훑으며 콜백. 경로 선을 점으로 그릴 때 쓴다.
 	template <typename Fn>
 	void ForEachCellOnLine(Vector2 a, Vector2 b, Fn&& fn)
@@ -175,17 +205,27 @@ void ServerDebugActor::OnDebugPath(const Protocol::S_DEBUG_PATH& pkt)
 
 	PathDebug& pd = paths[id];
 	pd.currentIndex = pkt.currentindex();
+	pd.boxCells = static_cast<int>(pkt.boxcells());
 
 	pd.waypoints.clear();
 	pd.waypoints.reserve(pkt.waypoints_size());
 	for (const Protocol::DebugPathNode& n : pkt.waypoints())
 		pd.waypoints.emplace_back(n.cell().x(), n.cell().y());
 
-	// searchNodes는 goto/path 명령 때만 채워져 온다. 비어 있으면 기존 것을 지운다.
-	pd.searchNodes.clear();
-	pd.searchNodes.reserve(pkt.searchnodes_size());
-	for (const Protocol::DebugPathNode& n : pkt.searchnodes())
-		pd.searchNodes.emplace_back(n.cell().x(), n.cell().y());
+	// searchNodes / pathJumpNodes 는 repath 때만 채워져 온다. 웨이포인트만 갱신하는
+	// 패킷(currentIndex 전진)에서는 비어 오므로, 그때는 기존 것을 유지한다.
+	if (pkt.searchnodes_size() > 0 || pkt.pathjumpnodes_size() > 0)
+	{
+		pd.searchNodes.clear();
+		pd.searchNodes.reserve(pkt.searchnodes_size());
+		for (const Protocol::DebugPathNode& n : pkt.searchnodes())
+			pd.searchNodes.emplace_back(n.cell().x(), n.cell().y());
+
+		pd.pathJumpNodes.clear();
+		pd.pathJumpNodes.reserve(pkt.pathjumpnodes_size());
+		for (const Protocol::DebugPathNode& n : pkt.pathjumpnodes())
+			pd.pathJumpNodes.emplace_back(n.cell().x(), n.cell().y());
+	}
 }
 
 void ServerDebugActor::Tick(float deltaTime)
@@ -376,35 +416,55 @@ void ServerDebugActor::DrawPaths()
 {
 	Renderer& renderer = Renderer::Get();
 
+	int labelBoxCells = 0;
+
 	for (const auto& kv : paths)
 	{
 		const PathDebug& pd = kv.second;
+		if (pd.boxCells > labelBoxCells)
+			labelBoxCells = pd.boxCells;
 
-		// JPS 탐색 노드 (가장 아래).
+		// JPS 탐색 흔적 (가장 아래, 흐리게).
 		for (const Vector2& node : pd.searchNodes)
-			renderer.SubmitWorld("x", node, Color::Purple, RenderLayer::WorldUI);
+			renderer.SubmitWorld("x", node, Color::DarkGray, RenderLayer::WorldUI);
 
 		// 실제 이동 궤적.
 		for (const Vector2& p : pd.trail)
-			renderer.SubmitWorld(".", p, Color::Orange, RenderLayer::WorldUI);
+			renderer.SubmitWorld(".", p, Color::Red, RenderLayer::WorldUI);
 
-		// 계획 경로 - 웨이포인트 사이를 점선으로 잇고, 노드를 찍는다.
+		// 계획 경로 - 웨이포인트 사이를 3x3 굵은 선으로 잇는다.
 		for (size_t i = 0; i + 1 < pd.waypoints.size(); ++i)
 		{
 			ForEachCellOnLine(pd.waypoints[i], pd.waypoints[i + 1], [&](Vector2 c)
 			{
-				renderer.SubmitWorld("+", c, Color::Blue, RenderLayer::WorldUI);
+				SubmitBlock3x3(renderer, c, "+", Color::Blue);
 			});
 		}
 
+		// 최종 경로가 지나는 점프 포인트 - 오렌지 3x3.
+		for (const Vector2& node : pd.pathJumpNodes)
+			SubmitBlock3x3(renderer, node, "#", Color::Orange);
+
+		// 웨이포인트 노드 - 지금 향하는 것은 노랑 3x3, 나머지는 파랑 점.
 		for (size_t i = 0; i < pd.waypoints.size(); ++i)
 		{
-			const bool isCurrent = (i == pd.currentIndex);
-			renderer.SubmitWorld(
-				isCurrent ? "@" : "O",
-				pd.waypoints[i],
-				isCurrent ? Color::Yellow : Color::Blue,
-				RenderLayer::WorldUI);
+			if (i == pd.currentIndex)
+				SubmitBlock3x3(renderer, pd.waypoints[i], "@", Color::Yellow);
+			else
+				renderer.SubmitWorld("O", pd.waypoints[i], Color::Blue, RenderLayer::WorldUI);
+		}
+
+		// 이 액터가 길찾기에서 차지하는 셀 영역(충돌 박스) 테두리 - 액터의 현재 위치 기준.
+		if (pd.boxCells > 1)
+		{
+			if (std::shared_ptr<ReplicatedActor> actor = ObjectManager::Get().Find(kv.first))
+				SubmitBoxOutline(renderer, actor->GetPosition(), pd.boxCells, Color::Green);
 		}
 	}
+
+	// 길찾기에 적용된 "타일"(= 충돌 박스) 크기 - 화면 고정 라벨.
+	char line[128];
+	sprintf_s(line, "[F5] pathfinding  box %dx%d cells  (= nav inflation = move collision)  paths %d",
+		labelBoxCells, labelBoxCells, static_cast<int>(paths.size()));
+	renderer.Submit(line, Vector2(1, 2), Color::White, RenderLayer::UI);
 }
