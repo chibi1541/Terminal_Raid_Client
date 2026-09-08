@@ -11,6 +11,7 @@ class AnimationPlayer;
 
 NAME_SPACE_END
 
+
 // 서버 권위 직진 투사체. 스폰 스냅샷의 속도 벡터(CreatureState.velSub)로 데드레커닝한다.
 // MovementInterpolator(200ms 지연)는 빠른 투사체에 안 맞아서 안 쓴다 -
 // 매 프레임 pos += vel*dt, S_MOVE(posSub) 도착 시 그 권위 위치로 부드럽게 당겨 오차만 보정.

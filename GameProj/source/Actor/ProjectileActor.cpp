@@ -43,14 +43,21 @@ void ProjectileActor::BeginPlay()
 		clipName = projData.GetAnimClip(type);
 	}
 
-	animPlayer = std::make_shared<AnimationPlayer>();
+	animPlayer = std::make_shared<Craft::AnimationPlayer>();
+	auto animData = Craft::AssetManager::Get().GetPrimaryAsset<Craft::AnimationDataAsset>("AnimationData");
 
-	auto animData = AssetManager::Get().GetPrimaryAsset<AnimationDataAsset>("AnimationData");
+	std::weak_ptr<Actor> weakSelf = weak_from_this();
 
-	AssetManager::Get().LoadAsync<AnimationClipSet>(
+	Craft::AssetManager::Get().LoadAsync<Craft::AnimationClipSet>(
 		animData->FindClipPath(animSet).c_str(),
-		[this, clipName](std::shared_ptr<const AnimationClipSet> clips)
+		[weakSelf, clipName](std::shared_ptr<const Craft::AnimationClipSet> clips)
 		{
+			const std::shared_ptr<ProjectileActor> self = Cast<ProjectileActor>(weakSelf.lock());
+			if (self == nullptr)
+			{
+				return;
+			}
+
 			if (nullptr == clips || clips->empty())
 			{
 				ASSERT_CRASH(false);
@@ -61,7 +68,7 @@ void ProjectileActor::BeginPlay()
 			// GetName() 이 아니라 GetLogicalName()("Pellet") 으로 비교한다.
 			// 투사체는 방향이 안 바뀌어서 anim.xml 에 facing="Down" 하나만 있다 - 논리 이름이
 			// 같은 첫 클립을 쓰면 된다. 못 찾으면 첫 클립으로 폴백.
-			std::shared_ptr<const AnimationClip> chosen = clips->front();
+			std::shared_ptr<const Craft::AnimationClip> chosen = clips->front();
 			for (const auto& clip : *clips)
 			{
 				if (clip != nullptr && clip->GetLogicalName() == clipName)
@@ -71,7 +78,12 @@ void ProjectileActor::BeginPlay()
 				}
 			}
 
-			animPlayer->Play(chosen);
+			if (self->animPlayer.get() == nullptr)
+			{
+				return;
+			}
+
+			self->animPlayer->Play(chosen);
 		});
 
 	super::BeginPlay();
@@ -89,7 +101,7 @@ void ProjectileActor::ApplyObjectInfo(const Protocol::ObjectInfo& info)
 	velCellsY = static_cast<float>(state.velsuby()) / kPosSubunits;
 	started = true;
 
-	SetPosition(Vector2(state.pos().x(), state.pos().y()));
+	SetPosition(Craft::Vector2(state.pos().x(), state.pos().y()));
 }
 
 void ProjectileActor::ApplyMove(const Protocol::MoveInfo& info)
@@ -128,7 +140,7 @@ void ProjectileActor::Tick(float deltaTime)
 	{
 		renderX += velCellsX * deltaTime;
 		renderY += velCellsY * deltaTime;
-		SetPosition(Vector2(
+		SetPosition(Craft::Vector2(
 			static_cast<int>(std::lround(renderX)),
 			static_cast<int>(std::lround(renderY))));
 	}
@@ -150,14 +162,14 @@ void ProjectileActor::Draw()
 	const int offsetY = static_cast<int>(::floorf(compositePivotY + 0.5f));
 
 	image = animPlayer->GetCurrentSprite()->GetPixelMap();
-	Renderer::Get().SubmitPixelsWorld(
+	Craft::Renderer::Get().SubmitPixelsWorld(
 		image,
-		SymbolPalette::GetTable(),
+		Craft::SymbolPalette::GetTable(),
 		GetPosition(),
 		GetSortingOrder(),
-		SymbolPalette::TransparentSymbol,
+		Craft::SymbolPalette::TransparentSymbol,
 		1,
 		1,
 		std::nullopt,
-		Vector2(-offsetX, -offsetY));
+		Craft::Vector2(-offsetX, -offsetY));
 }
