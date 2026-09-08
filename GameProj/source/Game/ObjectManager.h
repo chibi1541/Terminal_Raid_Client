@@ -10,6 +10,7 @@ class ReplicatedActor;
 class LocalPlayer;
 class ServerDebugActor;
 class PauseMenuActor;
+class CrosshairActor;
 
 namespace Craft { class Level; }
 
@@ -87,6 +88,9 @@ private:
 
 	// 룸 입장마다 하나 스폰하는 ESC 일시정지 메뉴. 소유권은 Level.
 	std::weak_ptr<PauseMenuActor> pauseMenu;
+
+	// 마우스 십자선 오버레이. 소유권은 Level.
+	std::weak_ptr<CrosshairActor> crosshair;
 
 	// OnEnterRoom 이 MenuLevel 위에서 만든 다음 레벨(TileMapLevel).
 	// 그 프레임의 스폰들이 이쪽으로 가야 한다. 교체 후엔 mainLevel 이 되어 GetLevel() 과 같아진다.

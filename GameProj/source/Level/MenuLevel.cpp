@@ -9,6 +9,7 @@
 
 #include "Globals.h"
 #include "UI/PixelText.h"
+#include "Actor/CrosshairActor.h"
 
 #include <cstring>
 #include <string>
@@ -98,6 +99,9 @@ void MenuLevel::OnInitialized()
 
 	// 아무것도 안 그려진 칸은 검게. (게임 레벨과 같은 기본값)
 	Renderer::Get().SetClearColor(Color::Black);
+
+	// 마우스 십자선 오버레이.
+	SpawnActor<CrosshairActor>();
 
 	ComputeLayout();
 }

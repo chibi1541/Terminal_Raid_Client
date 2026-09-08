@@ -7,6 +7,7 @@
 #include "Actor/ProjectileActor.h"
 #include "Actor/ServerDebugActor.h"
 #include "Actor/PauseMenuActor.h"
+#include "Actor/CrosshairActor.h"
 #include "Asset/AssetManager.h"
 #include "Engine/Engine.h"
 #include "Game/ActorDataAsset.h"
@@ -90,6 +91,16 @@ void ObjectManager::OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt)
 	if (std::shared_ptr<Level> level = SpawnLevel())
 	{
 		pauseMenu = level->SpawnActor<PauseMenuActor>();
+	}
+
+	// 마우스 십자선 오버레이.
+	if (std::shared_ptr<CrosshairActor> old = crosshair.lock())
+	{
+		old->Destroy();
+	}
+	if (std::shared_ptr<Level> level = SpawnLevel())
+	{
+		crosshair = level->SpawnActor<CrosshairActor>();
 	}
 }
 

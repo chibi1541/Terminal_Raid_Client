@@ -119,6 +119,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClCompile Include="source\Game\ObjectManager.cpp" />
     <ClCompile Include="source\Level\MenuLevel.cpp" />
     <ClCompile Include="source\Actor\PauseMenuActor.cpp" />
+    <ClCompile Include="source\Actor\CrosshairActor.cpp" />
     <ClCompile Include="source\UI\PixelText.cpp" />
     <ClCompile Include="source\Globals.cpp" />
     <ClCompile Include="source\Actor\TestActor.cpp" />
@@ -160,6 +161,7 @@ CALL $(SolutionDir)Common\ProtoBuf\GenPackets.bat</Command>
     <ClInclude Include="source\Game\ObjectManager.h" />
     <ClInclude Include="source\Level\MenuLevel.h" />
     <ClInclude Include="source\Actor\PauseMenuActor.h" />
+    <ClInclude Include="source\Actor\CrosshairActor.h" />
     <ClInclude Include="source\UI\PixelText.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\Actor\TestActor.h" />
