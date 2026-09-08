@@ -442,7 +442,7 @@ void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
 	Level* const level = GetOwner().get();
 
 	// 캐릭터 위치를 중심으로 한 셀 박스 판정 (= Room::IsActorBoxBlocked). 스프라이트 8x8 전체.
-	auto footprintBlocked = [level](int32 centerX, int32 centerY) -> bool
+	auto boxBlocked = [level](int32 centerX, int32 centerY) -> bool
 	{
 		if (level == nullptr)
 		{
@@ -464,7 +464,7 @@ void LocalPlayer::ReplayInputs(int32 startFpX, int32 startFpY, uint32 startMs,
 		const Vector2 unit = DeltaFromServerDirection(d);
 		MoveMath::IntegrateSlide(fpX, fpY, unit.x, unit.y,
 			MoveMath::DEFAULT_MOVE_SPEED_SUBUNITS, static_cast<int32>(toMs - fromMs),
-			footprintBlocked);
+			boxBlocked);
 	};
 
 	// startDir은 startMs부터 첫 미확인 입력 직전까지 유효했던 방향이다.
