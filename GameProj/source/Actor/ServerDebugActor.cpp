@@ -112,7 +112,8 @@ void ServerDebugActor::OnTogglePaths()
 	if (showPaths == false)
 	{
 		paths.clear();
-		lastPathExpanded = lastPathScanned = lastPathMicros = 0;
+		lastPathExpanded = lastPathScanned = 0;
+		lastPathMicrosAvg = lastPathMicrosMin = lastPathMicrosMax = 0;
 	}
 	SendConfig();
 
@@ -218,7 +219,9 @@ void ServerDebugActor::OnDebugPath(const Protocol::S_DEBUG_PATH& pkt)
 	{
 		lastPathExpanded = pkt.expandednodes();
 		lastPathScanned = pkt.scannednodes();
-		lastPathMicros = pkt.computemicros();
+		lastPathMicrosAvg = pkt.computemicros();
+		lastPathMicrosMin = pkt.computemicrosmin();
+		lastPathMicrosMax = pkt.computemicrosmax();
 	}
 
 	pd.waypoints.clear();
@@ -477,12 +480,18 @@ void ServerDebugActor::DrawPaths()
 	}
 
 	// 활성 알고리즘 + 마지막 repath 통계 + 박스 크기 - 화면 고정 라벨.
-	// expanded = open 에서 꺼낸 노드(JPS 는 점프포인트), scanned = 검사한 셀 수(두 알고리즘 공통 척도).
-	char line[224];
-	sprintf_s(line, "[F5] pathfinding  %s  box %dx%d  expanded %u  scanned %u  %u us  paths %d",
-		lastPathAlgo ? "A*" : "JPS",
+	// expanded = open 에서 꺼낸 노드(JPS 는 점프포인트), scanned = 검사한 셀 수(모든 알고리즘 공통 척도).
+	const char* algoName =
+		(lastPathAlgo == 1) ? "JPS_A" :
+		(lastPathAlgo == 2) ? "JPS_B" :
+		(lastPathAlgo == 3) ? "A*"    : "JPS";
+
+	char line[256];
+	sprintf_s(line, "[F5] pathfinding  %s  box %dx%d  expanded %u  scanned %u  us %u/%u/%u min/avg/max  paths %d",
+		algoName,
 		labelBoxCells, labelBoxCells,
-		lastPathExpanded, lastPathScanned, lastPathMicros,
+		lastPathExpanded, lastPathScanned,
+		lastPathMicrosMin, lastPathMicrosAvg, lastPathMicrosMax,
 		static_cast<int>(paths.size()));
 	renderer.Submit(line, Vector2(1, 2), Color::White, RenderLayer::UI);
 }
