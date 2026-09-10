@@ -6,6 +6,8 @@
 
 std::unique_ptr<Craft::Service> GService;
 
+LoginRequest GLoginRequest;
+
 void StartServerConnection()
 {
 	// 두 번 눌러도(또는 재입장 시) 한 번만.

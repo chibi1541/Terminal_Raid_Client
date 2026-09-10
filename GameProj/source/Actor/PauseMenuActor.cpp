@@ -50,11 +50,11 @@ namespace
 
 	int ButtonWidth(const char* label)
 	{
-		return PixelText::Width(std::strlen(label), true) * kButtonScale + kButtonPadX * 2;
+		return PixelText::Width(std::strlen(label), PixelText::Font::Small) * kButtonScale + kButtonPadX * 2;
 	}
 	int ButtonHeight()
 	{
-		return PixelText::Height(true) * kButtonScale + kButtonPadY * 2;
+		return PixelText::Height(PixelText::Font::Small) * kButtonScale + kButtonPadY * 2;
 	}
 
 	void SubmitButton(const Rect& rect, const char* label, bool hot)
@@ -67,7 +67,7 @@ namespace
 		}
 
 		Renderer::Get().SubmitPixels(
-			PixelText::Make(label, 'W', true), ButtonTextPalette(hot),
+			PixelText::Make(label, 'W', PixelText::Font::Small), ButtonTextPalette(hot),
 			Vector2(rect.position.x + kButtonPadX, rect.position.y + kButtonPadY),
 			RenderLayer::UI + 103, '.', kButtonScale, kButtonScale);
 	}

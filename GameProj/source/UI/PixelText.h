@@ -9,26 +9,32 @@
 // 메인 메뉴(MenuLevel)와 일시정지 메뉴(PauseMenuActor)가 공유한다.
 namespace PixelText
 {
-	// 큰 폰트 5x7 (메인 메뉴 타이틀/버튼).
+	// 큰 폰트 5x7 (메인 메뉴 타이틀/버튼, 사망 화면). 부분 글자셋.
 	constexpr int kBigW = 5;
 	constexpr int kBigH = 7;
 
-	// 작은 폰트 4x6 (일시정지 메뉴 - 큰 폰트보다 대략 15~20% 작다).
+	// 작은 폰트 4x6 (일시정지 메뉴). 전체 A-Z / 0-9 / < > _.
 	constexpr int kSmallW = 4;
 	constexpr int kSmallH = 6;
+
+	// 아주 작은 폰트 3x5 (메인 메뉴 이름/캐릭터 폼). 전체 A-Z / 0-9 / < > _.
+	constexpr int kTinyW = 3;
+	constexpr int kTinyH = 5;
 
 	// 글자 사이 간격(픽셀 열).
 	constexpr int kGap = 1;
 
+	enum class Font { Big, Small, Tiny };
+
 	// text 를 픽셀맵으로. '#' 위치 -> ink, 그 외 -> '.'. 소문자는 대문자로 취급.
-	// 폰트에 없는 글자는 공백. small=true 면 4x6 폰트.
-	std::string Make(const std::string& text, char ink, bool small = false);
+	// 폰트에 없는 글자는 공백.
+	std::string Make(const std::string& text, char ink, Font font = Font::Big);
 
 	// Make 결과의 픽셀 폭(배율 1).
-	int Width(size_t charCount, bool small = false);
+	int Width(size_t charCount, Font font = Font::Big);
 
-	// Make 결과의 픽셀 높이(배율 1) = kBigH / kSmallH.
-	int Height(bool small = false);
+	// Make 결과의 픽셀 높이(배율 1) = kBigH / kSmallH / kTinyH.
+	int Height(Font font = Font::Big);
 
 	// w x h 를 전부 ink 로 채운 픽셀맵(패널/하이라이트 배경용).
 	std::string SolidBlock(int w, int h, char ink);

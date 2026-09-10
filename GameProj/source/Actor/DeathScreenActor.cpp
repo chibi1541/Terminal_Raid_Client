@@ -53,9 +53,9 @@ namespace
 		return p;
 	}
 
-	int TitleWidthPx()  { return PixelText::Width(std::strlen(kTitle), false) * kScale; }
-	int ButtonWidthPx() { return PixelText::Width(std::strlen(kButtonLabel), false) * kScale; }
-	int GlyphHeightPx() { return PixelText::Height(false) * kScale; }
+	int TitleWidthPx()  { return PixelText::Width(std::strlen(kTitle), PixelText::Font::Big) * kScale; }
+	int ButtonWidthPx() { return PixelText::Width(std::strlen(kButtonLabel), PixelText::Font::Big) * kScale; }
+	int GlyphHeightPx() { return PixelText::Height(PixelText::Font::Big) * kScale; }
 }
 
 void DeathScreenActor::BeginPlay()
@@ -144,7 +144,7 @@ void DeathScreenActor::Draw()
 	// 타이틀 "YOU DIED" (빨강).
 	const int screenW = r.GetScreenSize().x;
 	r.SubmitPixels(
-		PixelText::Make(kTitle, 'W', false), TitlePalette(),
+		PixelText::Make(kTitle, 'W', PixelText::Font::Big), TitlePalette(),
 		Vector2((screenW - TitleWidthPx()) / 2, _panelRect.position.y + kPanelPad),
 		RenderLayer::UI + 102, '.', kScale, kScale);
 
@@ -165,7 +165,7 @@ void DeathScreenActor::Draw()
 			_respawnRect.position, RenderLayer::UI + 102, ' ', 1, 1);
 	}
 	r.SubmitPixels(
-		PixelText::Make(kButtonLabel, 'W', false), ButtonTextPalette(_hovered),
+		PixelText::Make(kButtonLabel, 'W', PixelText::Font::Big), ButtonTextPalette(_hovered),
 		Vector2(_respawnRect.position.x + kButtonPadX, _respawnRect.position.y + kButtonPadY),
 		RenderLayer::UI + 103, '.', kScale, kScale);
 }

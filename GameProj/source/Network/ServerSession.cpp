@@ -2,6 +2,7 @@
 #include "ServerSession.h"
 #include "Protocol/ServerPacketHandler.h"
 #include "Protocol/Protocol.pb.h"
+#include "Globals.h"
 
 using namespace Craft;
 
@@ -17,8 +18,10 @@ ServerSession::~ServerSession()
 
 void ServerSession::OnConnected()
 {
+	// 메뉴에서 고른 이름/캐릭터. 빈 이름이면 "Player".
 	Protocol::C_LOGIN loginPkt;
-	loginPkt.set_name("chibi");
+	loginPkt.set_name(GLoginRequest.name.empty() ? "Player" : GLoginRequest.name);
+	loginPkt.set_chartype(static_cast<Protocol::CharacterType>(GLoginRequest.charType));
 	int32 size = 0;
 	BYTE* buffer = ServerPacketHandler::MakeSendBuffer(loginPkt, OUT size);
 	RegisterSend(buffer, size);

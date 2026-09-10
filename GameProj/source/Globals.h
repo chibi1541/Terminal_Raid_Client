@@ -2,6 +2,17 @@
 #include "Network/Service.h"
 
 #include <memory>
+#include <string>
+
+// 메뉴에서 고른 로그인 정보. StartServerConnection() 전에 MenuLevel 이 채우고,
+// ServerSession::OnConnected() 가 C_LOGIN 에 실어 보낸다.
+// (charType 값은 Protocol::CharacterType - 헤더 무게 때문에 여기선 int 로 둔다. 1 = KNIGHT)
+struct LoginRequest
+{
+	std::string name = "Player";
+	int         charType = 1;
+};
+extern LoginRequest GLoginRequest;
 
 // 서버와의 연결을 소유한다.
 //
