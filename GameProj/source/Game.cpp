@@ -27,8 +27,62 @@
 #include "Game/ActorDataAsset.h"
 #include "Thread/ThreadManager.h"
 #include <memory>
+#include <string>
+#include <cstring>
+#include <cstdlib>
 
 using namespace Craft;
+
+namespace
+{
+	// 커맨드 라인으로 서버 주소를 못 받았을 때 쓰는 기본값.
+	constexpr const wchar_t* kDefaultServerIp = L"172.16.30.188";
+	constexpr uint16 kDefaultServerPort = 7777;
+
+	std::wstring Widen(const std::string& s)
+	{
+		// IP / 포트는 ASCII 라 단순 확장으로 충분하다.
+		return std::wstring(s.begin(), s.end());
+	}
+
+	// 실행 인자로 접속할 서버 주소를 정한다.
+	//   Client.exe <ip> [port]
+	//   Client.exe <ip:port>
+	// 빠진 값은 기본값으로 채운다.
+	Craft::NetAddress ParseServerAddress(int argc, char* argv[])
+	{
+		std::wstring ip = kDefaultServerIp;
+		uint16 port = kDefaultServerPort;
+
+		if (argc >= 2 && argv[1] != nullptr && argv[1][0] != '\0')
+		{
+			const std::string first = argv[1];
+			const size_t colon = first.find(':');
+			if (colon != std::string::npos)
+			{
+				ip = Widen(first.substr(0, colon));
+				port = static_cast<uint16>(std::atoi(first.substr(colon + 1).c_str()));
+			}
+			else
+			{
+				ip = Widen(first);
+			}
+		}
+
+		if (argc >= 3 && argv[2] != nullptr && argv[2][0] != '\0')
+		{
+			port = static_cast<uint16>(std::atoi(argv[2]));
+		}
+
+		if (port == 0)
+		{
+			port = kDefaultServerPort;
+		}
+
+		std::wcout << L"[net] server " << ip << L":" << port << std::endl;
+		return Craft::NetAddress(ip, port);
+	}
+}
 
 // 인게임 HUD 위젯을 만들어 뷰포트에 올린다.
 //
@@ -104,7 +158,7 @@ int main(int argc, char* argv[])
 	// 패킷 핸들러 Init
 	ServerPacketHandler::Init();
 
-	GService = std::make_unique<Craft::ServerService>(Craft::NetAddress(L"172.16.30.188", 7777), [](Craft::NetAddress address)
+	GService = std::make_unique<Craft::ServerService>(ParseServerAddress(argc, argv), [](Craft::NetAddress address)
 		{
 			return std::make_unique<ServerSession>(address);
 		}
