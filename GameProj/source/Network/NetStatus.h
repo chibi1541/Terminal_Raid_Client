@@ -33,7 +33,10 @@ public:
 
 	// 아래는 전부 패킷 핸들러가 게임 쓰레드로 넘긴 잡 안에서 호출된다.
 	void OnLogin(const Protocol::S_LOGIN& pkt);
-	void OnPong();
+	void OnPong(const Protocol::S_PONG& pkt);
+
+	// 마지막으로 측정한 왕복 시간(ms). 아직 한 번도 못 받았으면 -1.
+	int GetLastPingMs() const { return lastPingMs; }
 	void OnEnterRoom(const Protocol::S_ENTER_ROOM& pkt);
 	void OnExitRoom();
 	void OnSpawn(const Protocol::S_SPAWN& pkt);
@@ -65,4 +68,7 @@ private:
 	std::string lastPacket = "-";
 
 	int packetCount = 0;
+
+	// C_PING 을 보낸 시각(clientTime)을 S_PONG 이 그대로 돌려주므로 왕복 시간을 여기서 계산.
+	int lastPingMs = -1;
 };

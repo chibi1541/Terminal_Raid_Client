@@ -58,9 +58,15 @@ void NetStatus::OnLogin(const Protocol::S_LOGIN& pkt)
 	Refresh();
 }
 
-void NetStatus::OnPong()
+void NetStatus::OnPong(const Protocol::S_PONG& pkt)
 {
 	EnterGameThreadJob("S_PONG");
+
+	// clientTime 은 C_PING 을 보낼 때 넣은 GetTickCount64() 값. 서버는 해석 없이 반향한다.
+	const uint64 now = ::GetTickCount64();
+	if (pkt.clienttime() != 0 && now >= pkt.clienttime())
+		lastPingMs = static_cast<int>(now - pkt.clienttime());
+
 	Refresh();
 }
 
@@ -117,6 +123,7 @@ void NetStatus::Refresh()
 	std::string text;
 	text += "net  : " + state + "\n";
 	text += "pkt  : " + lastPacket + " x" + std::to_string(packetCount) + "\n";
+	text += "ping : " + (lastPingMs < 0 ? std::string("-") : std::to_string(lastPingMs) + " ms") + "\n";
 	// 개수를 여기서 따로 세지 않는다. 두 군데서 세면 반드시 어긋난다.
 	text += "obj  : " + std::to_string(ObjectManager::Get().GetCount()) + "\n";
 	text += "game thread : " + std::to_string(gameThreadId) + "\n";

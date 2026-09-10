@@ -18,7 +18,7 @@ public:
 	BYTE* WritePos() {return &_buffer[_writeIndex]; }
 	BYTE* ReadPos() {return &_buffer[_readIndex]; }
 	int32 DataSize() {return _writeIndex - _readIndex; }
-	int32 FreeSize() {return _capacity - _writeIndex; }
+	int32 FreeSize() { return (_capacity - 1) - _writeIndex; }
 
 private:
 	int32 _capacity;

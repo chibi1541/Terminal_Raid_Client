@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 	// 패킷 핸들러 Init
 	ServerPacketHandler::Init();
 
-	GService = std::make_unique<Craft::ServerService>(Craft::NetAddress(L"127.0.0.1", 7777), [](Craft::NetAddress address)
+	GService = std::make_unique<Craft::ServerService>(Craft::NetAddress(L"172.16.30.188", 7777), [](Craft::NetAddress address)
 		{
 			return std::make_unique<ServerSession>(address);
 		}

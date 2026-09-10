@@ -31,6 +31,13 @@ public:
 	SOCKET		GetSocket() { return _socket; }
 	bool		IsConnected() { return _connected; }
 
+	// 디버그 HUD용 버퍼 통계. 네트워크 쓰레드가 갱신하는 인덱스를 락 없이 읽으므로
+	// 한 프레임 어긋난 근사치일 수 있다(표시용이라 허용).
+	int32		GetRecvBufferDataSize() const;	// 수신했지만 아직 처리 안 한 바이트
+	int32		GetRecvBufferFreeSize() const;	// 수신 버퍼 여유 공간
+	int32		GetSendBufferRemainSize() const;	// 송신 큐에 쌓였지만 소켓으로 안 옮긴 바이트
+	int32		GetSendBufferFreeSize() const;	// 송신 큐 여유 공간
+
 	void HandleError(int32 errorCode);
 
 private:

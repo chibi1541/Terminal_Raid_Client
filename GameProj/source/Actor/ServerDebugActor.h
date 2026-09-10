@@ -16,6 +16,8 @@
 //
 //   F4 : 서버 충돌 격자 오버레이 (막힘 셀을 빨간 체커로)
 //   F5 : 길찾기 경로 / 노드 오버레이
+//   F6 : 충돌(쿼드트리) 오버레이 + 타이밍
+//   F7 : 네트워크 상태 보드 (우상단) - ping / 송수신 버퍼 처리 대기·여유
 //
 // 토글을 켜고 끌 때만 C_DEBUG_CONFIG를 보낸다. 서버는 구독한 세션에게만 데이터를 흘린다.
 class ServerDebugActor : public Craft::Actor
@@ -38,11 +40,13 @@ private:
 	void OnToggleGrid();
 	void OnTogglePaths();
 	void OnToggleCollision();
+	void OnToggleNet();
 	void SendConfig();
 
 	void DrawGrid();
 	void DrawPaths();
 	void DrawCollision();
+	void DrawNet();
 
 private:
 	std::shared_ptr<Craft::InputComponent> inputComponent;
@@ -50,6 +54,10 @@ private:
 	bool showGrid = false;
 	bool showPaths = false;
 	bool showCollision = false;
+	bool showNet = false;
+
+	// C_PING 주기 송신 타이머 (보드 표시 여부와 무관하게 항상 돈다).
+	float netPingAccumSec = 0.0f;
 
 	// --- 쿼드트리 + 타이밍 (S_DEBUG_QUADTREE) ---
 	struct QuadNode { int minX, minY, maxX, maxY; };

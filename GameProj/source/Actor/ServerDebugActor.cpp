@@ -7,6 +7,8 @@
 #include "Game/ObjectManager.h"
 #include "Math/ViewTransform.h"
 #include "Network/NetSend.h"
+#include "Network/NetStatus.h"
+#include "Network/Session.h"
 #include "Render/Renderer.h"
 #include "Render/RenderLayer.h"
 
@@ -91,6 +93,7 @@ void ServerDebugActor::BeginPlay()
 	inputComponent->BindKey(VK_F4, EInputEvent::Pressed, this, &ServerDebugActor::OnToggleGrid);
 	inputComponent->BindKey(VK_F5, EInputEvent::Pressed, this, &ServerDebugActor::OnTogglePaths);
 	inputComponent->BindKey(VK_F6, EInputEvent::Pressed, this, &ServerDebugActor::OnToggleCollision);
+	inputComponent->BindKey(VK_F7, EInputEvent::Pressed, this, &ServerDebugActor::OnToggleNet);
 
 	shouldDraw = true;
 	super::BeginPlay();
@@ -131,6 +134,15 @@ void ServerDebugActor::OnToggleCollision()
 
 	char msg[96];
 	sprintf_s(msg, "[ServerDebug] collision overlay %s\n", showCollision ? "ON" : "off");
+	::OutputDebugStringA(msg);
+}
+
+void ServerDebugActor::OnToggleNet()
+{
+	showNet = !showNet;
+
+	char msg[96];
+	sprintf_s(msg, "[ServerDebug] net board %s\n", showNet ? "ON" : "off");
 	::OutputDebugStringA(msg);
 }
 
@@ -249,6 +261,17 @@ void ServerDebugActor::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
+	// 주기적으로 C_PING 을 보낸다(1초). 서버가 clientTime 을 그대로 반향하면
+	// NetStatus 가 왕복 시간을 계산한다. 보드 표시 여부와 무관하게 항상 측정해 둔다.
+	netPingAccumSec += deltaTime;
+	if (netPingAccumSec >= 1.0f)
+	{
+		netPingAccumSec = 0.0f;
+		Protocol::C_PING ping;
+		ping.set_clienttime(::GetTickCount64());
+		SendToServer(ping);
+	}
+
 	// 실제 이동 궤적 샘플링 (~50ms 간격). 경로를 추종 중인 오브젝트만.
 	if (showPaths && paths.empty() == false)
 	{
@@ -289,6 +312,48 @@ void ServerDebugActor::Draw()
 
 	if (showCollision)
 		DrawCollision();
+
+	if (showNet)
+		DrawNet();
+}
+
+void ServerDebugActor::DrawNet()
+{
+	Renderer& renderer = Renderer::Get();
+
+	Craft::Session* session = (GService != nullptr) ? GService->GetSession() : nullptr;
+	const bool connected = (session != nullptr && session->IsConnected());
+
+	const int ping = NetStatus::Get().GetLastPingMs();
+
+	// 우상단 정렬. 각 줄을 오른쪽 끝에 맞춘다.
+	const int screenW = static_cast<int>(renderer.GetScreenSize().x);
+
+	char lines[6][48];
+	sprintf_s(lines[0], "[F7] network %s", connected ? "" : "(offline)");
+	sprintf_s(lines[1], "ping        %s", ping < 0 ? "-" : (std::to_string(ping) + " ms").c_str());
+	if (connected)
+	{
+		sprintf_s(lines[2], "recv wait   %d B", session->GetRecvBufferDataSize());
+		sprintf_s(lines[3], "recv free   %d B", session->GetRecvBufferFreeSize());
+		sprintf_s(lines[4], "send wait   %d B", session->GetSendBufferRemainSize());
+		sprintf_s(lines[5], "send free   %d B", session->GetSendBufferFreeSize());
+	}
+	else
+	{
+		sprintf_s(lines[2], "recv wait   -");
+		sprintf_s(lines[3], "recv free   -");
+		sprintf_s(lines[4], "send wait   -");
+		sprintf_s(lines[5], "send free   -");
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		const int len = static_cast<int>(strlen(lines[i]));
+		const int x = (screenW - len > 0) ? (screenW - len - 1) : 0;
+		const Color color = (i == 0) ? Color::Yellow : Color::White;
+		renderer.Submit(lines[i], Vector2(x, 1 + i), color, RenderLayer::UI);
+	}
 }
 
 void ServerDebugActor::DrawCollision()

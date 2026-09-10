@@ -51,9 +51,9 @@ bool Handle_S_LOGIN(const Session* session, Protocol::S_LOGIN& pkt)
 
 bool Handle_S_PONG(const Session* session, Protocol::S_PONG& pkt)
 {
-	Engine::Get().RunOnGameThread([]()
+	Engine::Get().RunOnGameThread([pkt]()
 		{
-			NetStatus::Get().OnPong();
+			NetStatus::Get().OnPong(pkt);
 		});
 
 	return true;
